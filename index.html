@@ -4,12 +4,576 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>GESTION NPS 2026</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #121212; }
-    iframe { width: 100%; height: 100%; border: none; }
+    :root { --bg-dark: #0f172a; --card-bg: #1e293b; --card-border: #334155; --text-muted: #94a3b8; --accent-blue: #38bdf8; }
+    body { background-color: var(--bg-dark); color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    .container-custom { max-width: 650px; margin: auto; padding: 14px; }
+    .login-card { max-width: 380px; margin: 40px auto; padding: 24px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); }
+    .header-bar { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; }
+    .user-avatar { width: 32px; height: 32px; background: #0284c7; color: white; border-radius: 50%; font-weight: bold; font-size: 0.85rem; }
+    .kpi-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; text-align: left; position: relative; overflow: hidden; }
+    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+    .kpi-pending::before { background-color: #f59e0b; } .kpi-done::before { background-color: #10b981; } .kpi-expired::before { background-color: #64748b; } .kpi-danger::before { background-color: #ef4444; }
+    .kpi-num { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+    .kpi-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .segmented-control { background: #0f172a; border: 1px solid var(--card-border); border-radius: 10px; padding: 3px; display: flex; gap: 4px; }
+    .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border-radius: 8px; font-size: 0.82rem; font-weight: 600; padding: 8px 12px; border: none; transition: all 0.2s; }
+    .segmented-control .nav-link.active { background: var(--card-bg); color: var(--accent-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .order-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; margin-bottom: 12px; padding: 14px; position: relative; }
+    .order-card.conflictive { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, #1e293b 0%, #2a1215 100%); }
+    .ot-code { font-family: monospace; font-size: 0.85rem; color: #e2e8f0; word-break: break-all; }
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; margin-top: 10px; }
+    .meta-item { background: rgba(15, 23, 42, 0.5); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.03); }
+    .badge-subtle { font-size: 0.7rem; font-weight: 600; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-done { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-expired { background: rgba(100, 116, 139, 0.15); color: #cbd5e1; border: 1px solid rgba(100, 116, 139, 0.3); }
+    .detail-row { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; }
+    .detail-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; }
+    .detail-val { font-size: 0.88rem; color: #f8fafc; font-weight: 500; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <iframe src="https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec" allow="camera; microphone; geolocation"></iframe>
+
+  <div class="container-custom">
+    <!-- LOGIN -->
+    <div id="view-login">
+      <div class="login-card shadow-lg">
+        <div class="text-center mb-4">
+          <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-2">
+            <i class="bi bi-shield-lock fs-3"></i>
+          </div>
+          <h5 class="fw-bold text-white m-0">GESTION NPS 2026</h5>
+          <small class="text-secondary">Ingrese sus credenciales de acceso</small>
+        </div>
+        <div id="login-alert" class="alert alert-danger p-2 small hidden"></div>
+        <div class="mb-3">
+          <label class="form-label small text-secondary">Usuario / Correo</label>
+          <input type="text" id="input-user" class="form-control bg-dark text-white border-secondary">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small text-secondary">Contraseña</label>
+          <input type="password" id="input-pass" class="form-control bg-dark text-white border-secondary">
+        </div>
+        <button type="button" id="btn-login-submit" onclick="ejecutarLogin()" class="btn btn-primary w-100 fw-bold py-2">Iniciar Sesión</button>
+      </div>
+    </div>
+
+    <!-- VISTA TÉCNICO -->
+    <div id="view-tecnico" class="hidden">
+      <div class="header-bar d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <div class="user-avatar d-flex align-items-center justify-content-center" id="avatar-tec">T</div>
+          <div>
+            <h6 class="m-0 text-white fw-bold" id="label-nombre-tec">Técnico</h6>
+            <small class="text-secondary" style="font-size: 0.75rem;">Panel Operativo</small>
+          </div>
+        </div>
+        <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
+      </div>
+
+      <div class="segmented-control mb-3">
+        <button class="nav-link active" id="tab-tec-pendientes-btn" onclick="cambiarPestanaTecnico('pendientes')"><i class="bi bi-clock-history me-1"></i> Pendientes</button>
+        <button class="nav-link" id="tab-tec-historico-btn" onclick="cambiarPestanaTecnico('historico')"><i class="bi bi-check2-square me-1"></i> Mi Histórico</button>
+      </div>
+
+      <div id="sec-tec-pendientes"><div id="lista-pendientes"></div></div>
+      <div id="sec-tec-historico" class="hidden"><div id="lista-historico-tecnico"></div></div>
+    </div>
+
+    <!-- VISTA ADMIN -->
+    <div id="view-admin" class="hidden">
+      <div class="header-bar d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <div class="user-avatar d-flex align-items-center justify-content-center">A</div>
+          <div>
+            <h6 class="m-0 text-white fw-bold">Panel Administrador</h6>
+            <small class="text-secondary" style="font-size: 0.72rem;">GESTION NPS 2026</small>
+          </div>
+        </div>
+        <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-6 col-md-3"><div class="kpi-card kpi-pending"><div class="kpi-label">Pendientes</div><div class="kpi-num text-warning" id="kpi-pendientes">0</div></div></div>
+        <div class="col-6 col-md-3"><div class="kpi-card kpi-done"><div class="kpi-label">Gestionados</div><div class="kpi-num text-success" id="kpi-gestionados">0</div></div></div>
+        <div class="col-6 col-md-3"><div class="kpi-card kpi-expired"><div class="kpi-label">Sin Gestión</div><div class="kpi-num text-secondary" id="kpi-sin-gestion">0</div></div></div>
+        <div class="col-6 col-md-3"><div class="kpi-card kpi-danger"><div class="kpi-label">Conflictivos</div><div class="kpi-num text-danger" id="kpi-conflictivos">0</div></div></div>
+      </div>
+
+      <div class="segmented-control mb-3">
+        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-person-badge me-1"></i> Por Técnico</button>
+        <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-list-task me-1"></i> Gestión General</button>
+      </div>
+
+      <div id="sec-tecnicos">
+        <div class="row g-2 mb-3">
+          <div class="col-6"><select id="select-tecnico" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Técnico --</option></select></div>
+          <div class="col-6"><select id="select-estado-tec" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Estado --</option><option value="Pendiente">Pendiente</option><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo</option></select></div>
+        </div>
+        <div id="contenedor-tecnico-filtrado"></div>
+      </div>
+
+      <div id="sec-general" class="hidden">
+        <div class="mb-3"><input type="text" id="input-buscar" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="🔍 Buscar por OT, cliente, usuario o teléfono..." onkeyup="filtrarListaGeneral()"></div>
+        <div id="contenedor-dashboard"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL GESTIÓN -->
+  <div class="modal fade" id="modalGestion" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white border-secondary">
+        <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Registrar Gestión</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input type="hidden" id="modal-fila">
+          <div class="mb-3"><label class="form-label small text-secondary">Estado de Gestión</label><select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="evaluarEstado()"><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo (NPS 0)</option></select></div>
+          <div class="mb-3"><label class="form-label small text-secondary">Resultado</label><select id="modal-resultado" class="form-select bg-dark text-white border-secondary"><option value="Exitoso">Exitoso</option><option value="Sin respuesta">Sin respuesta</option></select></div>
+          <div class="mb-3"><label class="form-label small text-secondary">Captura de Evidencia (Foto)</label><input type="file" id="modal-foto" class="form-control bg-dark text-white border-secondary" accept="image/*" capture="environment"></div>
+          <div id="box-observacion" class="mb-3 hidden"><label class="form-label small text-danger fw-bold">Motivo de Usuario Conflictivo *</label><textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3"></textarea></div>
+        </div>
+        <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" id="btn-guardar" class="btn btn-sm btn-primary" onclick="guardarFormulario()">Guardar Gestión</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL FICHA DETALLES -->
+  <div class="modal fade" id="modalDetalleOrden" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white border-secondary">
+        <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Ficha de Gestión NPS</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="detail-row"><div class="detail-label">ID Gestión</div><div class="detail-val" id="det-id">N/A</div></div>
+          <div class="detail-row"><div class="detail-label">Código Cliente</div><div class="detail-val text-primary" id="det-codigo">N/A</div></div>
+          <div class="detail-row"><div class="detail-label">Nombre Usuario</div><div class="detail-val fw-bold" id="det-nombre">N/A</div></div>
+          <div class="detail-row"><div class="detail-label">Técnico Asignado</div><div class="detail-val" id="det-tecnico">N/A</div></div>
+          <div class="detail-row"><div class="detail-label">Fecha Asignación</div><div class="detail-val" id="det-fecha">N/A</div></div>
+          <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-val" id="det-estado">N/A</div></div>
+          <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val ot-code" id="det-ot">N/A</div></div>
+          <div class="detail-row"><div class="detail-label">Teléfono Cliente (Encuesta NPS)</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
+          <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Observación de Gestión</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
+          <div class="mt-3 d-flex flex-column gap-2" id="box-btn-acciones"></div>
+        </div>
+        <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL VISOR FOTO -->
+  <div class="modal fade" id="modalVisorFoto" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white border-secondary">
+        <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Evidencia Fotográfica</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body text-center p-3">
+          <div id="visor-loading" class="spinner-border text-info my-4" role="status"></div>
+          <img id="visor-img" class="img-fluid rounded hidden" alt="Evidencia">
+          <div id="visor-error" class="text-danger small hidden my-3">No se pudo cargar la imagen.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // PEGA AQUÍ LA URL QUE COPIASTE DE GOOGLE APPS SCRIPT
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
+
+    let usuarioActual = null, modalBs = null, modalVisorBs = null, modalDetalleBs = null;
+    let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      modalBs = new bootstrap.Modal(document.getElementById('modalGestion'));
+      modalVisorBs = new bootstrap.Modal(document.getElementById('modalVisorFoto'));
+      modalDetalleBs = new bootstrap.Modal(document.getElementById('modalDetalleOrden'));
+    });
+
+    async function apiCall(accion, dataPayload = {}) {
+      const response = await fetch(WEB_APP_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ accion: accion, ...dataPayload })
+      });
+      return await response.json();
+    }
+
+    async function ejecutarLogin() {
+      const u = document.getElementById('input-user').value;
+      const p = document.getElementById('input-pass').value;
+      const alert = document.getElementById('login-alert');
+      const btnLogin = document.getElementById('btn-login-submit');
+      
+      alert.classList.add('hidden');
+      if (!u.trim() || !p.trim()) {
+        alert.innerText = "Por favor ingrese usuario y contraseña.";
+        alert.classList.remove('hidden');
+        return;
+      }
+
+      btnLogin.disabled = true;
+      btnLogin.innerText = "Verificando...";
+
+      try {
+        const res = await apiCall("loginUsuario", { usuario: u, password: p });
+        btnLogin.disabled = false;
+        btnLogin.innerText = "Iniciar Sesión";
+        
+        if (res && res.exito) {
+          usuarioActual = res;
+          document.getElementById('view-login').classList.add('hidden');
+          if (res.rol === 'Administrador') {
+            cargarDashboard();
+          } else {
+            document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
+            document.getElementById('avatar-tec').innerText = res.nombre ? res.nombre.charAt(0) : 'T';
+            cargarPendientesTecnico();
+          }
+        } else {
+          alert.innerText = res.mensaje || "Credenciales no válidas.";
+          alert.classList.remove('hidden');
+        }
+      } catch (err) {
+        btnLogin.disabled = false;
+        btnLogin.innerText = "Iniciar Sesión";
+        alert.innerText = "Error de conexión: " + err.toString();
+        alert.classList.remove('hidden');
+      }
+    }
+
+    function cambiarPestana(tipo) {
+      if (tipo === 'tecnicos') {
+        document.getElementById('sec-tecnicos').classList.remove('hidden');
+        document.getElementById('sec-general').classList.add('hidden');
+        document.getElementById('tab-tecnicos-btn').classList.add('active');
+        document.getElementById('tab-general-btn').classList.remove('active');
+      } else {
+        document.getElementById('sec-general').classList.remove('hidden');
+        document.getElementById('sec-tecnicos').classList.add('hidden');
+        document.getElementById('tab-general-btn').classList.add('active');
+        document.getElementById('tab-tecnicos-btn').classList.remove('active');
+      }
+    }
+
+    function cambiarPestanaTecnico(tipo) {
+      if (tipo === 'pendientes') {
+        document.getElementById('sec-tec-pendientes').classList.remove('hidden');
+        document.getElementById('sec-tec-historico').classList.add('hidden');
+        document.getElementById('tab-tec-pendientes-btn').classList.add('active');
+        document.getElementById('tab-tec-historico-btn').classList.remove('active');
+      } else {
+        document.getElementById('sec-tec-historico').classList.remove('hidden');
+        document.getElementById('sec-tec-pendientes').classList.add('hidden');
+        document.getElementById('tab-tec-historico-btn').classList.add('active');
+        document.getElementById('tab-tec-historico-btn').classList.remove('active');
+        cargarHistoricoTecnico();
+      }
+    }
+
+    async function cargarPendientesTecnico() {
+      document.getElementById('view-tecnico').classList.remove('hidden');
+      const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
+      pendientesTecnicoActual = lista || [];
+      const contenedor = document.getElementById('lista-pendientes');
+      contenedor.innerHTML = '';
+      
+      if (pendientesTecnicoActual.length === 0) {
+        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes órdenes pendientes.</div>';
+        return;
+      }
+      pendientesTecnicoActual.forEach((item, index) => {
+        let telLlamar = item.telefono && item.telefono !== 'Sin Teléfono' ? `<a href="tel:${item.telefono}" class="btn btn-xs btn-outline-warning p-1 px-2 small"><i class="bi bi-telephone-fill me-1"></i>${item.telefono}</a>` : '<span class="text-secondary small">Sin Tel.</span>';
+
+        contenedor.innerHTML += `
+          <div class="order-card">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <strong class="text-primary fs-6">${item.codigoCliente}</strong>
+              <span class="badge-subtle badge-pending">Pendiente</span>
+            </div>
+            <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${item.nombreUsuario}</div>
+            
+            <div class="d-flex justify-content-between align-items-center my-2 bg-dark p-2 rounded border border-secondary border-opacity-25">
+              <span class="text-secondary small">Teléfono NPS:</span>
+              ${telLlamar}
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
+              <button class="btn btn-sm btn-success flex-fill fw-bold py-2" onclick="abrirModal(${item.fila})"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
+            </div>
+          </div>`;
+      });
+    }
+
+    async function cargarHistoricoTecnico() {
+      const lista = await apiCall("obtenerHistoricoTecnico", { correoTecnico: usuarioActual.usuario });
+      historicoTecnicoActual = lista || [];
+      const contenedor = document.getElementById('lista-historico-tecnico');
+      contenedor.innerHTML = '';
+      if (historicoTecnicoActual.length === 0) {
+        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes gestiones registradas aún.</div>';
+        return;
+      }
+      historicoTecnicoActual.forEach((r, index) => {
+        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (r.estado === 'Conflictivo' ? 'badge-danger' : 'badge-expired');
+        let botonEvidencia = r.evidencia ? `<button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')"><i class="bi bi-file-image me-1"></i> Ver Foto</button>` : '<span class="text-secondary small" style="font-size: 0.72rem;">Sin imagen</span>';
+
+        contenedor.innerHTML += `
+          <div class="order-card">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <strong class="text-primary fs-6">${r.codigoCliente}</strong>
+              <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
+            </div>
+            <div class="fw-bold text-light mb-1" style="font-size: 0.85rem;">${r.nombreUsuario}</div>
+            
+            <div class="meta-grid">
+              <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
+              <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">FECHA GESTIÓN</span><span class="text-light" style="font-size: 0.72rem;">${r.fechaGestion}</span></div>
+            </div>
+
+            ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
+
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
+              <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenTecnico(${index}, 'HISTORICO')"><i class="bi bi-eye me-1"></i> Detalles</button>
+              ${botonEvidencia}
+            </div>
+          </div>`;
+      });
+    }
+
+    function verDetallesOrdenTecnico(index, origen) {
+      let item = (origen === 'PENDIENTE') ? pendientesTecnicoActual[index] : historicoTecnicoActual[index];
+      if (!item) return;
+
+      document.getElementById('det-id').innerText = item.idGestion;
+      document.getElementById('det-codigo').innerText = item.codigoCliente;
+      document.getElementById('det-nombre').innerText = item.nombreUsuario;
+      document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || usuarioActual.nombre || usuarioActual.usuario;
+      document.getElementById('det-fecha').innerText = item.fechaAsignacion;
+      document.getElementById('det-ot').innerText = item.numeroOT;
+      document.getElementById('det-telefono').innerText = item.telefono;
+
+      let badgeStyle = 'badge-pending';
+      if (item.estado === 'Gestionado') badgeStyle = 'badge-done';
+      if (item.estado === 'Conflictivo') badgeStyle = 'badge-danger';
+      if (item.estado === 'Sin Gestion') badgeStyle = 'badge-expired';
+      document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
+
+      const boxObs = document.getElementById('det-box-obs');
+      if (item.observacion) {
+        document.getElementById('det-observacion').innerText = item.observacion;
+        boxObs.classList.remove('hidden');
+      } else {
+        boxObs.classList.add('hidden');
+      }
+
+      const boxAcciones = document.getElementById('box-btn-acciones');
+      boxAcciones.innerHTML = '';
+
+      if (item.telefono && item.telefono !== 'Sin Teléfono') {
+        let numLimpio = item.telefono.replace(/[^0-9]/g, '');
+        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO, LE LLEGA MEDIANTE MENSAJE DE TEXTO NORMAL DE LA LINEA CON MAYUSCULAS TIGO, SI SU LINEA ES DE OTRA EMPRESA LE LLEGA DEL NUMERO 2820. LE AGRADESCO DE ANTEMANO SU PRONTA RESPUESTA Y CAPTURA DE PANTALLA AL FINALIZAR LA ENCUESTA. MUCHAS GRACIAS`;
+        let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
+
+        boxAcciones.innerHTML = `
+          <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
+          <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
+        `;
+      }
+
+      modalDetalleBs.show();
+    }
+
+    function abrirModal(fila) {
+      document.getElementById('modal-fila').value = fila;
+      document.getElementById('modal-estado').value = 'Gestionado';
+      document.getElementById('modal-observacion').value = '';
+      document.getElementById('modal-foto').value = '';
+      evaluarEstado();
+      modalBs.show();
+    }
+
+    function evaluarEstado() {
+      const est = document.getElementById('modal-estado').value;
+      const boxObs = document.getElementById('box-observacion');
+      if (est === 'Conflictivo') boxObs.classList.remove('hidden');
+      else boxObs.classList.add('hidden');
+    }
+
+    function guardarFormulario() {
+      const fila = document.getElementById('modal-fila').value;
+      const estado = document.getElementById('modal-estado').value;
+      const resultado = document.getElementById('modal-resultado').value;
+      const obs = document.getElementById('modal-observacion').value;
+      const fileInput = document.getElementById('modal-foto');
+
+      if (estado === 'Conflictivo' && !obs.trim()) {
+        alert('Ingrese la observación requerida para usuario conflictivo.');
+        return;
+      }
+
+      const btnGuardar = document.getElementById('btn-guardar');
+      btnGuardar.disabled = true;
+      btnGuardar.innerText = "Guardando...";
+
+      const payload = { fila: fila, estado: estado, resultado: resultado, observacion: obs, archivoBase64: null, nombreArchivo: null };
+
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          payload.archivoBase64 = e.target.result;
+          payload.nombreArchivo = `Evidencia_OT_${fila}_${Date.now()}_${file.name}`;
+          await enviarDatosAlServidor(payload);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        enviarDatosAlServidor(payload);
+      }
+    }
+
+    async function enviarDatosAlServidor(payload) {
+      await apiCall("guardarGestion", { payload: payload });
+      const btnGuardar = document.getElementById('btn-guardar');
+      btnGuardar.disabled = false;
+      btnGuardar.innerText = "Guardar Gestión";
+      modalBs.hide();
+      cargarPendientesTecnico();
+    }
+
+    async function cargarDashboard() {
+      document.getElementById('view-admin').classList.remove('hidden');
+      const res = await apiCall("obtenerDatosDashboard");
+      
+      document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
+      document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
+      document.getElementById('kpi-sin-gestion').innerText = res.kpis.sinGestion;
+      document.getElementById('kpi-conflictivos').innerText = res.kpis.conflictivos;
+
+      const selectTec = document.getElementById('select-tecnico');
+      selectTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
+      res.tecnicos.forEach(t => {
+        selectTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
+      });
+
+      todosLosRegistros = res.registros;
+      aplicarFiltrosTecnico();
+      renderizarListaGeneral(todosLosRegistros);
+    }
+
+    async function verFotoModal(url) {
+      const imgElement = document.getElementById('visor-img');
+      const loadingElement = document.getElementById('visor-loading');
+      const errorElement = document.getElementById('visor-error');
+      
+      imgElement.classList.add('hidden');
+      errorElement.classList.add('hidden');
+      loadingElement.classList.remove('hidden');
+      
+      modalVisorBs.show();
+      
+      const res = await apiCall("obtenerImagenEnBase64", { url: url });
+      loadingElement.classList.add('hidden');
+      if (res.exito) {
+        imgElement.src = res.dataUri;
+        imgElement.classList.remove('hidden');
+      } else {
+        errorElement.innerText = res.mensaje || "No se pudo cargar la imagen.";
+        errorElement.classList.remove('hidden');
+      }
+    }
+
+    function aplicarFiltrosTecnico() {
+      const tecSel = document.getElementById('select-tecnico').value;
+      const estSel = document.getElementById('select-estado-tec').value;
+      let resultado = todosLosRegistros;
+
+      if (tecSel !== 'TODOS') resultado = resultado.filter(r => r.tecnico.toLowerCase() === tecSel.toLowerCase());
+      if (estSel !== 'TODOS') {
+        resultado = resultado.filter(r => {
+          if (estSel === 'Sin Gestion') return r.estado === 'Sin Gestion' || r.estado === 'Sin gestion';
+          return r.estado === estSel;
+        });
+      }
+      renderizarTarjetas(resultado, 'contenedor-tecnico-filtrado');
+    }
+
+    function renderizarListaGeneral(lista) { renderizarTarjetas(lista, 'contenedor-dashboard'); }
+
+    function renderizarTarjetas(lista, idContenedor) {
+      const contenedor = document.getElementById(idContenedor);
+      contenedor.innerHTML = '';
+      if (lista.length === 0) {
+        contenedor.innerHTML = '<div class="text-secondary text-center small py-4">No hay órdenes para mostrar.</div>';
+        return;
+      }
+
+      lista.forEach(r => {
+        const isConflictive = r.estado === 'Conflictivo';
+        const cardClass = isConflictive ? 'order-card conflictive' : 'order-card';
+        let badgeStyle = 'badge-expired';
+        if (r.estado === 'Gestionado') badgeStyle = 'badge-done';
+        if (r.estado === 'Pendiente') badgeStyle = 'badge-pending';
+        if (isConflictive) badgeStyle = 'badge-danger';
+
+        let botonEvidencia = '<span class="text-secondary small" style="font-size: 0.72rem;">Sin imagen</span>';
+        if (r.evidencia) {
+          botonEvidencia = `<button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')"><i class="bi bi-file-image me-1"></i> Evidencia</button>`;
+        }
+
+        contenedor.innerHTML += `
+          <div class="${cardClass}">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
+              <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT}</small>
+            </div>
+            
+            <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombreUsuario}</div>
+
+            <div class="meta-grid">
+              <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">CLIENTE</span><strong class="text-light">${r.codigoCliente}</strong></div>
+              <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
+            </div>
+
+            ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
+            
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
+              <span class="text-secondary" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
+              ${botonEvidencia}
+            </div>
+          </div>`;
+      });
+    }
+
+    function filtrarListaGeneral() {
+      const q = document.getElementById('input-buscar').value.toLowerCase();
+      const filtrados = todosLosRegistros.filter(r => 
+        r.tecnico.toLowerCase().includes(q) || 
+        r.nombreUsuario.toLowerCase().includes(q) || 
+        r.codigoCliente.toString().toLowerCase().includes(q) || 
+        r.telefono.toString().toLowerCase().includes(q) || 
+        r.numeroOT.toString().toLowerCase().includes(q)
+      );
+      renderizarListaGeneral(filtrados);
+    }
+
+    function cerrarSesion() {
+      usuarioActual = null;
+      todosLosRegistros = [];
+      pendientesTecnicoActual = [];
+      historicoTecnicoActual = [];
+
+      document.getElementById('input-user').value = '';
+      document.getElementById('input-pass').value = '';
+      document.getElementById('login-alert').classList.add('hidden');
+      document.getElementById('view-tecnico').classList.add('hidden');
+      document.getElementById('view-admin').classList.add('hidden');
+      document.getElementById('view-login').classList.remove('hidden');
+    }
+  </script>
 </body>
 </html>
