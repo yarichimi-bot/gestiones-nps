@@ -4,9 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>GESTION NPS 2026</title>
+  
+  <!-- INTEGRACIÓN PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+
   <style>
     :root { --bg-dark: #0f172a; --card-bg: #1e293b; --card-border: #334155; --text-muted: #94a3b8; --accent-blue: #38bdf8; }
     body { background-color: var(--bg-dark); color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
@@ -41,6 +48,15 @@
 <body>
 
   <div class="container-custom">
+    <!-- BOTÓN DE INSTALACIÓN PWA -->
+    <div id="btn-instalar-pwa" class="alert alert-info border-info d-flex justify-content-between align-items-center mb-3 hidden p-2">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-phone-vibrate fs-4"></i>
+        <small class="lh-1"> Instala esta app en tu pantalla de inicio para entrar más rápido.</small>
+      </div>
+      <button class="btn btn-sm btn-light fw-bold" onclick="instalarApp()">Instalar</button>
+    </div>
+
     <!-- LOGIN -->
     <div id="view-login">
       <div class="login-card shadow-lg">
@@ -77,9 +93,21 @@
         <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
       </div>
 
+      <!-- BANNER DE RECORDATORIO / ALERTA IN-APP -->
+      <div id="banner-alerta-tecnico" class="alert alert-warning border-warning d-flex align-items-center gap-2 mb-3 hidden p-2">
+        <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
+        <div style="font-size: 0.78rem;" id="mensaje-alerta-tecnico">
+          <strong>RECORDATORIO NPS:</strong> Tiene clientes sin gestión. Favor gestionar a la brevedad o registrar su informe con respaldo. ¡Gracias!
+        </div>
+      </div>
+
       <div class="segmented-control mb-3">
-        <button class="nav-link active" id="tab-tec-pendientes-btn" onclick="cambiarPestanaTecnico('pendientes')"><i class="bi bi-clock-history me-1"></i> Pendientes</button>
-        <button class="nav-link" id="tab-tec-historico-btn" onclick="cambiarPestanaTecnico('historico')"><i class="bi bi-check2-square me-1"></i> Mi Histórico</button>
+        <button class="nav-link active" id="tab-tec-pendientes-btn" onclick="cambiarPestanaTecnico('pendientes')">
+          <i class="bi bi-clock-history me-1"></i> Pendientes <span id="badge-count-pendientes" class="badge bg-warning text-dark ms-1 hidden">0</span>
+        </button>
+        <button class="nav-link" id="tab-tec-historico-btn" onclick="cambiarPestanaTecnico('historico')">
+          <i class="bi bi-check2-square me-1"></i> Mi Histórico
+        </button>
       </div>
 
       <div id="sec-tec-pendientes"><div id="lista-pendientes"></div></div>
@@ -194,6 +222,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // PEGA AQUÍ LA URL DE TU GOOGLE APPS SCRIPT
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
 
     let usuarioActual = null, modalBs = null, modalVisorBs = null, modalDetalleBs = null;
@@ -214,7 +243,7 @@
         });
         const textResponse = await response.text();
         if (textResponse.trim().startsWith("<")) {
-          throw new Error("Respuesta HTML recibida. Asegúrese de que 'Quién tiene acceso' esté configurado en 'Cualquiera' y la URL termine en '/exec'.");
+          throw new Error("Respuesta HTML recibida. Verifique que 'Quién tiene acceso' esté en 'Cualquiera' y la URL termine en '/exec'.");
         }
         return JSON.parse(textResponse);
       } catch (err) {
@@ -301,10 +330,25 @@
       const contenedor = document.getElementById('lista-pendientes');
       contenedor.innerHTML = '';
       
+      const countBadge = document.getElementById('badge-count-pendientes');
+      const bannerAlerta = document.getElementById('banner-alerta-tecnico');
+      const msgAlerta = document.getElementById('mensaje-alerta-tecnico');
+
       if (pendientesTecnicoActual.length === 0) {
         contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes órdenes pendientes.</div>';
+        countBadge.classList.add('hidden');
+        bannerAlerta.classList.add('hidden');
         return;
       }
+
+      // ACTIVA NOTIFICACIÓN E INSIGNIA IN-APP
+      countBadge.innerText = pendientesTecnicoActual.length;
+      countBadge.classList.remove('hidden');
+      
+      let nombreTecnicoStr = usuarioActual.nombre ? usuarioActual.nombre.toUpperCase() : '';
+      msgAlerta.innerHTML = `<strong>ESTIMADO/A ${nombreTecnicoStr}:</strong> Tienes <strong>${pendientesTecnicoActual.length} cliente(s) NPS sin gestión</strong>. Favor gestionar a la brevedad o, si ya gestionó, registrar su informe con respaldo. ¡Gracias!`;
+      bannerAlerta.classList.remove('hidden');
+
       pendientesTecnicoActual.forEach((item, index) => {
         let telLlamar = item.telefono && item.telefono !== 'Sin Teléfono' ? `<a href="tel:${item.telefono}" class="btn btn-xs btn-outline-warning p-1 px-2 small"><i class="bi bi-telephone-fill me-1"></i>${item.telefono}</a>` : '<span class="text-secondary small">Sin Tel.</span>';
 
@@ -674,6 +718,32 @@
       document.getElementById('view-tecnico').classList.add('hidden');
       document.getElementById('view-admin').classList.add('hidden');
       document.getElementById('view-login').classList.remove('hidden');
+    }
+
+    // REGISTRO DE SERVICE WORKER PARA PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btnInstalar = document.getElementById('btn-instalar-pwa');
+      if (btnInstalar) btnInstalar.classList.remove('hidden');
+    });
+
+    function instalarApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('PWA instalada con éxito');
+            document.getElementById('btn-instalar-pwa').classList.add('hidden');
+          }
+          deferredPrompt = null;
+        });
+      }
     }
   </script>
 </body>
