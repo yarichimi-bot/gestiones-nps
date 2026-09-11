@@ -222,7 +222,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // PEGA AQUÍ LA URL DE TU GOOGLE APPS SCRIPT
+    // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT TERMINADA EN /exec
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
 
     let usuarioActual = null, modalBs = null, modalVisorBs = null, modalDetalleBs = null;
@@ -233,16 +233,24 @@
       modalVisorBs = new bootstrap.Modal(document.getElementById('modalVisorFoto'));
       modalDetalleBs = new bootstrap.Modal(document.getElementById('modalDetalleOrden'));
 
-      // SESIÓN PERSISTENTE: SI YA HABÍA INICIADO SESIÓN, ENTRA AUTOMÁTICAMENTE
-      const sesionGuardada = localStorage.getItem("nps_user_session");
-      if (sesionGuardada) {
+      // VERIFICAR SI YA EXISTE UN PERFIL AUTENTICADO GUARDADO EN EL DISPOSITIVO
+      const perfilGuardado = localStorage.getItem("nps_user_profile");
+      if (perfilGuardado) {
         try {
-          const creds = JSON.parse(sesionGuardada);
-          document.getElementById('input-user').value = creds.usuario;
-          document.getElementById('input-pass').value = creds.pass;
-          ejecutarLogin();
+          usuarioActual = JSON.parse(perfilGuardado);
+          document.getElementById('view-login').classList.add('hidden');
+          
+          if (usuarioActual.rol === 'Administrador') {
+            document.getElementById('view-admin').classList.remove('hidden');
+            cargarDashboard();
+          } else {
+            document.getElementById('view-tecnico').classList.remove('hidden');
+            document.getElementById('label-nombre-tec').innerText = usuarioActual.nombre || 'Técnico';
+            document.getElementById('avatar-tec').innerText = usuarioActual.nombre ? usuarioActual.nombre.charAt(0) : 'T';
+            cargarPendientesTecnico();
+          }
         } catch(e) {
-          localStorage.removeItem("nps_user_session");
+          cerrarSesion();
         }
       }
     });
@@ -288,8 +296,8 @@
         if (res && res.exito) {
           usuarioActual = res;
 
-          // GUARDAR CREDENCIALES EN EL TELÉFONO
-          localStorage.setItem("nps_user_session", JSON.stringify({ usuario: u, pass: p }));
+          // GUARDAR PERFIL PERMANENTE EN EL DISPOSITIVO
+          localStorage.setItem("nps_user_profile", JSON.stringify(res));
 
           document.getElementById('view-login').classList.add('hidden');
           if (res.rol === 'Administrador') {
@@ -342,52 +350,55 @@
 
     async function cargarPendientesTecnico() {
       document.getElementById('view-tecnico').classList.remove('hidden');
-      const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
-      pendientesTecnicoActual = lista || [];
-      const contenedor = document.getElementById('lista-pendientes');
-      contenedor.innerHTML = '';
-      
-      const countBadge = document.getElementById('badge-count-pendientes');
-      const bannerAlerta = document.getElementById('banner-alerta-tecnico');
-      const msgAlerta = document.getElementById('mensaje-alerta-tecnico');
+      try {
+        const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
+        pendientesTecnicoActual = lista || [];
+        const contenedor = document.getElementById('lista-pendientes');
+        contenedor.innerHTML = '';
+        
+        const countBadge = document.getElementById('badge-count-pendientes');
+        const bannerAlerta = document.getElementById('banner-alerta-tecnico');
+        const msgAlerta = document.getElementById('mensaje-alerta-tecnico');
 
-      if (pendientesTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes órdenes pendientes.</div>';
-        countBadge.classList.add('hidden');
-        bannerAlerta.classList.add('hidden');
-        return;
+        if (pendientesTecnicoActual.length === 0) {
+          contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes órdenes pendientes.</div>';
+          countBadge.classList.add('hidden');
+          bannerAlerta.classList.add('hidden');
+          return;
+        }
+
+        countBadge.innerText = pendientesTecnicoActual.length;
+        countBadge.classList.remove('hidden');
+        
+        let nombreTecnicoStr = usuarioActual.nombre ? usuarioActual.nombre.toUpperCase() : '';
+        msgAlerta.innerHTML = `<strong>ESTIMADO/A ${nombreTecnicoStr}:</strong> Tienes <strong>${pendientesTecnicoActual.length} cliente(s) NPS sin gestión</strong>. Favor gestionar a la brevedad o, si ya gestionó, registrar su informe con respaldo. ¡Gracias!`;
+        bannerAlerta.classList.remove('hidden');
+
+        pendientesTecnicoActual.forEach((item, index) => {
+          let telLlamar = item.telefono && item.telefono !== 'Sin Teléfono' ? `<a href="tel:${item.telefono}" class="btn btn-xs btn-outline-warning p-1 px-2 small"><i class="bi bi-telephone-fill me-1"></i>${item.telefono}</a>` : '<span class="text-secondary small">Sin Tel.</span>';
+
+          contenedor.innerHTML += `
+            <div class="order-card">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong class="text-primary fs-6">${item.codigoCliente}</strong>
+                <span class="badge-subtle badge-pending">Pendiente</span>
+              </div>
+              <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${item.nombreUsuario}</div>
+              
+              <div class="d-flex justify-content-between align-items-center my-2 bg-dark p-2 rounded border border-secondary border-opacity-25">
+                <span class="text-secondary small">Teléfono NPS:</span>
+                ${telLlamar}
+              </div>
+
+              <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
+                <button class="btn btn-sm btn-success flex-fill fw-bold py-2" onclick="abrirModal(${item.fila})"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
+              </div>
+            </div>`;
+        });
+      } catch(e) {
+        console.log("Error cargando pendientes: ", e);
       }
-
-      // DESPLIEGA ALERTA IN-APP E INSIGNIA DE NOTIFICACIÓN
-      countBadge.innerText = pendientesTecnicoActual.length;
-      countBadge.classList.remove('hidden');
-      
-      let nombreTecnicoStr = usuarioActual.nombre ? usuarioActual.nombre.toUpperCase() : '';
-      msgAlerta.innerHTML = `<strong>ESTIMADO/A ${nombreTecnicoStr}:</strong> Tienes <strong>${pendientesTecnicoActual.length} cliente(s) NPS sin gestión</strong>. Favor gestionar a la brevedad o, si ya gestionó, registrar su informe con respaldo. ¡Gracias!`;
-      bannerAlerta.classList.remove('hidden');
-
-      pendientesTecnicoActual.forEach((item, index) => {
-        let telLlamar = item.telefono && item.telefono !== 'Sin Teléfono' ? `<a href="tel:${item.telefono}" class="btn btn-xs btn-outline-warning p-1 px-2 small"><i class="bi bi-telephone-fill me-1"></i>${item.telefono}</a>` : '<span class="text-secondary small">Sin Tel.</span>';
-
-        contenedor.innerHTML += `
-          <div class="order-card">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <strong class="text-primary fs-6">${item.codigoCliente}</strong>
-              <span class="badge-subtle badge-pending">Pendiente</span>
-            </div>
-            <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${item.nombreUsuario}</div>
-            
-            <div class="d-flex justify-content-between align-items-center my-2 bg-dark p-2 rounded border border-secondary border-opacity-25">
-              <span class="text-secondary small">Teléfono NPS:</span>
-              ${telLlamar}
-            </div>
-
-            <div class="d-flex gap-2 mt-3">
-              <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
-              <button class="btn btn-sm btn-success flex-fill fw-bold py-2" onclick="abrirModal(${item.fila})"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
-            </div>
-          </div>`;
-      });
     }
 
     async function cargarHistoricoTecnico() {
@@ -724,9 +735,7 @@
     }
 
     function cerrarSesion() {
-      // BORRA LA SESIÓN AL PRESIONAR SALIR
-      localStorage.removeItem("nps_user_session");
-
+      localStorage.removeItem("nps_user_profile");
       usuarioActual = null;
       todosLosRegistros = [];
       pendientesTecnicoActual = [];
@@ -740,7 +749,6 @@
       document.getElementById('view-login').classList.remove('hidden');
     }
 
-    // REGISTRO DE SERVICE WORKER PARA PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
     }
@@ -758,7 +766,6 @@
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult.outcome === 'accepted') {
-            console.log('PWA instalada con éxito');
             document.getElementById('btn-instalar-pwa').classList.add('hidden');
           }
           deferredPrompt = null;
