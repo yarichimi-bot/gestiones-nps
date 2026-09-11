@@ -52,7 +52,7 @@
     <div id="btn-instalar-pwa" class="alert alert-info border-info d-flex justify-content-between align-items-center mb-3 hidden p-2">
       <div class="d-flex align-items-center gap-2">
         <i class="bi bi-phone-vibrate fs-4"></i>
-        <small class="lh-1"> Instala esta app en tu pantalla de inicio para entrar más rápido.</small>
+        <small class="lh-1">Instala esta app en tu pantalla de inicio para entrar más rápido.</small>
       </div>
       <button class="btn btn-sm btn-light fw-bold" onclick="instalarApp()">Instalar</button>
     </div>
@@ -232,6 +232,19 @@
       modalBs = new bootstrap.Modal(document.getElementById('modalGestion'));
       modalVisorBs = new bootstrap.Modal(document.getElementById('modalVisorFoto'));
       modalDetalleBs = new bootstrap.Modal(document.getElementById('modalDetalleOrden'));
+
+      // SESIÓN PERSISTENTE: SI YA HABÍA INICIADO SESIÓN, ENTRA AUTOMÁTICAMENTE
+      const sesionGuardada = localStorage.getItem("nps_user_session");
+      if (sesionGuardada) {
+        try {
+          const creds = JSON.parse(sesionGuardada);
+          document.getElementById('input-user').value = creds.usuario;
+          document.getElementById('input-pass').value = creds.pass;
+          ejecutarLogin();
+        } catch(e) {
+          localStorage.removeItem("nps_user_session");
+        }
+      }
     });
 
     async function apiCall(accion, dataPayload = {}) {
@@ -274,6 +287,10 @@
         
         if (res && res.exito) {
           usuarioActual = res;
+
+          // GUARDAR CREDENCIALES EN EL TELÉFONO
+          localStorage.setItem("nps_user_session", JSON.stringify({ usuario: u, pass: p }));
+
           document.getElementById('view-login').classList.add('hidden');
           if (res.rol === 'Administrador') {
             cargarDashboard();
@@ -341,7 +358,7 @@
         return;
       }
 
-      // ACTIVA NOTIFICACIÓN E INSIGNIA IN-APP
+      // DESPLIEGA ALERTA IN-APP E INSIGNIA DE NOTIFICACIÓN
       countBadge.innerText = pendientesTecnicoActual.length;
       countBadge.classList.remove('hidden');
       
@@ -707,6 +724,9 @@
     }
 
     function cerrarSesion() {
+      // BORRA LA SESIÓN AL PRESIONAR SALIR
+      localStorage.removeItem("nps_user_session");
+
       usuarioActual = null;
       todosLosRegistros = [];
       pendientesTecnicoActual = [];
