@@ -6,6 +6,7 @@
   <title>GESTION NPS 2026</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
   <style>
     :root { --bg-dark: #0f172a; --card-bg: #1e293b; --card-border: #334155; --text-muted: #94a3b8; --accent-blue: #38bdf8; }
     body { background-color: var(--bg-dark); color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
@@ -98,6 +99,16 @@
         <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
       </div>
 
+      <!-- SELECTOR DE PERIODO -->
+      <div class="d-flex justify-content-between align-items-center mb-3 bg-dark p-2 rounded border border-secondary">
+        <span class="small text-secondary fw-bold"><i class="bi bi-calendar-event me-1"></i> Periodo:</span>
+        <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
+          <option value="dia">Hoy / Últimas 24h</option>
+          <option value="semana">Últimos 7 días</option>
+          <option value="mes" selected>Últimos 30 días</option>
+        </select>
+      </div>
+
       <div class="row g-2 mb-3">
         <div class="col-6 col-md-3"><div class="kpi-card kpi-pending"><div class="kpi-label">Pendientes</div><div class="kpi-num text-warning" id="kpi-pendientes">0</div></div></div>
         <div class="col-6 col-md-3"><div class="kpi-card kpi-done"><div class="kpi-label">Gestionados</div><div class="kpi-num text-success" id="kpi-gestionados">0</div></div></div>
@@ -105,8 +116,10 @@
         <div class="col-6 col-md-3"><div class="kpi-card kpi-danger"><div class="kpi-label">Conflictivos</div><div class="kpi-num text-danger" id="kpi-conflictivos">0</div></div></div>
       </div>
 
+      <button class="btn btn-sm btn-success w-100 fw-bold mb-3 py-2" onclick="exportarExcelConImagenes()"><i class="bi bi-file-earmark-excel me-2"></i>Exportar Reporte Excel (con Fotos)</button>
+
       <div class="segmented-control mb-3">
-        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-person-badge me-1"></i> Por Técnico</button>
+        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-person-badge me-1"></i> Semáforo Técnicos</button>
         <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-list-task me-1"></i> Gestión General</button>
       </div>
 
@@ -115,6 +128,7 @@
           <div class="col-6"><select id="select-tecnico" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Técnico --</option></select></div>
           <div class="col-6"><select id="select-estado-tec" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Estado --</option><option value="Pendiente">Pendiente</option><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo</option></select></div>
         </div>
+        <div id="contenedor-tecnico-alertas" class="mb-3"></div>
         <div id="contenedor-tecnico-filtrado"></div>
       </div>
 
@@ -180,7 +194,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // PEGA AQUÍ LA URL QUE COPIASTE DE GOOGLE APPS SCRIPT
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
 
     let usuarioActual = null, modalBs = null, modalVisorBs = null, modalDetalleBs = null;
@@ -193,13 +206,20 @@
     });
 
     async function apiCall(accion, dataPayload = {}) {
-      const response = await fetch(WEB_APP_URL, {
-        method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ accion: accion, ...dataPayload })
-      });
-      return await response.json();
+      try {
+        const response = await fetch(WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ accion: accion, ...dataPayload })
+        });
+        const textResponse = await response.text();
+        if (textResponse.trim().startsWith("<")) {
+          throw new Error("Respuesta HTML recibida. Asegúrese de que 'Quién tiene acceso' esté configurado en 'Cualquiera' y la URL termine en '/exec'.");
+        }
+        return JSON.parse(textResponse);
+      } catch (err) {
+        throw err;
+      }
     }
 
     async function ejecutarLogin() {
@@ -319,7 +339,7 @@
         return;
       }
       historicoTecnicoActual.forEach((r, index) => {
-        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (r.estado === 'Conflictivo' ? 'badge-danger' : 'badge-expired');
+        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (r.estado === 'Conflictivo' || r.estado === 'UU conflictivo' ? 'badge-danger' : 'badge-expired');
         let botonEvidencia = r.evidencia ? `<button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')"><i class="bi bi-file-image me-1"></i> Ver Foto</button>` : '<span class="text-secondary small" style="font-size: 0.72rem;">Sin imagen</span>';
 
         contenedor.innerHTML += `
@@ -359,7 +379,7 @@
 
       let badgeStyle = 'badge-pending';
       if (item.estado === 'Gestionado') badgeStyle = 'badge-done';
-      if (item.estado === 'Conflictivo') badgeStyle = 'badge-danger';
+      if (item.estado === 'Conflictivo' || item.estado === 'UU conflictivo') badgeStyle = 'badge-danger';
       if (item.estado === 'Sin Gestion') badgeStyle = 'badge-expired';
       document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
 
@@ -447,7 +467,8 @@
 
     async function cargarDashboard() {
       document.getElementById('view-admin').classList.remove('hidden');
-      const res = await apiCall("obtenerDatosDashboard");
+      const per = document.getElementById('select-periodo').value;
+      const res = await apiCall("obtenerDatosDashboard", { periodo: per });
       
       document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
       document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
@@ -456,13 +477,93 @@
 
       const selectTec = document.getElementById('select-tecnico');
       selectTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
+      
+      const contAlertas = document.getElementById('contenedor-tecnico-alertas');
+      contAlertas.innerHTML = '';
+
       res.tecnicos.forEach(t => {
         selectTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
+        
+        contAlertas.innerHTML += `
+          <div class="d-flex justify-content-between align-items-center p-2 mb-1 bg-dark rounded border border-secondary">
+            <div>
+              <strong class="text-light small">${t.nombre}</strong>
+              <div class="text-secondary" style="font-size: 0.7rem;">Avance: ${t.gestionados}/${t.total} (${t.pctAvance}%)</div>
+            </div>
+            <span class="badge ${t.alertaClase} p-2 small">${t.alerta}</span>
+          </div>`;
       });
 
       todosLosRegistros = res.registros;
       aplicarFiltrosTecnico();
       renderizarListaGeneral(todosLosRegistros);
+    }
+
+    async function exportarExcelConImagenes() {
+      if (!todosLosRegistros || todosLosRegistros.length === 0) {
+        alert("No hay registros disponibles para exportar.");
+        return;
+      }
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Reporte Gestiones NPS');
+
+      worksheet.columns = [
+        { header: 'ID Gestión', key: 'idGestion', width: 12 },
+        { header: 'Código Cliente', key: 'codigoCliente', width: 15 },
+        { header: 'Nombre Usuario', key: 'nombreUsuario', width: 25 },
+        { header: 'Técnico Asignado', key: 'tecnico', width: 22 },
+        { header: 'Fecha', key: 'fecha', width: 12 },
+        { header: 'Estado', key: 'estado', width: 15 },
+        { header: 'Número OT', key: 'numeroOT', width: 22 },
+        { header: 'Teléfono', key: 'telefono', width: 15 },
+        { header: 'Observaciones', key: 'observacion', width: 30 },
+        { header: 'Foto Evidencia', key: 'evidencia', width: 20 }
+      ];
+
+      worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+      worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '0F172A' } };
+
+      for (let i = 0; i < todosLosRegistros.length; i++) {
+        const item = todosLosRegistros[i];
+        const row = worksheet.addRow({
+          idGestion: item.idGestion,
+          codigoCliente: item.codigoCliente,
+          nombreUsuario: item.nombreUsuario,
+          tecnico: item.tecnico,
+          fecha: item.fecha,
+          estado: item.estado,
+          numeroOT: item.numeroOT,
+          telefono: item.telefono,
+          observacion: item.observacion,
+          evidencia: ''
+        });
+
+        const rowIndex = row.number;
+
+        if (item.evidenciaBase64) {
+          try {
+            const imageId = workbook.addImage({
+              base64: item.evidenciaBase64,
+              extension: 'jpeg',
+            });
+            worksheet.addImage(imageId, {
+              tl: { col: 9, row: rowIndex - 1 },
+              ext: { width: 100, height: 75 }
+            });
+            worksheet.getRow(rowIndex).height = 60;
+          } catch (e) {
+            console.log("Error al incrustar imagen en Excel: ", e);
+          }
+        }
+      }
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `Reporte_Gestiones_NPS_${Date.now()}.xlsx`;
+      link.click();
     }
 
     async function verFotoModal(url) {
@@ -513,7 +614,7 @@
       }
 
       lista.forEach(r => {
-        const isConflictive = r.estado === 'Conflictivo';
+        const isConflictive = r.estado === 'Conflictivo' || r.estado === 'UU conflictivo';
         const cardClass = isConflictive ? 'order-card conflictive' : 'order-card';
         let badgeStyle = 'badge-expired';
         if (r.estado === 'Gestionado') badgeStyle = 'badge-done';
