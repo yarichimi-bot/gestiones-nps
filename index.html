@@ -17,26 +17,41 @@
   <style>
     :root { --bg-dark: #0f172a; --card-bg: #1e293b; --card-border: #334155; --text-muted: #94a3b8; --accent-blue: #38bdf8; }
     body { background-color: var(--bg-dark); color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-    .container-custom { max-width: 900px; margin: auto; padding: 14px; }
+    
+    /* ADAPTABILIDAD INTELIGENTE: ANCHO MÁXIMO DINÁMICO PARA PC Y MÓVIL */
+    .container-custom { max-width: 650px; margin: auto; padding: 14px; transition: max-width 0.3s ease; }
+    @media (min-width: 992px) {
+      .container-custom { max-width: 1200px; padding: 24px; } /* Se expande en PC para parecer un Dashboard BI real */
+    }
+
     .login-card { max-width: 380px; margin: 40px auto; padding: 24px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); }
     .header-bar { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px 18px; margin-bottom: 16px; }
     .user-avatar { width: 36px; height: 36px; background: #0284c7; color: white; border-radius: 50%; font-weight: bold; font-size: 0.9rem; }
     
     /* ESTILO TARJETAS EJECUTIVAS BI */
-    .executive-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; text-align: center; position: relative; overflow: hidden; }
+    .executive-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
     .executive-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
     .exec-total::before { background-color: #38bdf8; }
     .exec-done::before { background-color: #10b981; }
     .exec-pending::before { background-color: #f59e0b; }
     .exec-danger::before { background-color: #ef4444; }
-    .exec-num { font-size: 1.6rem; font-weight: 700; line-height: 1.2; color: #fff; }
-    .exec-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .exec-num { font-size: 1.8rem; font-weight: 700; line-height: 1.2; color: #fff; }
+    .exec-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .segmented-control { background: #0f172a; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px; display: flex; gap: 4px; }
+    .segmented-control { background: #0f172a; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px; display: flex; gap: 4px; max-width: 500px; margin: 0 auto 16px auto; }
     .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border-radius: 8px; font-size: 0.85rem; font-weight: 600; padding: 10px 14px; border: none; transition: all 0.2s; }
     .segmented-control .nav-link.active { background: var(--card-bg); color: var(--accent-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
     
-    .order-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; margin-bottom: 12px; padding: 14px; position: relative; }
+    /* CUADRÍCULA DE ÓRDENES Y TÉCNICOS EN PC */
+    .grid-dashboard { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 768px) {
+      .grid-dashboard { grid-template-columns: repeat(2, 1fr); } /* 2 columnas en Tablets y Laptops */
+    }
+    @media (min-width: 1200px) {
+      .grid-dashboard { grid-template-columns: repeat(3, 1fr); } /* 3 columnas en Monitores grandes */
+    }
+
+    .order-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; margin-bottom: 0; padding: 14px; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
     .order-card.conflictive { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, #1e293b 0%, #2a1215 100%); }
     .ot-code { font-family: monospace; font-size: 0.85rem; color: #e2e8f0; word-break: break-all; }
     .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; margin-top: 10px; }
@@ -119,11 +134,11 @@
         </button>
       </div>
 
-      <div id="sec-tec-pendientes"><div id="lista-pendientes"><div class="text-center text-secondary py-4 small">Cargando órdenes guardadas...</div></div></div>
-      <div id="sec-tec-historico" class="hidden"><div id="lista-historico-tecnico"></div></div>
+      <div id="sec-tec-pendientes"><div id="lista-pendientes" class="grid-dashboard"></div></div>
+      <div id="sec-tec-historico" class="hidden"><div id="lista-historico-tecnico" class="grid-dashboard"></div></div>
     </div>
 
-    <!-- VISTA ADMIN (ESTILO DASHBOARD EJECUTIVO BI) -->
+    <!-- VISTA ADMIN (DASHBOARD EJECUTIVO TIPO BI AMPLIO) -->
     <div id="view-admin" class="hidden">
       <div class="header-bar d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
@@ -137,7 +152,7 @@
       </div>
 
       <!-- BARRA DE FILTRO DE PERIODO -->
-      <div class="d-flex justify-content-between align-items-center mb-3 bg-dark p-2 rounded border border-secondary">
+      <div class="d-flex justify-content-between align-items-center mb-3 bg-dark p-3 rounded border border-secondary">
         <span class="small text-secondary fw-bold"><i class="bi bi-calendar-event me-1"></i> Periodo de Análisis:</span>
         <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
           <option value="dia">Hoy / Últimas 24h</option>
@@ -147,7 +162,7 @@
       </div>
 
       <!-- BLOQUE DE INDICADORES EJECUTIVOS SUPERIORES (ESTILO BI) -->
-      <div class="row g-2 mb-3">
+      <div class="row g-3 mb-3">
         <div class="col-6 col-md-3"><div class="executive-card exec-total"><div class="exec-label">Total Órdenes</div><div class="exec-num" id="kpi-total">0</div></div></div>
         <div class="col-6 col-md-3"><div class="executive-card exec-done"><div class="exec-label">Gestionados</div><div class="exec-num text-success" id="kpi-gestionados">0</div></div></div>
         <div class="col-6 col-md-3"><div class="executive-card exec-pending"><div class="exec-label">Pendientes</div><div class="exec-num text-warning" id="kpi-pendientes">0</div></div></div>
@@ -157,7 +172,7 @@
       <button class="btn btn-sm btn-success w-100 fw-bold mb-3 py-2 shadow-sm" onclick="exportarExcelConImagenes()"><i class="bi bi-file-earmark-excel me-2"></i>Exportar Reporte Excel Ejecutivo (con Fotos)</button>
 
       <!-- PESTAÑAS DE NAVEGACIÓN ADMINISTRATIVA -->
-      <div class="segmented-control mb-3">
+      <div class="segmented-control mb-4">
         <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-speedometer2 me-1"></i> Semáforo y Rendimiento Técnicos</button>
         <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-list-columns-reverse me-1"></i> Detalle Cliente por Cliente</button>
       </div>
@@ -169,7 +184,7 @@
           <div class="col-6"><select id="select-estado-tec" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Todos los Estados --</option><option value="Pendiente">Pendiente</option><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo</option></select></div>
         </div>
         <div id="contenedor-tecnico-alertas" class="mb-3"></div>
-        <div id="contenedor-tecnico-filtrado"></div>
+        <div id="contenedor-tecnico-filtrado" class="grid-dashboard"></div>
       </div>
 
       <!-- SECCIÓN 2: DETALLE CLIENTE POR CLIENTE CON BUSCADOR -->
@@ -180,7 +195,7 @@
             <input type="text" id="input-buscar" class="form-control bg-dark text-white border-secondary" placeholder="Buscar por código, cliente, OT, teléfono o técnico..." onkeyup="filtrarListaGeneral()">
           </div>
         </div>
-        <div id="contenedor-dashboard"></div>
+        <div id="contenedor-dashboard" class="grid-dashboard"></div>
       </div>
     </div>
   </div>
@@ -407,7 +422,7 @@
       const msgAlerta = document.getElementById('mensaje-alerta-tecnico');
 
       if (pendientesTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes órdenes pendientes.</div>';
+        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3 col-12">No tienes órdenes pendientes.</div>';
         countBadge.classList.add('hidden');
         bannerAlerta.classList.add('hidden');
         return;
@@ -425,15 +440,17 @@
 
         contenedor.innerHTML += `
           <div class="order-card">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <strong class="text-primary fs-6">${item.codigoCliente}</strong>
-              <span class="badge-subtle badge-pending">Pendiente</span>
-            </div>
-            <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${item.nombreUsuario}</div>
-            
-            <div class="d-flex justify-content-between align-items-center my-2 bg-dark p-2 rounded border border-secondary border-opacity-25">
-              <span class="text-secondary small">Teléfono NPS:</span>
-              ${telLlamar}
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong class="text-primary fs-6">${item.codigoCliente}</strong>
+                <span class="badge-subtle badge-pending">Pendiente</span>
+              </div>
+              <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${item.nombreUsuario}</div>
+              
+              <div class="d-flex justify-content-between align-items-center my-2 bg-dark p-2 rounded border border-secondary border-opacity-25">
+                <span class="text-secondary small">Teléfono NPS:</span>
+                ${telLlamar}
+              </div>
             </div>
 
             <div class="d-flex gap-2 mt-3">
@@ -455,7 +472,7 @@
       const contenedor = document.getElementById('lista-historico-tecnico');
       contenedor.innerHTML = '';
       if (historicoTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes gestiones registradas aún.</div>';
+        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3 col-12">No tienes gestiones registradas aún.</div>';
         return;
       }
       historicoTecnicoActual.forEach((r, index) => {
@@ -464,18 +481,20 @@
 
         contenedor.innerHTML += `
           <div class="order-card">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <strong class="text-primary fs-6">${r.codigoCliente}</strong>
-              <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
-            </div>
-            <div class="fw-bold text-light mb-1" style="font-size: 0.85rem;">${r.nombreUsuario}</div>
-            
-            <div class="meta-grid">
-              <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
-              <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">FECHA GESTIÓN</span><span class="text-light" style="font-size: 0.72rem;">${r.fechaGestion}</span></div>
-            </div>
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong class="text-primary fs-6">${r.codigoCliente}</strong>
+                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
+              </div>
+              <div class="fw-bold text-light mb-1" style="font-size: 0.85rem;">${r.nombreUsuario}</div>
+              
+              <div class="meta-grid">
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">FECHA GESTIÓN</span><span class="text-light" style="font-size: 0.72rem;">${r.fechaGestion}</span></div>
+              </div>
 
-            ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
+              ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
+            </div>
 
             <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
               <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenTecnico(${index}, 'HISTORICO')"><i class="bi bi-eye me-1"></i> Detalles</button>
@@ -753,7 +772,7 @@
       const contenedor = document.getElementById(idContenedor);
       contenedor.innerHTML = '';
       if (lista.length === 0) {
-        contenedor.innerHTML = '<div class="text-secondary text-center small py-4">No hay órdenes para mostrar.</div>';
+        contenedor.innerHTML = '<div class="text-secondary text-center small py-4 col-12">No hay órdenes para mostrar.</div>';
         return;
       }
 
@@ -772,19 +791,21 @@
 
         contenedor.innerHTML += `
           <div class="${cardClass}">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
-              <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT}</small>
-            </div>
-            
-            <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombreUsuario}</div>
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
+                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT}</small>
+              </div>
+              
+              <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombreUsuario}</div>
 
-            <div class="meta-grid">
-              <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">CLIENTE</span><strong class="text-light">${r.codigoCliente}</strong></div>
-              <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
-            </div>
+              <div class="meta-grid">
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">CLIENTE</span><strong class="text-light">${r.codigoCliente}</strong></div>
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
+              </div>
 
-            ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
+              ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
+            </div>
             
             <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
               <span class="text-secondary" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
@@ -830,7 +851,7 @@
       e.preventDefault();
       deferredPrompt = e;
       const btnInstalar = document.getElementById('btn-instalar-pwa');
-      if (btnInstalar) btnInstalar.classList.remove('hidden');
+      if (btnInstalar) btnInstalar.classList.add('hidden');
     });
 
     function instalarApp() {
