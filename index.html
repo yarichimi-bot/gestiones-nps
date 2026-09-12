@@ -142,7 +142,7 @@
               <small class="text-info fw-bold" style="font-size: 0.72rem;" id="admin-header-region">ZONA: NACIONAL</small>
             </div>
           </div>
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
             <button class="btn btn-sm btn-outline-info fw-bold" onclick="abrirModalCargaExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Cargar Excel</button>
             <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
               <option value="dia">Hoy / 24h</option>
@@ -150,6 +150,22 @@
               <option value="mes" selected>Últimos 30 días</option>
             </select>
             <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
+          </div>
+        </div>
+
+        <!-- FILTROS REGIONALES (ADMIN NACIONAL / GENERAL) -->
+        <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary border-opacity-25">
+          <div class="col-6 col-md-3">
+            <label class="form-label text-secondary small m-0 mb-1" style="font-size: 0.7rem;"><i class="bi bi-geo-alt me-1"></i>Departamento:</label>
+            <select id="select-filtro-dept" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="cargarDashboard()">
+              <option value="TODOS">-- Todos --</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label text-secondary small m-0 mb-1" style="font-size: 0.7rem;"><i class="bi bi-building me-1"></i>Ciudad:</label>
+            <select id="select-filtro-ciudad" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="cargarDashboard()">
+              <option value="TODAS">-- Todas --</option>
+            </select>
           </div>
         </div>
 
@@ -298,7 +314,7 @@
           <div class="detail-row"><div class="detail-label">ID Gestión</div><div class="detail-val" id="det-id">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Código Cliente</div><div class="detail-val text-primary" id="det-codigo">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Nombre Usuario</div><div class="detail-val fw-bold" id="det-nombre">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Técnico Asignado</div><div class="detail-val" id="det-tecnico">N/A</div></div>
+          <div class="detail-row"><div class="detail-label">Técnico Asignado</div><div class="detail-val fw-bold text-info" id="det-tecnico">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Fecha Asignación</div><div class="detail-val" id="det-fecha">N/A</div></div>
           <div class="detail-row"><div class="detail-label text-info">Fecha de Gestión</div><div class="detail-val text-info fw-bold" id="det-fecha-gestion">Pendiente</div></div>
           <div class="detail-row"><div class="detail-label text-success">Tiempo de Respuesta</div><div class="detail-val text-success fw-bold" id="det-tiempo-respuesta">N/A</div></div>
@@ -699,14 +715,38 @@
 
     async function cargarDashboard() {
       const per = document.getElementById('select-periodo').value;
+      const filtroDeptEl = document.getElementById('select-filtro-dept');
+      const filtroCiuEl = document.getElementById('select-filtro-ciudad');
+
+      const deptVal = filtroDeptEl ? filtroDeptEl.value : usuarioActual.departamento;
+      const ciuVal = filtroCiuEl ? filtroCiuEl.value : usuarioActual.ciudad;
+
       try {
         const res = await apiCall("obtenerDatosDashboard", {
           usuario: usuarioActual.usuario,
           rol: usuarioActual.rol,
-          departamento: usuarioActual.departamento,
-          ciudad: usuarioActual.ciudad,
+          departamento: deptVal,
+          ciudad: ciuVal,
           periodo: per
         });
+
+        // Cargar Opciones de Departamentos
+        if (filtroDeptEl && res.departamentos) {
+          let currDept = filtroDeptEl.value;
+          filtroDeptEl.innerHTML = '<option value="TODOS">-- Todos los Departamentos --</option>';
+          res.departamentos.forEach(d => {
+            filtroDeptEl.innerHTML += `<option value="${d}" ${d === currDept ? 'selected' : ''}>${d}</option>`;
+          });
+        }
+
+        // Cargar Opciones de Ciudades
+        if (filtroCiuEl && res.ciudades) {
+          let currCiu = filtroCiuEl.value;
+          filtroCiuEl.innerHTML = '<option value="TODAS">-- Todas las Ciudades --</option>';
+          res.ciudades.forEach(c => {
+            filtroCiuEl.innerHTML += `<option value="${c}" ${c === currCiu ? 'selected' : ''}>${c}</option>`;
+          });
+        }
 
         const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos;
         
@@ -860,7 +900,7 @@
             </div>
             
             <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
-              <span class="text-secondary" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
+              <span class="text-secondary fw-bold" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
               <div class="d-flex gap-1">
                 <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenAdmin(${indexOriginal})"><i class="bi bi-eye me-1"></i>Detalles</button>
                 ${r.evidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')">Foto</button>` : ''}
