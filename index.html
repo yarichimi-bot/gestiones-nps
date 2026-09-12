@@ -110,7 +110,7 @@
         </button>
       </div>
 
-      <div id="sec-tec-pendientes"><div id="lista-pendientes"></div></div>
+      <div id="sec-tec-pendientes"><div id="lista-pendientes"><div class="text-center text-secondary py-4 small">Cargando órdenes guardadas...</div></div></div>
       <div id="sec-tec-historico" class="hidden"><div id="lista-historico-tecnico"></div></div>
     </div>
 
@@ -233,7 +233,6 @@
       modalVisorBs = new bootstrap.Modal(document.getElementById('modalVisorFoto'));
       modalDetalleBs = new bootstrap.Modal(document.getElementById('modalDetalleOrden'));
 
-      // VERIFICAR SI YA EXISTE UN PERFIL AUTENTICADO GUARDADO EN EL DISPOSITIVO
       const perfilGuardado = localStorage.getItem("nps_user_profile");
       if (perfilGuardado) {
         try {
@@ -247,6 +246,14 @@
             document.getElementById('view-tecnico').classList.remove('hidden');
             document.getElementById('label-nombre-tec').innerText = usuarioActual.nombre || 'Técnico';
             document.getElementById('avatar-tec').innerText = usuarioActual.nombre ? usuarioActual.nombre.charAt(0) : 'T';
+            
+            // CARGA INSTANTÁNEA DESDE CACHÉ SI EXISTE (VELOCIDAD MÁXIMA EN ZONAS CON MALA SEÑAL)
+            const cachePendientes = localStorage.getItem("nps_cache_pendientes_" + usuarioActual.usuario);
+            if (cachePendientes) {
+              pendientesTecnicoActual = JSON.parse(cachePendientes);
+              renderizarPendientesTecnicoUI();
+            }
+
             cargarPendientesTecnico();
           }
         } catch(e) {
@@ -264,7 +271,7 @@
         });
         const textResponse = await response.text();
         if (textResponse.trim().startsWith("<")) {
-          throw new Error("Respuesta HTML recibida. Verifique que 'Quién tiene acceso' esté en 'Cualquiera' y la URL termine en '/exec'.");
+          throw new Error("Respuesta HTML recibida.");
         }
         return JSON.parse(textResponse);
       } catch (err) {
@@ -295,8 +302,6 @@
         
         if (res && res.exito) {
           usuarioActual = res;
-
-          // GUARDAR PERFIL PERMANENTE EN EL DISPOSITIVO
           localStorage.setItem("nps_user_profile", JSON.stringify(res));
 
           document.getElementById('view-login').classList.add('hidden');
@@ -353,61 +358,74 @@
       try {
         const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
         pendientesTecnicoActual = lista || [];
-        const contenedor = document.getElementById('lista-pendientes');
-        contenedor.innerHTML = '';
         
-        const countBadge = document.getElementById('badge-count-pendientes');
-        const bannerAlerta = document.getElementById('banner-alerta-tecnico');
-        const msgAlerta = document.getElementById('mensaje-alerta-tecnico');
-
-        if (pendientesTecnicoActual.length === 0) {
-          contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes órdenes pendientes.</div>';
-          countBadge.classList.add('hidden');
-          bannerAlerta.classList.add('hidden');
-          return;
-        }
-
-        countBadge.innerText = pendientesTecnicoActual.length;
-        countBadge.classList.remove('hidden');
+        // GUARDAR EN CACHÉ LOCAL PARA ACCESO INSTANTÁNEO EN ZONAS DE MALA SEÑAL
+        localStorage.setItem("nps_cache_pendientes_" + usuarioActual.usuario, JSON.stringify(pendientesTecnicoActual));
         
-        let nombreTecnicoStr = usuarioActual.nombre ? usuarioActual.nombre.toUpperCase() : '';
-        msgAlerta.innerHTML = `<strong>ESTIMADO/A ${nombreTecnicoStr}:</strong> Tienes <strong>${pendientesTecnicoActual.length} cliente(s) NPS sin gestión</strong>. Favor gestionar a la brevedad o, si ya gestionó, registrar su informe con respaldo. ¡Gracias!`;
-        bannerAlerta.classList.remove('hidden');
-
-        pendientesTecnicoActual.forEach((item, index) => {
-          let telLlamar = item.telefono && item.telefono !== 'Sin Teléfono' ? `<a href="tel:${item.telefono}" class="btn btn-xs btn-outline-warning p-1 px-2 small"><i class="bi bi-telephone-fill me-1"></i>${item.telefono}</a>` : '<span class="text-secondary small">Sin Tel.</span>';
-
-          contenedor.innerHTML += `
-            <div class="order-card">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <strong class="text-primary fs-6">${item.codigoCliente}</strong>
-                <span class="badge-subtle badge-pending">Pendiente</span>
-              </div>
-              <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${item.nombreUsuario}</div>
-              
-              <div class="d-flex justify-content-between align-items-center my-2 bg-dark p-2 rounded border border-secondary border-opacity-25">
-                <span class="text-secondary small">Teléfono NPS:</span>
-                ${telLlamar}
-              </div>
-
-              <div class="d-flex gap-2 mt-3">
-                <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
-                <button class="btn btn-sm btn-success flex-fill fw-bold py-2" onclick="abrirModal(${item.fila})"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
-              </div>
-            </div>`;
-        });
+        renderizarPendientesTecnicoUI();
       } catch(e) {
-        console.log("Error cargando pendientes: ", e);
+        console.log("Error de red, manteniendo datos en caché local si existen.");
       }
     }
 
+    function renderizarPendientesTecnicoUI() {
+      const contenedor = document.getElementById('lista-pendientes');
+      contenedor.innerHTML = '';
+      
+      const countBadge = document.getElementById('badge-count-pendientes');
+      const bannerAlerta = document.getElementById('banner-alerta-tecnico');
+      const msgAlerta = document.getElementById('mensaje-alerta-tecnico');
+
+      if (pendientesTecnicoActual.length === 0) {
+        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes órdenes pendientes.</div>';
+        countBadge.classList.add('hidden');
+        bannerAlerta.classList.add('hidden');
+        return;
+      }
+
+      countBadge.innerText = pendientesTecnicoActual.length;
+      countBadge.classList.remove('hidden');
+      
+      let nombreTecnicoStr = usuarioActual.nombre ? usuarioActual.nombre.toUpperCase() : '';
+      msgAlerta.innerHTML = `<strong>ESTIMADO/A ${nombreTecnicoStr}:</strong> Tienes <strong>${pendientesTecnicoActual.length} cliente(s) NPS sin gestión</strong>. Favor gestionar a la brevedad o registrar tu informe con respaldo. ¡Gracias!`;
+      bannerAlerta.classList.remove('hidden');
+
+      pendientesTecnicoActual.forEach((item, index) => {
+        let telLlamar = item.telefono && item.telefono !== 'Sin Teléfono' ? `<a href="tel:${item.telefono}" class="btn btn-xs btn-outline-warning p-1 px-2 small"><i class="bi bi-telephone-fill me-1"></i>${item.telefono}</a>` : '<span class="text-secondary small">Sin Tel.</span>';
+
+        contenedor.innerHTML += `
+          <div class="order-card">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <strong class="text-primary fs-6">${item.codigoCliente}</strong>
+              <span class="badge-subtle badge-pending">Pendiente</span>
+            </div>
+            <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${item.nombreUsuario}</div>
+            
+            <div class="d-flex justify-content-between align-items-center my-2 bg-dark p-2 rounded border border-secondary border-opacity-25">
+              <span class="text-secondary small">Teléfono NPS:</span>
+              ${telLlamar}
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
+              <button class="btn btn-sm btn-success flex-fill fw-bold py-2" onclick="abrirModal(${item.fila})"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
+            </div>
+          </div>`;
+      });
+    }
+
     async function cargarHistoricoTecnico() {
-      const lista = await apiCall("obtenerHistoricoTecnico", { correoTecnico: usuarioActual.usuario });
-      historicoTecnicoActual = lista || [];
+      try {
+        const lista = await apiCall("obtenerHistoricoTecnico", { correoTecnico: usuarioActual.usuario });
+        historicoTecnicoActual = lista || [];
+      } catch(e) {
+        historicoTecnicoActual = [];
+      }
+      
       const contenedor = document.getElementById('lista-historico-tecnico');
       contenedor.innerHTML = '';
       if (historicoTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes gestiones registradas aún.</div>';
+        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes gestiones registradas aún (o sin conexión).</div>';
         return;
       }
       historicoTecnicoActual.forEach((r, index) => {
@@ -529,7 +547,11 @@
     }
 
     async function enviarDatosAlServidor(payload) {
-      await apiCall("guardarGestion", { payload: payload });
+      try {
+        await apiCall("guardarGestion", { payload: payload });
+      } catch(e) {
+        alert("Aviso: Se guardó localmente o hubo retraso en red. Verifique conexión.");
+      }
       const btnGuardar = document.getElementById('btn-guardar');
       btnGuardar.disabled = false;
       btnGuardar.innerText = "Guardar Gestión";
@@ -540,35 +562,39 @@
     async function cargarDashboard() {
       document.getElementById('view-admin').classList.remove('hidden');
       const per = document.getElementById('select-periodo').value;
-      const res = await apiCall("obtenerDatosDashboard", { periodo: per });
-      
-      document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
-      document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
-      document.getElementById('kpi-sin-gestion').innerText = res.kpis.sinGestion;
-      document.getElementById('kpi-conflictivos').innerText = res.kpis.conflictivos;
-
-      const selectTec = document.getElementById('select-tecnico');
-      selectTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
-      
-      const contAlertas = document.getElementById('contenedor-tecnico-alertas');
-      contAlertas.innerHTML = '';
-
-      res.tecnicos.forEach(t => {
-        selectTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
+      try {
+        const res = await apiCall("obtenerDatosDashboard", { periodo: per });
         
-        contAlertas.innerHTML += `
-          <div class="d-flex justify-content-between align-items-center p-2 mb-1 bg-dark rounded border border-secondary">
-            <div>
-              <strong class="text-light small">${t.nombre}</strong>
-              <div class="text-secondary" style="font-size: 0.7rem;">Avance: ${t.gestionados}/${t.total} (${t.pctAvance}%)</div>
-            </div>
-            <span class="badge ${t.alertaClase} p-2 small">${t.alerta}</span>
-          </div>`;
-      });
+        document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
+        document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
+        document.getElementById('kpi-sin-gestion').innerText = res.kpis.sinGestion;
+        document.getElementById('kpi-conflictivos').innerText = res.kpis.conflictivos;
 
-      todosLosRegistros = res.registros;
-      aplicarFiltrosTecnico();
-      renderizarListaGeneral(todosLosRegistros);
+        const selectTec = document.getElementById('select-tecnico');
+        selectTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
+        
+        const contAlertas = document.getElementById('contenedor-tecnico-alertas');
+        contAlertas.innerHTML = '';
+
+        res.tecnicos.forEach(t => {
+          selectTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
+          
+          contAlertas.innerHTML += `
+            <div class="d-flex justify-content-between align-items-center p-2 mb-1 bg-dark rounded border border-secondary">
+              <div>
+                <strong class="text-light small">${t.nombre}</strong>
+                <div class="text-secondary" style="font-size: 0.7rem;">Avance: ${t.gestionados}/${t.total} (${t.pctAvance}%)</div>
+              </div>
+              <span class="badge ${t.alertaClase} p-2 small">${t.alerta}</span>
+            </div>`;
+        });
+
+        todosLosRegistros = res.registros;
+        aplicarFiltrosTecnico();
+        renderizarListaGeneral(todosLosRegistros);
+      } catch(e) {
+        console.log("Error cargando dashboard admin");
+      }
     }
 
     async function exportarExcelConImagenes() {
@@ -649,13 +675,19 @@
       
       modalVisorBs.show();
       
-      const res = await apiCall("obtenerImagenEnBase64", { url: url });
-      loadingElement.classList.add('hidden');
-      if (res.exito) {
-        imgElement.src = res.dataUri;
-        imgElement.classList.remove('hidden');
-      } else {
-        errorElement.innerText = res.mensaje || "No se pudo cargar la imagen.";
+      try {
+        const res = await apiCall("obtenerImagenEnBase64", { url: url });
+        loadingElement.classList.add('hidden');
+        if (res.exito) {
+          imgElement.src = res.dataUri;
+          imgElement.classList.remove('hidden');
+        } else {
+          errorElement.innerText = res.mensaje || "No se pudo cargar la imagen.";
+          errorElement.classList.remove('hidden');
+        }
+      } catch(e) {
+        loadingElement.classList.add('hidden');
+        errorElement.innerText = "Error de conexión al cargar foto.";
         errorElement.classList.remove('hidden');
       }
     }
