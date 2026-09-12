@@ -289,7 +289,7 @@
     </div>
   </div>
 
-  <!-- MODAL FICHA DETALLES -->
+  <!-- MODAL FICHA DETALLES CON WHATSAPP Y LLAMADAS -->
   <div class="modal fade" id="modalDetalleOrden" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -306,6 +306,8 @@
           <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val" id="det-ot">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
           <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Observación de Gestión</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
+          
+          <!-- CONTENEDOR DE BOTONES DE ACCIÓN (WHATSAPP / LLAMAR) -->
           <div class="mt-3 d-flex flex-column gap-2" id="box-btn-acciones"></div>
         </div>
         <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button></div>
@@ -594,6 +596,19 @@
         boxObs.classList.add('hidden');
       }
 
+      // BOTONES DE ACCIÓN PARA WHATSAPP Y LLAMADAS
+      const boxAcciones = document.getElementById('box-btn-acciones');
+      boxAcciones.innerHTML = '';
+      if (item.telefono && item.telefono !== 'Sin Teléfono') {
+        let numLimpio = item.telefono.replace(/[^0-9]/g, '');
+        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO...`;
+        let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
+        boxAcciones.innerHTML = `
+          <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
+          <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
+        `;
+      }
+
       modalDetalleBs.show();
     }
 
@@ -621,6 +636,18 @@
 
       let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (item.estado === 'Conflictivo' ? 'badge-danger' : 'badge-pending');
       document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
+
+      const boxAcciones = document.getElementById('box-btn-acciones');
+      boxAcciones.innerHTML = '';
+      if (item.telefono && item.telefono !== 'Sin Teléfono') {
+        let numLimpio = item.telefono.replace(/[^0-9]/g, '');
+        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO...`;
+        let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
+        boxAcciones.innerHTML = `
+          <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
+          <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
+        `;
+      }
 
       modalDetalleBs.show();
     }
@@ -953,6 +980,8 @@
     }
 
     async function verFotoModal(url) {
+      if (!url) return alert("No hay foto registrada para esta gestión.");
+      
       const imgElement = document.getElementById('visor-img');
       const loadingElement = document.getElementById('visor-loading');
       const errorElement = document.getElementById('visor-error');
@@ -965,7 +994,7 @@
       try {
         const res = await apiCall("obtenerImagenEnBase64", { url: url });
         loadingElement.classList.add('hidden');
-        if (res.exito) {
+        if (res && res.exito) {
           imgElement.src = res.dataUri;
           imgElement.classList.remove('hidden');
         } else {
@@ -974,7 +1003,7 @@
         }
       } catch(e) {
         loadingElement.classList.add('hidden');
-        errorElement.innerText = "Error de conexión.";
+        errorElement.innerText = "Error de conexión con Google Drive.";
         errorElement.classList.remove('hidden');
       }
     }
