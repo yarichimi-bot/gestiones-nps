@@ -143,7 +143,6 @@
             </div>
           </div>
           <div class="d-flex align-items-center gap-2">
-            <!-- BOTÓN PARA CARGAR EXCEL -->
             <button class="btn btn-sm btn-outline-info fw-bold" onclick="abrirModalCargaExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Cargar Excel</button>
             <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
               <option value="dia">Hoy / 24h</option>
@@ -239,7 +238,7 @@
     </div>
   </div>
 
-  <!-- MODAL PARA CARGA MASIVA DE EXCEL -->
+  <!-- MODAL CARGA MASIVA EXCEL -->
   <div class="modal fade" id="modalCargaExcel" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -329,7 +328,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT TERMINADA EN /exec
+    // ⚠️ REEMPLAZA ESTA URL CON TU URL REAL DE GOOGLE APPS SCRIPT TERMINADA EN /exec
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
 
     let usuarioActual = null, modalBs = null, modalVisorBs = null, modalDetalleBs = null, modalCargaExcelBs = null;
@@ -347,12 +346,19 @@
         try {
           usuarioActual = JSON.parse(perfilGuardado);
           document.getElementById('view-login').classList.add('hidden');
-          if (usuarioActual.rol === 'Técnico') {
+          
+          const esRolTecnico = usuarioActual.esTecnico || 
+                               (usuarioActual.rol && usuarioActual.rol.toLowerCase().includes('tec'));
+
+          if (esRolTecnico) {
             document.getElementById('view-tecnico').classList.remove('hidden');
+            document.getElementById('view-admin').classList.add('hidden');
             document.getElementById('label-nombre-tec').innerText = usuarioActual.nombre || 'Técnico';
+            document.getElementById('avatar-tec').innerText = (usuarioActual.nombre || 'T').charAt(0).toUpperCase();
             cargarPendientesTecnico();
           } else {
             document.getElementById('view-admin').classList.remove('hidden');
+            document.getElementById('view-tecnico').classList.add('hidden');
             document.getElementById('admin-header-titulo').innerText = `${usuarioActual.nombre} (${usuarioActual.rol})`;
             document.getElementById('admin-header-region').innerText = `DEP: ${usuarioActual.departamento} | CIUDAD: ${usuarioActual.ciudad}`;
             cargarDashboard();
@@ -415,7 +421,7 @@
           const filasNuevas = jsonData.map(row => ({
             codigoCliente: row['Codigo_Cliente'] || row['CODIGO'] || row['CLIENTE'] || '',
             nombreUsuario: row['Nombre_Usuario'] || row['USUARIO'] || row['NOMBRE'] || '',
-            tecnico: row['Tecnico_Asignado'] || row['TECNICO'] || '',
+            tecnico: row['Tecnico_Asignado'] || row['TECNICO'] || row['Tecnico_asignado'] || '',
             numeroOT: row['Numero_OT'] || row['OT'] || row['NRO_OT'] || '',
             telefono: row['Telefono_Cliente'] || row['TELEFONO'] || row['CELULAR'] || '',
             operadora: row['Operadora'] || row['OPERADORA'] || ''
