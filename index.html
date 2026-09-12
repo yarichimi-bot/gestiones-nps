@@ -17,28 +17,37 @@
   <style>
     :root { --bg-dark: #0f172a; --card-bg: #1e293b; --card-border: #334155; --text-muted: #94a3b8; --accent-blue: #38bdf8; }
     body { background-color: var(--bg-dark); color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-    .container-custom { max-width: 650px; margin: auto; padding: 14px; }
+    .container-custom { max-width: 900px; margin: auto; padding: 14px; }
     .login-card { max-width: 380px; margin: 40px auto; padding: 24px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); }
-    .header-bar { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; }
-    .user-avatar { width: 32px; height: 32px; background: #0284c7; color: white; border-radius: 50%; font-weight: bold; font-size: 0.85rem; }
-    .kpi-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; text-align: left; position: relative; overflow: hidden; }
-    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
-    .kpi-pending::before { background-color: #f59e0b; } .kpi-done::before { background-color: #10b981; } .kpi-expired::before { background-color: #64748b; } .kpi-danger::before { background-color: #ef4444; }
-    .kpi-num { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
-    .kpi-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-    .segmented-control { background: #0f172a; border: 1px solid var(--card-border); border-radius: 10px; padding: 3px; display: flex; gap: 4px; }
-    .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border-radius: 8px; font-size: 0.82rem; font-weight: 600; padding: 8px 12px; border: none; transition: all 0.2s; }
+    .header-bar { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px 18px; margin-bottom: 16px; }
+    .user-avatar { width: 36px; height: 36px; background: #0284c7; color: white; border-radius: 50%; font-weight: bold; font-size: 0.9rem; }
+    
+    /* ESTILO TARJETAS EJECUTIVAS BI */
+    .executive-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; text-align: center; position: relative; overflow: hidden; }
+    .executive-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+    .exec-total::before { background-color: #38bdf8; }
+    .exec-done::before { background-color: #10b981; }
+    .exec-pending::before { background-color: #f59e0b; }
+    .exec-danger::before { background-color: #ef4444; }
+    .exec-num { font-size: 1.6rem; font-weight: 700; line-height: 1.2; color: #fff; }
+    .exec-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .segmented-control { background: #0f172a; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px; display: flex; gap: 4px; }
+    .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border-radius: 8px; font-size: 0.85rem; font-weight: 600; padding: 10px 14px; border: none; transition: all 0.2s; }
     .segmented-control .nav-link.active { background: var(--card-bg); color: var(--accent-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    
     .order-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; margin-bottom: 12px; padding: 14px; position: relative; }
     .order-card.conflictive { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, #1e293b 0%, #2a1215 100%); }
     .ot-code { font-family: monospace; font-size: 0.85rem; color: #e2e8f0; word-break: break-all; }
     .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; margin-top: 10px; }
     .meta-item { background: rgba(15, 23, 42, 0.5); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.03); }
+    
     .badge-subtle { font-size: 0.7rem; font-weight: 600; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
     .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
     .badge-done { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
     .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
     .badge-expired { background: rgba(100, 116, 139, 0.15); color: #cbd5e1; border: 1px solid rgba(100, 116, 139, 0.3); }
+    
     .detail-row { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; }
     .detail-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; }
     .detail-val { font-size: 0.88rem; color: #f8fafc; font-weight: 500; }
@@ -114,22 +123,22 @@
       <div id="sec-tec-historico" class="hidden"><div id="lista-historico-tecnico"></div></div>
     </div>
 
-    <!-- VISTA ADMIN -->
+    <!-- VISTA ADMIN (ESTILO DASHBOARD EJECUTIVO BI) -->
     <div id="view-admin" class="hidden">
       <div class="header-bar d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
           <div class="user-avatar d-flex align-items-center justify-content-center">A</div>
           <div>
-            <h6 class="m-0 text-white fw-bold">Panel Administrador</h6>
-            <small class="text-secondary" style="font-size: 0.72rem;">GESTION NPS 2026</small>
+            <h6 class="m-0 text-white fw-bold">Panel Administrador - Ejecutivo NPS</h6>
+            <small class="text-secondary" style="font-size: 0.72rem;">COMUNICA / GESTION NPS 2026</small>
           </div>
         </div>
         <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
       </div>
 
-      <!-- SELECTOR DE PERIODO -->
+      <!-- BARRA DE FILTRO DE PERIODO -->
       <div class="d-flex justify-content-between align-items-center mb-3 bg-dark p-2 rounded border border-secondary">
-        <span class="small text-secondary fw-bold"><i class="bi bi-calendar-event me-1"></i> Periodo:</span>
+        <span class="small text-secondary fw-bold"><i class="bi bi-calendar-event me-1"></i> Periodo de Análisis:</span>
         <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
           <option value="dia">Hoy / Últimas 24h</option>
           <option value="semana">Últimos 7 días</option>
@@ -137,31 +146,40 @@
         </select>
       </div>
 
+      <!-- BLOQUE DE INDICADORES EJECUTIVOS SUPERIORES (ESTILO BI) -->
       <div class="row g-2 mb-3">
-        <div class="col-6 col-md-3"><div class="kpi-card kpi-pending"><div class="kpi-label">Pendientes</div><div class="kpi-num text-warning" id="kpi-pendientes">0</div></div></div>
-        <div class="col-6 col-md-3"><div class="kpi-card kpi-done"><div class="kpi-label">Gestionados</div><div class="kpi-num text-success" id="kpi-gestionados">0</div></div></div>
-        <div class="col-6 col-md-3"><div class="kpi-card kpi-expired"><div class="kpi-label">Sin Gestión</div><div class="kpi-num text-secondary" id="kpi-sin-gestion">0</div></div></div>
-        <div class="col-6 col-md-3"><div class="kpi-card kpi-danger"><div class="kpi-label">Conflictivos</div><div class="kpi-num text-danger" id="kpi-conflictivos">0</div></div></div>
+        <div class="col-6 col-md-3"><div class="executive-card exec-total"><div class="exec-label">Total Órdenes</div><div class="exec-num" id="kpi-total">0</div></div></div>
+        <div class="col-6 col-md-3"><div class="executive-card exec-done"><div class="exec-label">Gestionados</div><div class="exec-num text-success" id="kpi-gestionados">0</div></div></div>
+        <div class="col-6 col-md-3"><div class="executive-card exec-pending"><div class="exec-label">Pendientes</div><div class="exec-num text-warning" id="kpi-pendientes">0</div></div></div>
+        <div class="col-6 col-md-3"><div class="executive-card exec-danger"><div class="exec-label">Conflictivos</div><div class="exec-num text-danger" id="kpi-conflictivos">0</div></div></div>
       </div>
 
-      <button class="btn btn-sm btn-success w-100 fw-bold mb-3 py-2" onclick="exportarExcelConImagenes()"><i class="bi bi-file-earmark-excel me-2"></i>Exportar Reporte Excel (con Fotos)</button>
+      <button class="btn btn-sm btn-success w-100 fw-bold mb-3 py-2 shadow-sm" onclick="exportarExcelConImagenes()"><i class="bi bi-file-earmark-excel me-2"></i>Exportar Reporte Excel Ejecutivo (con Fotos)</button>
 
+      <!-- PESTAÑAS DE NAVEGACIÓN ADMINISTRATIVA -->
       <div class="segmented-control mb-3">
-        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-person-badge me-1"></i> Semáforo Técnicos</button>
-        <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-list-task me-1"></i> Gestión General</button>
+        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-speedometer2 me-1"></i> Semáforo y Rendimiento Técnicos</button>
+        <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-list-columns-reverse me-1"></i> Detalle Cliente por Cliente</button>
       </div>
 
+      <!-- SECCIÓN 1: SEMÁFORO TÉCNICOS -->
       <div id="sec-tecnicos">
         <div class="row g-2 mb-3">
-          <div class="col-6"><select id="select-tecnico" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Técnico --</option></select></div>
-          <div class="col-6"><select id="select-estado-tec" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Estado --</option><option value="Pendiente">Pendiente</option><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo</option></select></div>
+          <div class="col-6"><select id="select-tecnico" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Todos los Técnicos --</option></select></div>
+          <div class="col-6"><select id="select-estado-tec" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Todos los Estados --</option><option value="Pendiente">Pendiente</option><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo</option></select></div>
         </div>
         <div id="contenedor-tecnico-alertas" class="mb-3"></div>
         <div id="contenedor-tecnico-filtrado"></div>
       </div>
 
+      <!-- SECCIÓN 2: DETALLE CLIENTE POR CLIENTE CON BUSCADOR -->
       <div id="sec-general" class="hidden">
-        <div class="mb-3"><input type="text" id="input-buscar" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="🔍 Buscar por OT, cliente, usuario o teléfono..." onkeyup="filtrarListaGeneral()"></div>
+        <div class="mb-3">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-dark text-secondary border-secondary"><i class="bi bi-search"></i></span>
+            <input type="text" id="input-buscar" class="form-control bg-dark text-white border-secondary" placeholder="Buscar por código, cliente, OT, teléfono o técnico..." onkeyup="filtrarListaGeneral()">
+          </div>
+        </div>
         <div id="contenedor-dashboard"></div>
       </div>
     </div>
@@ -177,7 +195,6 @@
           <div class="mb-3"><label class="form-label small text-secondary">Estado de Gestión</label><select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="evaluarEstado()"><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo (NPS 0)</option></select></div>
           <div class="mb-3"><label class="form-label small text-secondary">Resultado</label><select id="modal-resultado" class="form-select bg-dark text-white border-secondary"><option value="Exitoso">Exitoso</option><option value="Sin respuesta">Sin respuesta</option></select></div>
           
-          <!-- SECTOR DE EVIDENCIA CON 2 BOTONES INDEPENDIENTES (CÁMARA / GALERÍA) -->
           <div class="mb-3">
             <label class="form-label small text-secondary">Evidencia Fotográfica</label>
             <div class="d-flex gap-2 mb-2">
@@ -527,8 +544,6 @@
       if (input.files && input.files[0]) {
         archivoFotoSeleccionado = input.files[0];
         document.getElementById('label-archivo-elegido').innerText = "✓ Archivo listo: " + archivoFotoSeleccionado.name;
-        
-        // Limpiar el otro input para evitar cruces
         if (input.id === 'modal-foto-camara') document.getElementById('modal-foto-galeria').value = '';
         if (input.id === 'modal-foto-galeria') document.getElementById('modal-foto-camara').value = '';
       }
@@ -581,7 +596,7 @@
       btnGuardar.disabled = false;
       btnGuardar.innerText = "Guardar Gestión";
       modalBs.hide();
-      cargarPendientesTecnico();
+      cargarDashboard();
     }
 
     async function cargarDashboard() {
@@ -590,9 +605,9 @@
       try {
         const res = await apiCall("obtenerDatosDashboard", { periodo: per });
         
+        document.getElementById('kpi-total').innerText = (res.kpis.gestionados + res.kpis.pendientes + res.kpis.sinGestion + res.kpis.conflictivos);
         document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
         document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
-        document.getElementById('kpi-sin-gestion').innerText = res.kpis.sinGestion;
         document.getElementById('kpi-conflictivos').innerText = res.kpis.conflictivos;
 
         const selectTec = document.getElementById('select-tecnico');
