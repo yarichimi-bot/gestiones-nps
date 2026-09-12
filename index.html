@@ -154,7 +154,7 @@
           <div class="d-flex align-items-center gap-2">
             <div class="bg-primary bg-opacity-25 text-primary p-2 rounded-3 border border-primary border-opacity-25"><i class="bi bi-speedometer2 fs-4"></i></div>
             <div>
-              <h6 class="fw-bold m-0 text-white">NPS - PANEL ADMINISTRATIVO</h6>
+              <h6 class="fw-bold m-0 text-white">COMUNICA - PANEL EJECUTIVO</h6>
               <small class="text-info fw-bold" style="font-size: 0.72rem; letter-spacing: 0.5px;">GESTION NPS 2026</small>
             </div>
           </div>
@@ -301,6 +301,8 @@
           <div class="detail-row"><div class="detail-label">Nombre Usuario</div><div class="detail-val fw-bold" id="det-nombre">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Técnico Asignado</div><div class="detail-val" id="det-tecnico">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Fecha Asignación</div><div class="detail-val" id="det-fecha">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-info">Fecha de Gestión</div><div class="detail-val text-info fw-bold" id="det-fecha-gestion">Pendiente</div></div>
+          <div class="detail-row"><div class="detail-label text-success">Tiempo de Respuesta / Gestión</div><div class="detail-val text-success fw-bold" id="det-tiempo-respuesta">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-val" id="det-estado">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val" id="det-ot">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
@@ -474,7 +476,7 @@
               <div class="fw-bold text-light mb-1" style="font-size: 0.85rem;">${r.nombreUsuario}</div>
               <div class="meta-grid">
                 <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">FECHA</span><span class="text-light" style="font-size: 0.72rem;">${r.fechaGestion}</span></div>
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">FECHA GESTIÓN</span><span class="text-light" style="font-size: 0.72rem;">${r.fechaGestion || r.fecha || 'N/A'}</span></div>
               </div>
             </div>
             <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
@@ -485,22 +487,105 @@
       });
     }
 
+    function verDetallesOrdenAdmin(index) {
+      let item = todosLosRegistros[index];
+      if (!item) return;
+
+      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
+      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
+      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
+      document.getElementById('det-tecnico').innerText = item.tecnico || 'Sin Asignar';
+      document.getElementById('det-fecha').innerText = item.fechaAsignacion || item.fecha || 'N/A';
+      
+      const fechaG = item.fechaGestion || item.fecha;
+      document.getElementById('det-fecha-gestion').innerText = fechaG ? fechaG : 'Pendiente de Gestión';
+
+      // Calcular tiempo transcurrido si existen ambas fechas
+      let tiempoTexto = "En proceso / Pendiente";
+      if (item.fechaAsignacion && fechaG) {
+        tiempoTexto = calcularTiempoDiferencia(item.fechaAsignacion, fechaG);
+      } else if (fechaG) {
+        tiempoTexto = "Gestión registrada";
+      }
+      document.getElementById('det-tiempo-respuesta').innerText = tiempoTexto;
+
+      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
+      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
+
+      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (item.estado === 'Conflictivo' || item.estado === 'UU conflictivo' ? 'badge-danger' : 'badge-pending');
+      document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
+
+      const boxObs = document.getElementById('det-box-obs');
+      if (item.observacion) {
+        document.getElementById('det-observacion').innerText = item.observacion;
+        boxObs.classList.remove('hidden');
+      } else {
+        boxObs.classList.add('hidden');
+      }
+
+      const boxAcciones = document.getElementById('box-btn-acciones');
+      boxAcciones.innerHTML = '';
+      if (item.telefono && item.telefono !== 'Sin Teléfono') {
+        let numLimpio = item.telefono.replace(/[^0-9]/g, '');
+        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO...`;
+        let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
+        boxAcciones.innerHTML = `
+          <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
+          <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
+        `;
+      }
+
+      modalDetalleBs.show();
+    }
+
     function verDetallesOrdenTecnico(index, origen) {
       let item = (origen === 'PENDIENTE') ? pendientesTecnicoActual[index] : historicoTecnicoActual[index];
       if (!item) return;
 
-      document.getElementById('det-id').innerText = item.idGestion;
-      document.getElementById('det-codigo').innerText = item.codigoCliente;
-      document.getElementById('det-nombre').innerText = item.nombreUsuario;
+      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
+      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
+      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
       document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || usuarioActual.nombre || usuarioActual.usuario;
-      document.getElementById('det-fecha').innerText = item.fechaAsignacion;
-      document.getElementById('det-ot').innerText = item.numeroOT;
-      document.getElementById('det-telefono').innerText = item.telefono;
+      document.getElementById('det-fecha').innerText = item.fechaAsignacion || item.fecha || 'N/A';
+      
+      const fechaG = item.fechaGestion || item.fecha;
+      document.getElementById('det-fecha-gestion').innerText = fechaG ? fechaG : 'Pendiente de Gestión';
+
+      let tiempoTexto = "En proceso / Pendiente";
+      if (item.fechaAsignacion && fechaG) {
+        tiempoTexto = calcularTiempoDiferencia(item.fechaAsignacion, fechaG);
+      } else if (fechaG) {
+        tiempoTexto = "Gestión registrada";
+      }
+      document.getElementById('det-tiempo-respuesta').innerText = tiempoTexto;
+
+      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
+      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
 
       let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (item.estado === 'Conflictivo' ? 'badge-danger' : 'badge-pending');
       document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
 
       modalDetalleBs.show();
+    }
+
+    function calcularTiempoDiferencia(fechaInicioStr, fechaFinStr) {
+      try {
+        const f1 = new Date(fechaInicioStr);
+        const f2 = new Date(fechaFinStr);
+        if (isNaN(f1.getTime()) || isNaN(f2.getTime())) return "Registrado";
+        
+        const diffMs = Math.abs(f2 - f1);
+        const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (diffHoras > 24) {
+          const dias = Math.floor(diffHoras / 24);
+          return `${dias} día(s) y ${diffHoras % 24} hr(s)`;
+        }
+        return `${diffHoras} hr(s) y ${diffMinutos} min`;
+      } catch(e) {
+        return "Registrado";
+      }
     }
 
     async function cargarDashboard() {
@@ -525,7 +610,6 @@
         document.getElementById('pct-neutros').innerText = (tot > 0 ? Math.round((res.kpis.pendientes / tot) * 100) : 0) + "%";
         document.getElementById('pct-detractores').innerText = (tot > 0 ? Math.round((res.kpis.conflictivos / tot) * 100) : 0) + "%";
 
-        // Cargar lista desplegable de técnicos para el filtro
         const selectFiltroTec = document.getElementById('select-filtro-tecnico');
         selectFiltroTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
         res.tecnicos.forEach(t => {
@@ -601,12 +685,10 @@
 
       let resultado = todosLosRegistros;
 
-      // Filtro por Técnico
       if (tecSel !== 'todos') {
         resultado = resultado.filter(r => r.tecnico && r.tecnico.toLowerCase() === tecSel);
       }
 
-      // Filtro por Estado
       if (estSel !== 'TODOS') {
         resultado = resultado.filter(r => {
           if (estSel === 'Sin Gestion') return r.estado === 'Sin Gestion' || r.estado === 'Sin gestion';
@@ -614,7 +696,6 @@
         });
       }
 
-      // Filtro por Búsqueda (Texto)
       if (q.trim()) {
         resultado = resultado.filter(r => 
           (r.tecnico && r.tecnico.toLowerCase().includes(q)) || 
@@ -625,10 +706,10 @@
         );
       }
 
-      renderizarTarjetas(resultado, 'contenedor-dashboard');
+      renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
     }
 
-    function renderizarTarjetas(lista, idContenedor) {
+    function renderizarTarjetasAdmin(lista, idContenedor) {
       const contenedor = document.getElementById(idContenedor);
       contenedor.innerHTML = '';
       if (lista.length === 0) {
@@ -639,6 +720,10 @@
       lista.forEach(r => {
         const isConflict = r.estado === 'Conflictivo' || r.estado === 'UU conflictivo';
         let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+        const indexOriginal = todosLosRegistros.indexOf(r);
+
+        let fechaGestionMostrar = r.fechaGestion || r.fecha;
+        let subtextoFecha = fechaGestionMostrar ? `<span class="text-info" style="font-size: 0.68rem;">Gestión: ${fechaGestionMostrar}</span>` : '<span class="text-secondary" style="font-size: 0.68rem;">Sin gestión</span>';
 
         contenedor.innerHTML += `
           <div class="order-card ${isConflict ? 'conflictive' : ''}">
@@ -652,11 +737,18 @@
                 <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">CLIENTE</span><strong class="text-light">${r.codigoCliente}</strong></div>
                 <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
               </div>
+              <div class="mt-2 p-1 px-2 bg-dark rounded border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                ${subtextoFecha}
+              </div>
               ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
             </div>
+            
             <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
               <span class="text-secondary" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
-              ${r.evidencia ? `<button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')">Evidencia</button>` : '<span class="text-secondary small" style="font-size: 0.72rem;">Sin Foto</span>'}
+              <div class="d-flex gap-1">
+                <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenAdmin(${indexOriginal})"><i class="bi bi-eye me-1"></i>Detalles</button>
+                ${r.evidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')">Foto</button>` : ''}
+              </div>
             </div>
           </div>`;
       });
@@ -736,7 +828,8 @@
         { header: 'Código Cliente', key: 'codigoCliente', width: 15 },
         { header: 'Nombre Usuario', key: 'nombreUsuario', width: 25 },
         { header: 'Técnico', key: 'tecnico', width: 22 },
-        { header: 'Fecha', key: 'fecha', width: 12 },
+        { header: 'Fecha Asignación', key: 'fechaAsignacion', width: 16 },
+        { header: 'Fecha Gestión', key: 'fechaGestion', width: 16 },
         { header: 'Estado', key: 'estado', width: 15 },
         { header: 'Número OT', key: 'numeroOT', width: 22 },
         { header: 'Teléfono', key: 'telefono', width: 15 },
@@ -754,7 +847,8 @@
           codigoCliente: item.codigoCliente,
           nombreUsuario: item.nombreUsuario,
           tecnico: item.tecnico,
-          fecha: item.fecha,
+          fechaAsignacion: item.fechaAsignacion || item.fecha,
+          fechaGestion: item.fechaGestion || item.fecha || 'Sin Gestión',
           estado: item.estado,
           numeroOT: item.numeroOT,
           telefono: item.telefono,
@@ -765,7 +859,7 @@
         if (item.evidenciaBase64) {
           try {
             const imageId = workbook.addImage({ base64: item.evidenciaBase64, extension: 'jpeg' });
-            worksheet.addImage(imageId, { tl: { col: 9, row: row.number - 1 }, ext: { width: 100, height: 75 } });
+            worksheet.addImage(imageId, { tl: { col: 10, row: row.number - 1 }, ext: { width: 100, height: 75 } });
             worksheet.getRow(row.number).height = 60;
           } catch (e) {}
         }
