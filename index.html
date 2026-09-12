@@ -289,7 +289,7 @@
     </div>
   </div>
 
-  <!-- MODAL FICHA DETALLES CON WHATSAPP Y LLAMADAS -->
+  <!-- MODAL FICHA DETALLES -->
   <div class="modal fade" id="modalDetalleOrden" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -307,7 +307,6 @@
           <div class="detail-row"><div class="detail-label">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
           <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Observación de Gestión</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
           
-          <!-- CONTENEDOR DE BOTONES DE ACCIÓN (WHATSAPP / LLAMAR) -->
           <div class="mt-3 d-flex flex-column gap-2" id="box-btn-acciones"></div>
         </div>
         <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button></div>
@@ -333,16 +332,28 @@
     // ⚠️ REEMPLAZA ESTA URL CON TU URL REAL DE GOOGLE APPS SCRIPT TERMINADA EN /exec
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
 
-    let usuarioActual = null, modalBs = null, modalVisorBs = null, modalDetalleBs = null, modalCargaExcelBs = null;
+    let usuarioActual = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [];
     let archivoFotoSeleccionado = null, chartGauge = null, chartBar = null;
 
-    document.addEventListener("DOMContentLoaded", () => {
-      modalBs = new bootstrap.Modal(document.getElementById('modalGestion'));
-      modalVisorBs = new bootstrap.Modal(document.getElementById('modalVisorFoto'));
-      modalDetalleBs = new bootstrap.Modal(document.getElementById('modalDetalleOrden'));
-      modalCargaExcelBs = new bootstrap.Modal(document.getElementById('modalCargaExcel'));
+    function abrirModalBS(elementId) {
+      const modalEl = document.getElementById(elementId);
+      if (modalEl) {
+        let instance = bootstrap.Modal.getInstance(modalEl);
+        if (!instance) instance = new bootstrap.Modal(modalEl);
+        instance.show();
+      }
+    }
 
+    function ocultarModalBS(elementId) {
+      const modalEl = document.getElementById(elementId);
+      if (modalEl) {
+        let instance = bootstrap.Modal.getInstance(modalEl);
+        if (instance) instance.hide();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
       const perfilGuardado = localStorage.getItem("nps_user_profile");
       if (perfilGuardado) {
         try {
@@ -398,7 +409,7 @@
       const resBox = document.getElementById('resultado-carga-excel');
       resBox.classList.add('hidden');
       resBox.className = "small hidden p-2 rounded";
-      modalCargaExcelBs.show();
+      abrirModalBS('modalCargaExcel');
     }
 
     function procesarArchivoExcel() {
@@ -441,7 +452,7 @@
             resBox.innerHTML = `<strong>Éxito:</strong> Se agregaron <strong>${res.agregados}</strong> órdenes nuevas. (${res.omitidos} ya existían).`;
             resBox.className = "small p-2 rounded alert alert-success";
             resBox.classList.remove('hidden');
-            setTimeout(() => { modalCargaExcelBs.hide(); cargarDashboard(); }, 2000);
+            setTimeout(() => { ocultarModalBS('modalCargaExcel'); cargarDashboard(); }, 2000);
           } else {
             resBox.innerText = res.mensaje || "Error al subir archivo.";
             resBox.className = "small p-2 rounded alert alert-danger";
@@ -596,11 +607,10 @@
         boxObs.classList.add('hidden');
       }
 
-      // BOTONES DE ACCIÓN PARA WHATSAPP Y LLAMADAS
       const boxAcciones = document.getElementById('box-btn-acciones');
       boxAcciones.innerHTML = '';
       if (item.telefono && item.telefono !== 'Sin Teléfono') {
-        let numLimpio = item.telefono.replace(/[^0-9]/g, '');
+        let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
         let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO...`;
         let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
         boxAcciones.innerHTML = `
@@ -609,7 +619,7 @@
         `;
       }
 
-      modalDetalleBs.show();
+      abrirModalBS('modalDetalleOrden');
     }
 
     function verDetallesOrdenTecnico(index, origen) {
@@ -640,7 +650,7 @@
       const boxAcciones = document.getElementById('box-btn-acciones');
       boxAcciones.innerHTML = '';
       if (item.telefono && item.telefono !== 'Sin Teléfono') {
-        let numLimpio = item.telefono.replace(/[^0-9]/g, '');
+        let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
         let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO...`;
         let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
         boxAcciones.innerHTML = `
@@ -649,7 +659,7 @@
         `;
       }
 
-      modalDetalleBs.show();
+      abrirModalBS('modalDetalleOrden');
     }
 
     function calcularTiempoDiferencia(fechaInicioStr, fechaFinStr) {
@@ -869,7 +879,7 @@
       document.getElementById('modal-foto-camara').value = '';
       document.getElementById('modal-foto-galeria').value = '';
       evaluarEstado();
-      modalBs.show();
+      abrirModalBS('modalGestion');
     }
 
     function procesarFotoSeleccionada(input) {
@@ -919,7 +929,7 @@
       try { await apiCall("guardarGestion", { payload: payload }); } catch(e) {}
       document.getElementById('btn-guardar').disabled = false;
       document.getElementById('btn-guardar').innerText = "Guardar Gestión";
-      modalBs.hide();
+      ocultarModalBS('modalGestion');
       cargarDashboard();
     }
 
@@ -989,7 +999,7 @@
       imgElement.classList.add('hidden');
       errorElement.classList.add('hidden');
       loadingElement.classList.remove('hidden');
-      modalVisorBs.show();
+      abrirModalBS('modalVisorFoto');
       
       try {
         const res = await apiCall("obtenerImagenEnBase64", { url: url });
