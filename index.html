@@ -176,7 +176,13 @@
           <input type="hidden" id="modal-fila">
           <div class="mb-3"><label class="form-label small text-secondary">Estado de Gestión</label><select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="evaluarEstado()"><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo (NPS 0)</option></select></div>
           <div class="mb-3"><label class="form-label small text-secondary">Resultado</label><select id="modal-resultado" class="form-select bg-dark text-white border-secondary"><option value="Exitoso">Exitoso</option><option value="Sin respuesta">Sin respuesta</option></select></div>
-          <div class="mb-3"><label class="form-label small text-secondary">Captura de Evidencia (Foto)</label><input type="file" id="modal-foto" class="form-control bg-dark text-white border-secondary" accept="image/*" capture="environment"></div>
+          
+          <!-- SECTOR DE EVIDENCIA CORREGIDO PARA PERMITIR CÁMARA O ARCHIVOS DE GALERÍA -->
+          <div class="mb-3">
+            <label class="form-label small text-secondary">Captura de Evidencia (Foto o Galería)</label>
+            <input type="file" id="modal-foto" class="form-control bg-dark text-white border-secondary form-control-sm" accept="image/*">
+          </div>
+
           <div id="box-observacion" class="mb-3 hidden"><label class="form-label small text-danger fw-bold">Motivo de Usuario Conflictivo *</label><textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3"></textarea></div>
         </div>
         <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" id="btn-guardar" class="btn btn-sm btn-primary" onclick="guardarFormulario()">Guardar Gestión</button></div>
@@ -247,7 +253,6 @@
             document.getElementById('label-nombre-tec').innerText = usuarioActual.nombre || 'Técnico';
             document.getElementById('avatar-tec').innerText = usuarioActual.nombre ? usuarioActual.nombre.charAt(0) : 'T';
             
-            // CARGA INSTANTÁNEA DESDE CACHÉ SI EXISTE (VELOCIDAD MÁXIMA EN ZONAS CON MALA SEÑAL)
             const cachePendientes = localStorage.getItem("nps_cache_pendientes_" + usuarioActual.usuario);
             if (cachePendientes) {
               pendientesTecnicoActual = JSON.parse(cachePendientes);
@@ -358,13 +363,10 @@
       try {
         const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
         pendientesTecnicoActual = lista || [];
-        
-        // GUARDAR EN CACHÉ LOCAL PARA ACCESO INSTANTÁNEO EN ZONAS DE MALA SEÑAL
         localStorage.setItem("nps_cache_pendientes_" + usuarioActual.usuario, JSON.stringify(pendientesTecnicoActual));
-        
         renderizarPendientesTecnicoUI();
       } catch(e) {
-        console.log("Error de red, manteniendo datos en caché local si existen.");
+        console.log("Error de red, manteniendo datos en caché local.");
       }
     }
 
@@ -387,7 +389,7 @@
       countBadge.classList.remove('hidden');
       
       let nombreTecnicoStr = usuarioActual.nombre ? usuarioActual.nombre.toUpperCase() : '';
-      msgAlerta.innerHTML = `<strong>ESTIMADO/A ${nombreTecnicoStr}:</strong> Tienes <strong>${pendientesTecnicoActual.length} cliente(s) NPS sin gestión</strong>. Favor gestionar a la brevedad o registrar tu informe con respaldo. ¡Gracias!`;
+      msgAlerta.innerHTML = `<strong>ESTIMADO/A ${nombreTecnicoStr}:</strong> Tienes <strong>${pendientesTecnicoActual.length} cliente(s) NPS sin gestión</strong>. Favor gestionar a la brevedad o registrar su informe con respaldo. ¡Gracias!`;
       bannerAlerta.classList.remove('hidden');
 
       pendientesTecnicoActual.forEach((item, index) => {
@@ -425,7 +427,7 @@
       const contenedor = document.getElementById('lista-historico-tecnico');
       contenedor.innerHTML = '';
       if (historicoTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes gestiones registradas aún (o sin conexión).</div>';
+        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3">No tienes gestiones registradas aún.</div>';
         return;
       }
       historicoTecnicoActual.forEach((r, index) => {
@@ -550,7 +552,7 @@
       try {
         await apiCall("guardarGestion", { payload: payload });
       } catch(e) {
-        alert("Aviso: Se guardó localmente o hubo retraso en red. Verifique conexión.");
+        alert("Aviso: Error al enviar datos.");
       }
       const btnGuardar = document.getElementById('btn-guardar');
       btnGuardar.disabled = false;
