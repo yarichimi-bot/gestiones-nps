@@ -12,60 +12,67 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  
+  <!-- LIBRERÍAS DE GRÁFICOS Y EXCEL -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 
   <style>
-    :root { --bg-dark: #0f172a; --card-bg: #1e293b; --card-border: #334155; --text-muted: #94a3b8; --accent-blue: #38bdf8; }
+    :root { 
+      --bg-dark: #0f172a; 
+      --card-bg: #1e293b; 
+      --card-border: #334155; 
+      --text-muted: #94a3b8; 
+      --accent-blue: #38bdf8; 
+    }
+
     body { background-color: var(--bg-dark); color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
     
-    /* ADAPTABILIDAD INTELIGENTE: ANCHO MÁXIMO DINÁMICO PARA PC Y MÓVIL */
     .container-custom { max-width: 650px; margin: auto; padding: 14px; transition: max-width 0.3s ease; }
     @media (min-width: 992px) {
-      .container-custom { max-width: 1200px; padding: 24px; } /* Se expande en PC para parecer un Dashboard BI real */
+      .container-custom { max-width: 1250px; padding: 24px; }
     }
+
+    /* TARJETAS ESTILO BI EN TEMA OSCURO */
+    .bi-card-dark { 
+      background: var(--card-bg); 
+      border: 1px solid var(--card-border); 
+      border-radius: 14px; 
+      padding: 16px; 
+    }
+
+    .kpi-strip {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+    .kpi-strip .val { font-size: 1.5rem; font-weight: 700; line-height: 1.1; }
+    .kpi-strip .lbl { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
 
     .login-card { max-width: 380px; margin: 40px auto; padding: 24px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); }
-    .header-bar { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px 18px; margin-bottom: 16px; }
-    .user-avatar { width: 36px; height: 36px; background: #0284c7; color: white; border-radius: 50%; font-weight: bold; font-size: 0.9rem; }
-    
-    /* ESTILO TARJETAS EJECUTIVAS BI */
-    .executive-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
-    .executive-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
-    .exec-total::before { background-color: #38bdf8; }
-    .exec-done::before { background-color: #10b981; }
-    .exec-pending::before { background-color: #f59e0b; }
-    .exec-danger::before { background-color: #ef4444; }
-    .exec-num { font-size: 1.8rem; font-weight: 700; line-height: 1.2; color: #fff; }
-    .exec-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .segmented-control { background: #0f172a; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px; display: flex; gap: 4px; max-width: 500px; margin: 0 auto 16px auto; }
-    .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border-radius: 8px; font-size: 0.85rem; font-weight: 600; padding: 10px 14px; border: none; transition: all 0.2s; }
+    .segmented-control { background: #0f172a; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px; display: flex; gap: 4px; }
+    .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border-radius: 8px; font-size: 0.85rem; font-weight: 600; padding: 8px 12px; border: none; transition: all 0.2s; }
     .segmented-control .nav-link.active { background: var(--card-bg); color: var(--accent-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-    
-    /* CUADRÍCULA DE ÓRDENES Y TÉCNICOS EN PC */
-    .grid-dashboard { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 768px) {
-      .grid-dashboard { grid-template-columns: repeat(2, 1fr); } /* 2 columnas en Tablets y Laptops */
-    }
-    @media (min-width: 1200px) {
-      .grid-dashboard { grid-template-columns: repeat(3, 1fr); } /* 3 columnas en Monitores grandes */
-    }
 
-    .order-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; margin-bottom: 0; padding: 14px; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+    .grid-dashboard { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 768px) { .grid-dashboard { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1200px) { .grid-dashboard { grid-template-columns: repeat(3, 1fr); } }
+
+    .order-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 14px; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
     .order-card.conflictive { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, #1e293b 0%, #2a1215 100%); }
-    .ot-code { font-family: monospace; font-size: 0.85rem; color: #e2e8f0; word-break: break-all; }
+
     .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; margin-top: 10px; }
     .meta-item { background: rgba(15, 23, 42, 0.5); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.03); }
-    
-    .badge-subtle { font-size: 0.7rem; font-weight: 600; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+    .badge-subtle { font-size: 0.7rem; font-weight: 600; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; }
     .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
     .badge-done { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
     .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
     .badge-expired { background: rgba(100, 116, 139, 0.15); color: #cbd5e1; border: 1px solid rgba(100, 116, 139, 0.3); }
-    
-    .detail-row { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; }
-    .detail-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; }
-    .detail-val { font-size: 0.88rem; color: #f8fafc; font-weight: 500; }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -106,9 +113,9 @@
 
     <!-- VISTA TÉCNICO -->
     <div id="view-tecnico" class="hidden">
-      <div class="header-bar d-flex justify-content-between align-items-center">
+      <div class="bi-card-dark d-flex justify-content-between align-items-center mb-3">
         <div class="d-flex align-items-center gap-2">
-          <div class="user-avatar d-flex align-items-center justify-content-center" id="avatar-tec">T</div>
+          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px;" id="avatar-tec">T</div>
           <div>
             <h6 class="m-0 text-white fw-bold" id="label-nombre-tec">Técnico</h6>
             <small class="text-secondary" style="font-size: 0.75rem;">Panel Operativo</small>
@@ -117,12 +124,9 @@
         <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
       </div>
 
-      <!-- BANNER DE RECORDATORIO / ALERTA IN-APP -->
       <div id="banner-alerta-tecnico" class="alert alert-warning border-warning d-flex align-items-center gap-2 mb-3 hidden p-2">
         <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
-        <div style="font-size: 0.78rem;" id="mensaje-alerta-tecnico">
-          <strong>RECORDATORIO NPS:</strong> Tiene clientes sin gestión. Favor gestionar a la brevedad o registrar su informe con respaldo. ¡Gracias!
-        </div>
+        <div style="font-size: 0.78rem;" id="mensaje-alerta-tecnico"></div>
       </div>
 
       <div class="segmented-control mb-3">
@@ -138,56 +142,84 @@
       <div id="sec-tec-historico" class="hidden"><div id="lista-historico-tecnico" class="grid-dashboard"></div></div>
     </div>
 
-    <!-- VISTA ADMIN (DASHBOARD EJECUTIVO TIPO BI AMPLIO) -->
+    <!-- VISTA ADMIN: ESTRUCTURA BI EN COLORES OSCUROS -->
     <div id="view-admin" class="hidden">
-      <div class="header-bar d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-          <div class="user-avatar d-flex align-items-center justify-content-center">A</div>
-          <div>
-            <h6 class="m-0 text-white fw-bold">Panel Administrador - Ejecutivo NPS</h6>
-            <small class="text-secondary" style="font-size: 0.72rem;">COMUNICA / GESTION NPS 2026</small>
+      
+      <div class="bi-card-dark mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="bg-primary bg-opacity-25 text-primary p-2 rounded-3 border border-primary border-opacity-25"><i class="bi bi-speedometer2 fs-4"></i></div>
+            <div>
+              <h6 class="fw-bold m-0 text-white">COMUNICA - PANEL EJECUTIVO</h6>
+              <small class="text-info fw-bold" style="font-size: 0.72rem; letter-spacing: 0.5px;">GESTION NPS 2026</small>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
+              <option value="dia">Hoy / 24h</option>
+              <option value="semana">Últimos 7 días</option>
+              <option value="mes" selected>Últimos 30 días</option>
+            </select>
+            <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
           </div>
         </div>
-        <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
-      </div>
 
-      <!-- BARRA DE FILTRO DE PERIODO -->
-      <div class="d-flex justify-content-between align-items-center mb-3 bg-dark p-3 rounded border border-secondary">
-        <span class="small text-secondary fw-bold"><i class="bi bi-calendar-event me-1"></i> Periodo de Análisis:</span>
-        <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
-          <option value="dia">Hoy / Últimas 24h</option>
-          <option value="semana">Últimos 7 días</option>
-          <option value="mes" selected>Últimos 30 días</option>
-        </select>
-      </div>
-
-      <!-- BLOQUE DE INDICADORES EJECUTIVOS SUPERIORES (ESTILO BI) -->
-      <div class="row g-3 mb-3">
-        <div class="col-6 col-md-3"><div class="executive-card exec-total"><div class="exec-label">Total Órdenes</div><div class="exec-num" id="kpi-total">0</div></div></div>
-        <div class="col-6 col-md-3"><div class="executive-card exec-done"><div class="exec-label">Gestionados</div><div class="exec-num text-success" id="kpi-gestionados">0</div></div></div>
-        <div class="col-6 col-md-3"><div class="executive-card exec-pending"><div class="exec-label">Pendientes</div><div class="exec-num text-warning" id="kpi-pendientes">0</div></div></div>
-        <div class="col-6 col-md-3"><div class="executive-card exec-danger"><div class="exec-label">Conflictivos</div><div class="exec-num text-danger" id="kpi-conflictivos">0</div></div></div>
-      </div>
-
-      <button class="btn btn-sm btn-success w-100 fw-bold mb-3 py-2 shadow-sm" onclick="exportarExcelConImagenes()"><i class="bi bi-file-earmark-excel me-2"></i>Exportar Reporte Excel Ejecutivo (con Fotos)</button>
-
-      <!-- PESTAÑAS DE NAVEGACIÓN ADMINISTRATIVA -->
-      <div class="segmented-control mb-4">
-        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-speedometer2 me-1"></i> Semáforo y Rendimiento Técnicos</button>
-        <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-list-columns-reverse me-1"></i> Detalle Cliente por Cliente</button>
-      </div>
-
-      <!-- SECCIÓN 1: SEMÁFORO TÉCNICOS -->
-      <div id="sec-tecnicos">
-        <div class="row g-2 mb-3">
-          <div class="col-6"><select id="select-tecnico" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Todos los Técnicos --</option></select></div>
-          <div class="col-6"><select id="select-estado-tec" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosTecnico()"><option value="TODOS">-- Todos los Estados --</option><option value="Pendiente">Pendiente</option><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo</option></select></div>
+        <!-- STRIP SUPERIOR DE MEDIDORES BI -->
+        <div class="row g-2 text-center">
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl">TOTAL</div><div class="val text-light" id="kpi-total">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-success">PROMOTORES</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-warning">NEUTROS</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-danger">DETRACTORES</div><div class="val text-danger" id="kpi-conflictivos">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-info">% GESTIÓN</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip border-info"><div class="lbl text-info">NPS SCORE</div><div class="val text-info" id="kpi-nps-score">0</div></div></div>
         </div>
-        <div id="contenedor-tecnico-alertas" class="mb-3"></div>
-        <div id="contenedor-tecnico-filtrado" class="grid-dashboard"></div>
       </div>
 
-      <!-- SECCIÓN 2: DETALLE CLIENTE POR CLIENTE CON BUSCADOR -->
+      <div class="segmented-control mb-3">
+        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-pie-chart-fill me-1"></i> Resumen Visual BI</button>
+        <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-card-checklist me-1"></i> Detalle por Cliente y Buscador</button>
+      </div>
+
+      <!-- SECCIÓN VISUAL (GAUGE + BARRAS POR TÉCNICO) -->
+      <div id="sec-tecnicos">
+        <div class="row g-3 mb-3">
+          <!-- VELOCÍMETRO IZQUIERDA -->
+          <div class="col-12 col-md-5">
+            <div class="bi-card-dark text-center h-100 d-flex flex-column justify-content-between">
+              <h6 class="fw-bold text-secondary small">ZONA DE CLASIFICACIÓN (NPS)</h6>
+              <div style="position: relative; max-width: 240px; margin: auto;">
+                <canvas id="gaugeChart"></canvas>
+                <div style="position: absolute; bottom: 10px; left: 0; right: 0;">
+                  <h2 class="fw-bold m-0 text-white" id="gauge-score-val">0</h2>
+                  <span class="badge bg-success" id="gauge-score-lbl">Zona Promedio</span>
+                </div>
+              </div>
+              <div class="row g-1 pt-3 border-top border-secondary mt-2">
+                <div class="col-4"><small class="text-danger d-block fw-bold" id="pct-detractores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Detractores</span></div>
+                <div class="col-4"><small class="text-warning d-block fw-bold" id="pct-neutros">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Neutros</span></div>
+                <div class="col-4"><small class="text-success d-block fw-bold" id="pct-promotores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Promotores</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- GRÁFICO DE BARRAS TÉCNICOS DERECHA -->
+          <div class="col-12 col-md-7">
+            <div class="bi-card-dark h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-secondary small m-0">Rendimiento por Técnico</h6>
+                <button class="btn btn-xs btn-outline-success p-1 px-2" style="font-size: 0.75rem;" onclick="exportarExcelConImagenes()"><i class="bi bi-file-earmark-excel me-1"></i>Excel Fotos</button>
+              </div>
+              <div style="position: relative; height: 220px;">
+                <canvas id="barTecnicosChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="contenedor-tecnico-alertas" class="mb-3"></div>
+      </div>
+
+      <!-- SECCIÓN DETALLE CLIENTE POR CLIENTE CON BUSCADOR -->
       <div id="sec-general" class="hidden">
         <div class="mb-3">
           <div class="input-group input-group-sm">
@@ -197,6 +229,7 @@
         </div>
         <div id="contenedor-dashboard" class="grid-dashboard"></div>
       </div>
+
     </div>
   </div>
 
@@ -209,7 +242,6 @@
           <input type="hidden" id="modal-fila">
           <div class="mb-3"><label class="form-label small text-secondary">Estado de Gestión</label><select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="evaluarEstado()"><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo (NPS 0)</option></select></div>
           <div class="mb-3"><label class="form-label small text-secondary">Resultado</label><select id="modal-resultado" class="form-select bg-dark text-white border-secondary"><option value="Exitoso">Exitoso</option><option value="Sin respuesta">Sin respuesta</option></select></div>
-          
           <div class="mb-3">
             <label class="form-label small text-secondary">Evidencia Fotográfica</label>
             <div class="d-flex gap-2 mb-2">
@@ -222,10 +254,9 @@
                 <input type="file" id="modal-foto-galeria" class="hidden" accept="image/*" onchange="procesarFotoSeleccionada(this)">
               </label>
             </div>
-            <div id="label-archivo-elegido" class="text-success small fw-bold text-center" style="font-size: 0.75rem;"></div>
+            <div id="label-archivo-elegido" class="text-success small fw-bold text-center"></div>
           </div>
-
-          <div id="box-observacion" class="mb-3 hidden"><label class="form-label small text-danger fw-bold">Motivo de Usuario Conflictivo *</label><textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3"></textarea></div>
+          <div id="box-observacion" class="mb-3 hidden"><label class="form-label small text-danger fw-bold">Motivo Conflictivo *</label><textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3"></textarea></div>
         </div>
         <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" id="btn-guardar" class="btn btn-sm btn-primary" onclick="guardarFormulario()">Guardar Gestión</button></div>
       </div>
@@ -238,14 +269,14 @@
       <div class="modal-content bg-dark text-white border-secondary">
         <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Ficha de Gestión NPS</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
-          <div class="detail-row"><div class="detail-label">ID Gestión</div><div class="detail-val" id="det-id">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Código Cliente</div><div class="detail-val text-primary" id="det-codigo">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Nombre Usuario</div><div class="detail-val fw-bold" id="det-nombre">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Técnico Asignado</div><div class="detail-val" id="det-tecnico">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Fecha Asignación</div><div class="detail-val" id="det-fecha">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-val" id="det-estado">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val ot-code" id="det-ot">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Teléfono Cliente (Encuesta NPS)</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-secondary">ID Gestión</div><div class="detail-val" id="det-id">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-secondary">Código Cliente</div><div class="detail-val text-primary" id="det-codigo">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-secondary">Nombre Usuario</div><div class="detail-val fw-bold" id="det-nombre">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-secondary">Técnico Asignado</div><div class="detail-val" id="det-tecnico">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-secondary">Fecha Asignación</div><div class="detail-val" id="det-fecha">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-secondary">Estado</div><div class="detail-val" id="det-estado">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-secondary">Número OT</div><div class="detail-val" id="det-ot">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-secondary">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
           <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Observación de Gestión</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
           <div class="mt-3 d-flex flex-column gap-2" id="box-btn-acciones"></div>
         </div>
@@ -254,14 +285,13 @@
     </div>
   </div>
 
-  <!-- MODAL VISOR FOTO -->
   <div class="modal fade" id="modalVisorFoto" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
         <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Evidencia Fotográfica</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body text-center p-3">
-          <div id="visor-loading" class="spinner-border text-info my-4" role="status"></div>
-          <img id="visor-img" class="img-fluid rounded hidden" alt="Evidencia">
+          <div id="visor-loading" class="spinner-border text-info my-4"></div>
+          <img id="visor-img" class="img-fluid rounded hidden">
           <div id="visor-error" class="text-danger small hidden my-3">No se pudo cargar la imagen.</div>
         </div>
       </div>
@@ -275,7 +305,7 @@
 
     let usuarioActual = null, modalBs = null, modalVisorBs = null, modalDetalleBs = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [];
-    let archivoFotoSeleccionado = null;
+    let archivoFotoSeleccionado = null, chartGauge = null, chartBar = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       modalBs = new bootstrap.Modal(document.getElementById('modalGestion'));
@@ -287,89 +317,40 @@
         try {
           usuarioActual = JSON.parse(perfilGuardado);
           document.getElementById('view-login').classList.add('hidden');
-          
           if (usuarioActual.rol === 'Administrador') {
             document.getElementById('view-admin').classList.remove('hidden');
             cargarDashboard();
           } else {
             document.getElementById('view-tecnico').classList.remove('hidden');
             document.getElementById('label-nombre-tec').innerText = usuarioActual.nombre || 'Técnico';
-            document.getElementById('avatar-tec').innerText = usuarioActual.nombre ? usuarioActual.nombre.charAt(0) : 'T';
-            
-            const cachePendientes = localStorage.getItem("nps_cache_pendientes_" + usuarioActual.usuario);
-            if (cachePendientes) {
-              pendientesTecnicoActual = JSON.parse(cachePendientes);
-              renderizarPendientesTecnicoUI();
-            }
-
             cargarPendientesTecnico();
           }
-        } catch(e) {
-          cerrarSesion();
-        }
+        } catch(e) { cerrarSesion(); }
       }
     });
 
     async function apiCall(accion, dataPayload = {}) {
-      try {
-        const response = await fetch(WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ accion: accion, ...dataPayload })
-        });
-        const textResponse = await response.text();
-        if (textResponse.trim().startsWith("<")) {
-          throw new Error("Respuesta HTML recibida.");
-        }
-        return JSON.parse(textResponse);
-      } catch (err) {
-        throw err;
-      }
+      const response = await fetch(WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ accion: accion, ...dataPayload })
+      });
+      return JSON.parse(await response.text());
     }
 
     async function ejecutarLogin() {
       const u = document.getElementById('input-user').value;
       const p = document.getElementById('input-pass').value;
-      const alert = document.getElementById('login-alert');
-      const btnLogin = document.getElementById('btn-login-submit');
-      
-      alert.classList.add('hidden');
-      if (!u.trim() || !p.trim()) {
-        alert.innerText = "Por favor ingrese usuario y contraseña.";
-        alert.classList.remove('hidden');
-        return;
-      }
-
-      btnLogin.disabled = true;
-      btnLogin.innerText = "Verificando...";
+      if (!u || !p) return alert("Ingrese usuario y contraseña");
 
       try {
         const res = await apiCall("loginUsuario", { usuario: u, password: p });
-        btnLogin.disabled = false;
-        btnLogin.innerText = "Iniciar Sesión";
-        
         if (res && res.exito) {
           usuarioActual = res;
           localStorage.setItem("nps_user_profile", JSON.stringify(res));
-
-          document.getElementById('view-login').classList.add('hidden');
-          if (res.rol === 'Administrador') {
-            cargarDashboard();
-          } else {
-            document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
-            document.getElementById('avatar-tec').innerText = res.nombre ? res.nombre.charAt(0) : 'T';
-            cargarPendientesTecnico();
-          }
-        } else {
-          alert.innerText = res.mensaje || "Credenciales no válidas.";
-          alert.classList.remove('hidden');
-        }
-      } catch (err) {
-        btnLogin.disabled = false;
-        btnLogin.innerText = "Iniciar Sesión";
-        alert.innerText = "Error de conexión: " + err.toString();
-        alert.classList.remove('hidden');
-      }
+          location.reload();
+        } else alert(res.mensaje || "Credenciales no válidas");
+      } catch(e) { alert("Error de conexión"); }
     }
 
     function cambiarPestana(tipo) {
@@ -402,38 +383,20 @@
     }
 
     async function cargarPendientesTecnico() {
-      document.getElementById('view-tecnico').classList.remove('hidden');
       try {
         const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
         pendientesTecnicoActual = lista || [];
-        localStorage.setItem("nps_cache_pendientes_" + usuarioActual.usuario, JSON.stringify(pendientesTecnicoActual));
         renderizarPendientesTecnicoUI();
-      } catch(e) {
-        console.log("Error de red, manteniendo datos en caché local.");
-      }
+      } catch(e) {}
     }
 
     function renderizarPendientesTecnicoUI() {
       const contenedor = document.getElementById('lista-pendientes');
       contenedor.innerHTML = '';
-      
-      const countBadge = document.getElementById('badge-count-pendientes');
-      const bannerAlerta = document.getElementById('banner-alerta-tecnico');
-      const msgAlerta = document.getElementById('mensaje-alerta-tecnico');
-
       if (pendientesTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3 col-12">No tienes órdenes pendientes.</div>';
-        countBadge.classList.add('hidden');
-        bannerAlerta.classList.add('hidden');
+        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes.</div>';
         return;
       }
-
-      countBadge.innerText = pendientesTecnicoActual.length;
-      countBadge.classList.remove('hidden');
-      
-      let nombreTecnicoStr = usuarioActual.nombre ? usuarioActual.nombre.toUpperCase() : '';
-      msgAlerta.innerHTML = `<strong>ESTIMADO/A ${nombreTecnicoStr}:</strong> Tienes <strong>${pendientesTecnicoActual.length} cliente(s) NPS sin gestión</strong>. Favor gestionar a la brevedad o registrar su informe con respaldo. ¡Gracias!`;
-      bannerAlerta.classList.remove('hidden');
 
       pendientesTecnicoActual.forEach((item, index) => {
         let telLlamar = item.telefono && item.telefono !== 'Sin Teléfono' ? `<a href="tel:${item.telefono}" class="btn btn-xs btn-outline-warning p-1 px-2 small"><i class="bi bi-telephone-fill me-1"></i>${item.telefono}</a>` : '<span class="text-secondary small">Sin Tel.</span>';
@@ -446,13 +409,11 @@
                 <span class="badge-subtle badge-pending">Pendiente</span>
               </div>
               <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${item.nombreUsuario}</div>
-              
               <div class="d-flex justify-content-between align-items-center my-2 bg-dark p-2 rounded border border-secondary border-opacity-25">
                 <span class="text-secondary small">Teléfono NPS:</span>
                 ${telLlamar}
               </div>
             </div>
-
             <div class="d-flex gap-2 mt-3">
               <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
               <button class="btn btn-sm btn-success flex-fill fw-bold py-2" onclick="abrirModal(${item.fila})"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
@@ -465,19 +426,16 @@
       try {
         const lista = await apiCall("obtenerHistoricoTecnico", { correoTecnico: usuarioActual.usuario });
         historicoTecnicoActual = lista || [];
-      } catch(e) {
-        historicoTecnicoActual = [];
-      }
+      } catch(e) { historicoTecnicoActual = []; }
       
       const contenedor = document.getElementById('lista-historico-tecnico');
       contenedor.innerHTML = '';
       if (historicoTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark text-secondary border-secondary text-center small py-3 col-12">No tienes gestiones registradas aún.</div>';
+        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes gestiones registradas.</div>';
         return;
       }
       historicoTecnicoActual.forEach((r, index) => {
-        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (r.estado === 'Conflictivo' || r.estado === 'UU conflictivo' ? 'badge-danger' : 'badge-expired');
-        let botonEvidencia = r.evidencia ? `<button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')"><i class="bi bi-file-image me-1"></i> Ver Foto</button>` : '<span class="text-secondary small" style="font-size: 0.72rem;">Sin imagen</span>';
+        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (r.estado === 'Conflictivo' ? 'badge-danger' : 'badge-expired');
 
         contenedor.innerHTML += `
           <div class="order-card">
@@ -487,18 +445,14 @@
                 <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
               </div>
               <div class="fw-bold text-light mb-1" style="font-size: 0.85rem;">${r.nombreUsuario}</div>
-              
               <div class="meta-grid">
                 <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">FECHA GESTIÓN</span><span class="text-light" style="font-size: 0.72rem;">${r.fechaGestion}</span></div>
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">FECHA</span><span class="text-light" style="font-size: 0.72rem;">${r.fechaGestion}</span></div>
               </div>
-
-              ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
             </div>
-
             <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
-              <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenTecnico(${index}, 'HISTORICO')"><i class="bi bi-eye me-1"></i> Detalles</button>
-              ${botonEvidencia}
+              <button class="btn btn-xs btn-outline-info p-1 px-2 small" onclick="verDetallesOrdenTecnico(${index}, 'HISTORICO')">Detalles</button>
+              ${r.evidencia ? `<button class="btn btn-xs btn-outline-info p-1 px-2 small" onclick="verFotoModal('${r.evidencia}')">Ver Foto</button>` : '<span class="text-secondary small">Sin Foto</span>'}
             </div>
           </div>`;
       });
@@ -516,35 +470,142 @@
       document.getElementById('det-ot').innerText = item.numeroOT;
       document.getElementById('det-telefono').innerText = item.telefono;
 
-      let badgeStyle = 'badge-pending';
-      if (item.estado === 'Gestionado') badgeStyle = 'badge-done';
-      if (item.estado === 'Conflictivo' || item.estado === 'UU conflictivo') badgeStyle = 'badge-danger';
-      if (item.estado === 'Sin Gestion') badgeStyle = 'badge-expired';
+      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (item.estado === 'Conflictivo' ? 'badge-danger' : 'badge-pending');
       document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
 
-      const boxObs = document.getElementById('det-box-obs');
-      if (item.observacion) {
-        document.getElementById('det-observacion').innerText = item.observacion;
-        boxObs.classList.remove('hidden');
-      } else {
-        boxObs.classList.add('hidden');
-      }
-
-      const boxAcciones = document.getElementById('box-btn-acciones');
-      boxAcciones.innerHTML = '';
-
-      if (item.telefono && item.telefono !== 'Sin Teléfono') {
-        let numLimpio = item.telefono.replace(/[^0-9]/g, '');
-        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO, LE LLEGA MEDIANTE MENSAJE DE TEXTO NORMAL DE LA LINEA CON MAYUSCULAS TIGO, SI SU LINEA ES DE OTRA EMPRESA LE LLEGA DEL NUMERO 2820. LE AGRADESCO DE ANTEMANO SU PRONTA RESPUESTA Y CAPTURA DE PANTALLA AL FINALIZAR LA ENCUESTA. MUCHAS GRACIAS`;
-        let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
-
-        boxAcciones.innerHTML = `
-          <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
-          <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
-        `;
-      }
-
       modalDetalleBs.show();
+    }
+
+    async function cargarDashboard() {
+      const per = document.getElementById('select-periodo').value;
+      try {
+        const res = await apiCall("obtenerDatosDashboard", { periodo: per });
+        const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.sinGestion + res.kpis.conflictivos;
+        
+        document.getElementById('kpi-total').innerText = tot;
+        document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
+        document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
+        document.getElementById('kpi-conflictivos').innerText = res.kpis.conflictivos;
+
+        const pct = tot > 0 ? Math.round((res.kpis.gestionados / tot) * 100) : 0;
+        document.getElementById('kpi-pct-prom').innerText = pct + "%";
+        
+        const scoreNps = tot > 0 ? Math.round(((res.kpis.gestionados - res.kpis.conflictivos) / tot) * 100) : 0;
+        document.getElementById('kpi-nps-score').innerText = scoreNps;
+        document.getElementById('gauge-score-val').innerText = scoreNps;
+
+        document.getElementById('pct-promotores').innerText = pct + "%";
+        document.getElementById('pct-neutros').innerText = (tot > 0 ? Math.round((res.kpis.pendientes / tot) * 100) : 0) + "%";
+        document.getElementById('pct-detractores').innerText = (tot > 0 ? Math.round((res.kpis.conflictivos / tot) * 100) : 0) + "%";
+
+        renderizarGraficoGauge(scoreNps);
+        renderizarGraficoBarras(res.tecnicos);
+
+        todosLosRegistros = res.registros;
+        renderizarListaGeneral(todosLosRegistros);
+      } catch(e) { console.log("Error dashboard"); }
+    }
+
+    function renderizarGraficoGauge(score) {
+      const ctx = document.getElementById('gaugeChart').getContext('2d');
+      if (chartGauge) chartGauge.destroy();
+
+      chartGauge = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Detractores', 'Neutros', 'Promotores'],
+          datasets: [{
+            data: [25, 25, 50],
+            backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          rotation: -90,
+          circumference: 180,
+          cutout: '75%',
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderizarGraficoBarras(tecnicos) {
+      const ctx = document.getElementById('barTecnicosChart').getContext('2d');
+      if (chartBar) chartBar.destroy();
+
+      const nombres = tecnicos.map(t => t.nombre);
+      const avances = tecnicos.map(t => t.pctAvance);
+
+      chartBar = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: nombres,
+          datasets: [{
+            label: '% Cumplimiento',
+            data: avances,
+            backgroundColor: '#38bdf8',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { 
+            x: { max: 100, ticks: { color: '#94a3b8', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#f8fafc' }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderizarListaGeneral(lista) { renderizarTarjetas(lista, 'contenedor-dashboard'); }
+
+    function renderizarTarjetas(lista, idContenedor) {
+      const contenedor = document.getElementById(idContenedor);
+      contenedor.innerHTML = '';
+      if (lista.length === 0) {
+        contenedor.innerHTML = '<div class="text-secondary text-center small py-4 col-12">No hay órdenes guardadas.</div>';
+        return;
+      }
+
+      lista.forEach(r => {
+        const isConflict = r.estado === 'Conflictivo' || r.estado === 'UU conflictivo';
+        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+
+        contenedor.innerHTML += `
+          <div class="order-card ${isConflict ? 'conflictive' : ''}">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
+                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT}</small>
+              </div>
+              <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombreUsuario}</div>
+              <div class="meta-grid">
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">CLIENTE</span><strong class="text-light">${r.codigoCliente}</strong></div>
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
+              </div>
+              ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
+              <span class="text-secondary" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
+              ${r.evidencia ? `<button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')">Evidencia</button>` : '<span class="text-secondary small" style="font-size: 0.72rem;">Sin Foto</span>'}
+            </div>
+          </div>`;
+      });
+    }
+
+    function filtrarListaGeneral() {
+      const q = document.getElementById('input-buscar').value.toLowerCase();
+      const filtrados = todosLosRegistros.filter(r => 
+        r.tecnico.toLowerCase().includes(q) || 
+        r.nombreUsuario.toLowerCase().includes(q) || 
+        r.codigoCliente.toString().toLowerCase().includes(q) || 
+        r.telefono.toString().toLowerCase().includes(q) || 
+        r.numeroOT.toString().toLowerCase().includes(q)
+      );
+      renderizarListaGeneral(filtrados);
     }
 
     function abrirModal(fila) {
@@ -562,7 +623,7 @@
     function procesarFotoSeleccionada(input) {
       if (input.files && input.files[0]) {
         archivoFotoSeleccionado = input.files[0];
-        document.getElementById('label-archivo-elegido').innerText = "✓ Archivo listo: " + archivoFotoSeleccionado.name;
+        document.getElementById('label-archivo-elegido').innerText = "✓ Listo: " + archivoFotoSeleccionado.name;
         if (input.id === 'modal-foto-camara') document.getElementById('modal-foto-galeria').value = '';
         if (input.id === 'modal-foto-galeria') document.getElementById('modal-foto-camara').value = '';
       }
@@ -581,10 +642,7 @@
       const resultado = document.getElementById('modal-resultado').value;
       const obs = document.getElementById('modal-observacion').value;
 
-      if (estado === 'Conflictivo' && !obs.trim()) {
-        alert('Ingrese la observación requerida para usuario conflictivo.');
-        return;
-      }
+      if (estado === 'Conflictivo' && !obs.trim()) return alert('Ingrese la observación requerida.');
 
       const btnGuardar = document.getElementById('btn-guardar');
       btnGuardar.disabled = true;
@@ -606,61 +664,15 @@
     }
 
     async function enviarDatosAlServidor(payload) {
-      try {
-        await apiCall("guardarGestion", { payload: payload });
-      } catch(e) {
-        alert("Aviso: Error al enviar datos.");
-      }
-      const btnGuardar = document.getElementById('btn-guardar');
-      btnGuardar.disabled = false;
-      btnGuardar.innerText = "Guardar Gestión";
+      try { await apiCall("guardarGestion", { payload: payload }); } catch(e) {}
+      document.getElementById('btn-guardar').disabled = false;
+      document.getElementById('btn-guardar').innerText = "Guardar Gestión";
       modalBs.hide();
       cargarDashboard();
     }
 
-    async function cargarDashboard() {
-      document.getElementById('view-admin').classList.remove('hidden');
-      const per = document.getElementById('select-periodo').value;
-      try {
-        const res = await apiCall("obtenerDatosDashboard", { periodo: per });
-        
-        document.getElementById('kpi-total').innerText = (res.kpis.gestionados + res.kpis.pendientes + res.kpis.sinGestion + res.kpis.conflictivos);
-        document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
-        document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
-        document.getElementById('kpi-conflictivos').innerText = res.kpis.conflictivos;
-
-        const selectTec = document.getElementById('select-tecnico');
-        selectTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
-        
-        const contAlertas = document.getElementById('contenedor-tecnico-alertas');
-        contAlertas.innerHTML = '';
-
-        res.tecnicos.forEach(t => {
-          selectTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
-          
-          contAlertas.innerHTML += `
-            <div class="d-flex justify-content-between align-items-center p-2 mb-1 bg-dark rounded border border-secondary">
-              <div>
-                <strong class="text-light small">${t.nombre}</strong>
-                <div class="text-secondary" style="font-size: 0.7rem;">Avance: ${t.gestionados}/${t.total} (${t.pctAvance}%)</div>
-              </div>
-              <span class="badge ${t.alertaClase} p-2 small">${t.alerta}</span>
-            </div>`;
-        });
-
-        todosLosRegistros = res.registros;
-        aplicarFiltrosTecnico();
-        renderizarListaGeneral(todosLosRegistros);
-      } catch(e) {
-        console.log("Error cargando dashboard admin");
-      }
-    }
-
     async function exportarExcelConImagenes() {
-      if (!todosLosRegistros || todosLosRegistros.length === 0) {
-        alert("No hay registros disponibles para exportar.");
-        return;
-      }
+      if (!todosLosRegistros || todosLosRegistros.length === 0) return alert("No hay registros para exportar.");
 
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Reporte Gestiones NPS');
@@ -669,7 +681,7 @@
         { header: 'ID Gestión', key: 'idGestion', width: 12 },
         { header: 'Código Cliente', key: 'codigoCliente', width: 15 },
         { header: 'Nombre Usuario', key: 'nombreUsuario', width: 25 },
-        { header: 'Técnico Asignado', key: 'tecnico', width: 22 },
+        { header: 'Técnico', key: 'tecnico', width: 22 },
         { header: 'Fecha', key: 'fecha', width: 12 },
         { header: 'Estado', key: 'estado', width: 15 },
         { header: 'Número OT', key: 'numeroOT', width: 22 },
@@ -696,22 +708,12 @@
           evidencia: ''
         });
 
-        const rowIndex = row.number;
-
         if (item.evidenciaBase64) {
           try {
-            const imageId = workbook.addImage({
-              base64: item.evidenciaBase64,
-              extension: 'jpeg',
-            });
-            worksheet.addImage(imageId, {
-              tl: { col: 9, row: rowIndex - 1 },
-              ext: { width: 100, height: 75 }
-            });
-            worksheet.getRow(rowIndex).height = 60;
-          } catch (e) {
-            console.log("Error al incrustar imagen en Excel: ", e);
-          }
+            const imageId = workbook.addImage({ base64: item.evidenciaBase64, extension: 'jpeg' });
+            worksheet.addImage(imageId, { tl: { col: 9, row: row.number - 1 }, ext: { width: 100, height: 75 } });
+            worksheet.getRow(row.number).height = 60;
+          } catch (e) {}
         }
       }
 
@@ -731,7 +733,6 @@
       imgElement.classList.add('hidden');
       errorElement.classList.add('hidden');
       loadingElement.classList.remove('hidden');
-      
       modalVisorBs.show();
       
       try {
@@ -741,129 +742,19 @@
           imgElement.src = res.dataUri;
           imgElement.classList.remove('hidden');
         } else {
-          errorElement.innerText = res.mensaje || "No se pudo cargar la imagen.";
+          errorElement.innerText = "No se pudo cargar la imagen.";
           errorElement.classList.remove('hidden');
         }
       } catch(e) {
         loadingElement.classList.add('hidden');
-        errorElement.innerText = "Error de conexión al cargar foto.";
+        errorElement.innerText = "Error de conexión.";
         errorElement.classList.remove('hidden');
       }
     }
 
-    function aplicarFiltrosTecnico() {
-      const tecSel = document.getElementById('select-tecnico').value;
-      const estSel = document.getElementById('select-estado-tec').value;
-      let resultado = todosLosRegistros;
-
-      if (tecSel !== 'TODOS') resultado = resultado.filter(r => r.tecnico.toLowerCase() === tecSel.toLowerCase());
-      if (estSel !== 'TODOS') {
-        resultado = resultado.filter(r => {
-          if (estSel === 'Sin Gestion') return r.estado === 'Sin Gestion' || r.estado === 'Sin gestion';
-          return r.estado === estSel;
-        });
-      }
-      renderizarTarjetas(resultado, 'contenedor-tecnico-filtrado');
-    }
-
-    function renderizarListaGeneral(lista) { renderizarTarjetas(lista, 'contenedor-dashboard'); }
-
-    function renderizarTarjetas(lista, idContenedor) {
-      const contenedor = document.getElementById(idContenedor);
-      contenedor.innerHTML = '';
-      if (lista.length === 0) {
-        contenedor.innerHTML = '<div class="text-secondary text-center small py-4 col-12">No hay órdenes para mostrar.</div>';
-        return;
-      }
-
-      lista.forEach(r => {
-        const isConflictive = r.estado === 'Conflictivo' || r.estado === 'UU conflictivo';
-        const cardClass = isConflictive ? 'order-card conflictive' : 'order-card';
-        let badgeStyle = 'badge-expired';
-        if (r.estado === 'Gestionado') badgeStyle = 'badge-done';
-        if (r.estado === 'Pendiente') badgeStyle = 'badge-pending';
-        if (isConflictive) badgeStyle = 'badge-danger';
-
-        let botonEvidencia = '<span class="text-secondary small" style="font-size: 0.72rem;">Sin imagen</span>';
-        if (r.evidencia) {
-          botonEvidencia = `<button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')"><i class="bi bi-file-image me-1"></i> Evidencia</button>`;
-        }
-
-        contenedor.innerHTML += `
-          <div class="${cardClass}">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
-                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT}</small>
-              </div>
-              
-              <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombreUsuario}</div>
-
-              <div class="meta-grid">
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">CLIENTE</span><strong class="text-light">${r.codigoCliente}</strong></div>
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
-              </div>
-
-              ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
-              <span class="text-secondary" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
-              ${botonEvidencia}
-            </div>
-          </div>`;
-      });
-    }
-
-    function filtrarListaGeneral() {
-      const q = document.getElementById('input-buscar').value.toLowerCase();
-      const filtrados = todosLosRegistros.filter(r => 
-        r.tecnico.toLowerCase().includes(q) || 
-        r.nombreUsuario.toLowerCase().includes(q) || 
-        r.codigoCliente.toString().toLowerCase().includes(q) || 
-        r.telefono.toString().toLowerCase().includes(q) || 
-        r.numeroOT.toString().toLowerCase().includes(q)
-      );
-      renderizarListaGeneral(filtrados);
-    }
-
     function cerrarSesion() {
       localStorage.removeItem("nps_user_profile");
-      usuarioActual = null;
-      todosLosRegistros = [];
-      pendientesTecnicoActual = [];
-      historicoTecnicoActual = [];
-
-      document.getElementById('input-user').value = '';
-      document.getElementById('input-pass').value = '';
-      document.getElementById('login-alert').classList.add('hidden');
-      document.getElementById('view-tecnico').classList.add('hidden');
-      document.getElementById('view-admin').classList.add('hidden');
-      document.getElementById('view-login').classList.remove('hidden');
-    }
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
-    }
-
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const btnInstalar = document.getElementById('btn-instalar-pwa');
-      if (btnInstalar) btnInstalar.classList.add('hidden');
-    });
-
-    function instalarApp() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            document.getElementById('btn-instalar-pwa').classList.add('hidden');
-          }
-          deferredPrompt = null;
-        });
-      }
+      location.reload();
     }
   </script>
 </body>
