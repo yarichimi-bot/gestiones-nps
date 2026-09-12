@@ -177,10 +177,20 @@
           <div class="mb-3"><label class="form-label small text-secondary">Estado de Gestión</label><select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="evaluarEstado()"><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo (NPS 0)</option></select></div>
           <div class="mb-3"><label class="form-label small text-secondary">Resultado</label><select id="modal-resultado" class="form-select bg-dark text-white border-secondary"><option value="Exitoso">Exitoso</option><option value="Sin respuesta">Sin respuesta</option></select></div>
           
-          <!-- SECTOR DE EVIDENCIA CORREGIDO PARA PERMITIR CÁMARA O ARCHIVOS DE GALERÍA -->
+          <!-- SECTOR DE EVIDENCIA CON 2 BOTONES INDEPENDIENTES (CÁMARA / GALERÍA) -->
           <div class="mb-3">
-            <label class="form-label small text-secondary">Captura de Evidencia (Foto o Galería)</label>
-            <input type="file" id="modal-foto" class="form-control bg-dark text-white border-secondary form-control-sm" accept="image/*">
+            <label class="form-label small text-secondary">Evidencia Fotográfica</label>
+            <div class="d-flex gap-2 mb-2">
+              <label class="btn btn-outline-info btn-sm flex-fill fw-bold mb-0 py-2" style="font-size: 0.78rem; cursor: pointer;">
+                <i class="bi bi-camera-fill me-1"></i> Tomar Foto
+                <input type="file" id="modal-foto-camara" class="hidden" accept="image/*" capture="environment" onchange="procesarFotoSeleccionada(this)">
+              </label>
+              <label class="btn btn-outline-warning btn-sm flex-fill fw-bold mb-0 py-2" style="font-size: 0.78rem; cursor: pointer;">
+                <i class="bi bi-image-fill me-1"></i> Elegir Galería
+                <input type="file" id="modal-foto-galeria" class="hidden" accept="image/*" onchange="procesarFotoSeleccionada(this)">
+              </label>
+            </div>
+            <div id="label-archivo-elegido" class="text-success small fw-bold text-center" style="font-size: 0.75rem;"></div>
           </div>
 
           <div id="box-observacion" class="mb-3 hidden"><label class="form-label small text-danger fw-bold">Motivo de Usuario Conflictivo *</label><textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3"></textarea></div>
@@ -233,6 +243,7 @@
 
     let usuarioActual = null, modalBs = null, modalVisorBs = null, modalDetalleBs = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [];
+    let archivoFotoSeleccionado = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       modalBs = new bootstrap.Modal(document.getElementById('modalGestion'));
@@ -504,9 +515,23 @@
       document.getElementById('modal-fila').value = fila;
       document.getElementById('modal-estado').value = 'Gestionado';
       document.getElementById('modal-observacion').value = '';
-      document.getElementById('modal-foto').value = '';
+      archivoFotoSeleccionado = null;
+      document.getElementById('label-archivo-elegido').innerText = '';
+      document.getElementById('modal-foto-camara').value = '';
+      document.getElementById('modal-foto-galeria').value = '';
       evaluarEstado();
       modalBs.show();
+    }
+
+    function procesarFotoSeleccionada(input) {
+      if (input.files && input.files[0]) {
+        archivoFotoSeleccionado = input.files[0];
+        document.getElementById('label-archivo-elegido').innerText = "✓ Archivo listo: " + archivoFotoSeleccionado.name;
+        
+        // Limpiar el otro input para evitar cruces
+        if (input.id === 'modal-foto-camara') document.getElementById('modal-foto-galeria').value = '';
+        if (input.id === 'modal-foto-galeria') document.getElementById('modal-foto-camara').value = '';
+      }
     }
 
     function evaluarEstado() {
@@ -521,7 +546,6 @@
       const estado = document.getElementById('modal-estado').value;
       const resultado = document.getElementById('modal-resultado').value;
       const obs = document.getElementById('modal-observacion').value;
-      const fileInput = document.getElementById('modal-foto');
 
       if (estado === 'Conflictivo' && !obs.trim()) {
         alert('Ingrese la observación requerida para usuario conflictivo.');
@@ -534,15 +558,14 @@
 
       const payload = { fila: fila, estado: estado, resultado: resultado, observacion: obs, archivoBase64: null, nombreArchivo: null };
 
-      if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
+      if (archivoFotoSeleccionado) {
         const reader = new FileReader();
         reader.onload = async function(e) {
           payload.archivoBase64 = e.target.result;
-          payload.nombreArchivo = `Evidencia_OT_${fila}_${Date.now()}_${file.name}`;
+          payload.nombreArchivo = `Evidencia_OT_${fila}_${Date.now()}_${archivoFotoSeleccionado.name}`;
           await enviarDatosAlServidor(payload);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(archivoFotoSeleccionado);
       } else {
         enviarDatosAlServidor(payload);
       }
