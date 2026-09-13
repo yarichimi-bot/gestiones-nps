@@ -235,7 +235,7 @@
                 <option value="TODOS">-- Todos los Estados --</option>
                 <option value="Gestionado">Gestionado</option>
                 <option value="Pendiente">Pendiente</option>
-                <option value="Conflictivo">Conflictivo</option>
+                <option value="UU conflictivo">UU conflictivo</option>
               </select>
             </div>
             <div class="col-12 col-md-4">
@@ -282,8 +282,21 @@
         <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Registrar Gestión</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
           <input type="hidden" id="modal-fila">
-          <div class="mb-3"><label class="form-label small text-secondary">Estado de Gestión</label><select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="evaluarEstado()"><option value="Gestionado">Gestionado</option><option value="Sin Gestion">Sin Gestión</option><option value="Conflictivo">Conflictivo (NPS 0)</option></select></div>
-          <div class="mb-3"><label class="form-label small text-secondary">Resultado</label><select id="modal-resultado" class="form-select bg-dark text-white border-secondary"><option value="Exitoso">Exitoso</option><option value="Sin respuesta">Sin respuesta</option></select></div>
+          <div class="mb-3">
+            <label class="form-label small text-secondary">Estado de Gestión</label>
+            <select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="evaluarEstado()">
+              <option value="Gestionado">Gestionado</option>
+              <option value="Sin Gestion">Sin Gestión</option>
+              <option value="UU conflictivo">UU conflictivo</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-secondary">Resultado</label>
+            <select id="modal-resultado" class="form-select bg-dark text-white border-secondary">
+              <option value="Exitoso">Exitoso</option>
+              <option value="Sin respuesta">Sin respuesta</option>
+            </select>
+          </div>
           <div class="mb-3">
             <label class="form-label small text-secondary">Evidencia Fotográfica</label>
             <div class="d-flex gap-2 mb-2">
@@ -298,7 +311,10 @@
             </div>
             <div id="label-archivo-elegido" class="text-success small fw-bold text-center"></div>
           </div>
-          <div id="box-observacion" class="mb-3 hidden"><label class="form-label small text-danger fw-bold">Motivo Conflictivo *</label><textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3"></textarea></div>
+          <div id="box-observacion" class="mb-3 hidden">
+            <label class="form-label small text-danger fw-bold">Informe / Motivo (Obligatorio para UU conflictivo) *</label>
+            <textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Detalla aquí el informe del problema registrado..."></textarea>
+          </div>
         </div>
         <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" id="btn-guardar" class="btn btn-sm btn-primary" onclick="guardarFormulario()">Guardar Gestión</button></div>
       </div>
@@ -321,7 +337,7 @@
           <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-val" id="det-estado">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val" id="det-ot">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
-          <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Observación de Gestión</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
+          <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Informe UU Conflictivo</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
           
           <div class="mt-3 d-flex flex-column gap-2" id="box-btn-acciones"></div>
         </div>
@@ -398,7 +414,7 @@
 
     async function apiCall(accion, dataPayload = {}) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 35000);
       try {
         const response = await fetch(WEB_APP_URL, {
           method: "POST",
@@ -576,10 +592,11 @@
         return;
       }
       historicoTecnicoActual.forEach((r, index) => {
-        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (r.estado === 'Conflictivo' ? 'badge-danger' : 'badge-expired');
+        let isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
+        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
 
         contenedor.innerHTML += `
-          <div class="order-card">
+          <div class="order-card ${isConflict ? 'conflictive' : ''}">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <strong class="text-primary fs-6">${r.codigoCliente}</strong>
@@ -621,7 +638,8 @@
       document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
       document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
 
-      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (item.estado === 'Conflictivo' || item.estado === 'UU conflictivo' ? 'badge-danger' : 'badge-pending');
+      let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
+      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
       document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
 
       const boxObs = document.getElementById('det-box-obs');
@@ -636,7 +654,9 @@
       boxAcciones.innerHTML = '';
       if (item.telefono && item.telefono !== 'Sin Teléfono') {
         let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
-        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO...`;
+        let mensajeWs = `Estimado/a cliente, le saludo cordialmente del servicio técnico de Tigo por el trabajo realizado de su código ${item.codigoCliente}  (${item.nombreUsuario}).
+Esperando que todo marche excelente, quería consultarle si pudo responder la encuesta sobre nuestra atención. Si aún no lo ha hecho, le invitamos cordialmente a completarla para seguir mejorando.
+¡Muchas gracias por su tiempo y confianza!`;
         let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
         boxAcciones.innerHTML = `
           <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
@@ -669,8 +689,17 @@
       document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
       document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
 
-      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (item.estado === 'Conflictivo' ? 'badge-danger' : 'badge-pending');
+      let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
+      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
       document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
+
+      const boxObs = document.getElementById('det-box-obs');
+      if (item.observacion) {
+        document.getElementById('det-observacion').innerText = item.observacion;
+        boxObs.classList.remove('hidden');
+      } else {
+        boxObs.classList.add('hidden');
+      }
 
       const boxAcciones = document.getElementById('box-btn-acciones');
       boxAcciones.innerHTML = '';
@@ -881,7 +910,7 @@
       }
 
       lista.forEach(r => {
-        const isConflict = r.estado === 'Conflictivo' || r.estado === 'UU conflictivo';
+        const isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
         let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
         const indexOriginal = todosLosRegistros.indexOf(r);
 
@@ -903,7 +932,7 @@
               <div class="mt-2 p-1 px-2 bg-dark rounded border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
                 ${subtextoFecha}
               </div>
-              ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Obs:</strong> ${r.observacion}</div>` : ''}
+              ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Informe:</strong> ${r.observacion}</div>` : ''}
             </div>
             
             <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
@@ -930,7 +959,6 @@
       abrirModalBS('modalGestion');
     }
 
-    // FUNCIÓN DE COMPRESIÓN AUTOMÁTICA DE IMAGEN EN CLIENTE
     function procesarFotoSeleccionada(input) {
       if (input.files && input.files[0]) {
         archivoFotoSeleccionado = input.files[0];
@@ -946,7 +974,7 @@
           const img = new Image();
           img.onload = function() {
             const canvas = document.createElement('canvas');
-            let maxDimension = 1024; // Máxima resolución optimizada
+            let maxDimension = 1024;
             let width = img.width;
             let height = img.height;
 
@@ -967,7 +995,6 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            // Exportar como JPG a 70% de calidad (Súper ligero ~ 200KB)
             base64Compresion = canvas.toDataURL('image/jpeg', 0.7);
             lbl.className = "text-success small fw-bold text-center";
             lbl.innerText = "✓ Listo: Imagen lista para subir";
@@ -981,8 +1008,11 @@
     function evaluarEstado() {
       const est = document.getElementById('modal-estado').value;
       const boxObs = document.getElementById('box-observacion');
-      if (est === 'Conflictivo') boxObs.classList.remove('hidden');
-      else boxObs.classList.add('hidden');
+      if (est === 'UU conflictivo' || est === 'Conflictivo') {
+        boxObs.classList.remove('hidden');
+      } else {
+        boxObs.classList.add('hidden');
+      }
     }
 
     async function guardarFormulario() {
@@ -991,7 +1021,9 @@
       const resultado = document.getElementById('modal-resultado').value;
       const obs = document.getElementById('modal-observacion').value;
 
-      if (estado === 'Conflictivo' && !obs.trim()) return alert('Ingrese la observación requerida.');
+      if ((estado === 'UU conflictivo' || estado === 'Conflictivo') && !obs.trim()) {
+        return alert('Ingrese la observación / informe requerido para UU conflictivo.');
+      }
 
       const btnGuardar = document.getElementById('btn-guardar');
       btnGuardar.disabled = true;
@@ -1045,7 +1077,7 @@
         { header: 'Estado', key: 'estado', width: 15 },
         { header: 'Número OT', key: 'numeroOT', width: 22 },
         { header: 'Teléfono', key: 'telefono', width: 15 },
-        { header: 'Observaciones', key: 'observacion', width: 30 },
+        { header: 'Informe Observación', key: 'observacion', width: 30 },
         { header: 'Foto Evidencia', key: 'evidencia', width: 20 }
       ];
 
