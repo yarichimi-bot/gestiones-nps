@@ -979,7 +979,7 @@
           const img = new Image();
           img.onload = function() {
             const canvas = document.createElement('canvas');
-            let maxDimension = 650;
+            let maxDimension = 500;
             let width = img.width;
             let height = img.height;
 
@@ -1000,7 +1000,7 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            resolve(canvas.toDataURL('image/jpeg', 0.5));
+            resolve(canvas.toDataURL('image/jpeg', 0.35));
           };
           img.onerror = reject;
           img.src = e.target.result;
@@ -1033,39 +1033,26 @@
 
       const btnGuardar = document.getElementById('btn-guardar');
       btnGuardar.disabled = true;
-      btnGuardar.innerText = "Subiendo imagen...";
+      btnGuardar.innerText = "Guardando...";
 
-      let rutaRelativaFoto = "";
-
-      // PASO 1: SUBIR FOTO A DRIVE SI FUE SELECCIONADA
-      if (archivoFotoSeleccionado) {
+      let b64Foto = base64Compresion;
+      if (archivoFotoSeleccionado && !b64Foto) {
         try {
-          let b64 = base64Compresion;
-          if (!b64) {
-            b64 = await convertirYComprimirFoto(archivoFotoSeleccionado);
-          }
-          const resFoto = await apiCall("subirSoloImagen", { archivoBase64: b64, numeroOT: numeroOT });
-          if (resFoto && resFoto.exito) {
-            rutaRelativaFoto = resFoto.ruta;
-          }
-        } catch(e) {
-          console.log("Error subiendo foto", e);
-        }
+          b64Foto = await convertirYComprimirFoto(archivoFotoSeleccionado);
+        } catch(e) {}
       }
 
-      btnGuardar.innerText = "Guardando datos...";
-
-      // PASO 2: GUARDAR DATOS EN LA HOJA
       const payload = { 
         fila: fila, 
+        numeroOT: numeroOT,
         estado: estado, 
         resultado: resultado, 
         observacion: obs, 
-        rutaRelativaFoto: rutaRelativaFoto 
+        fotoBase64: b64Foto
       };
 
       try {
-        const res = await apiCall("guardarGestion", { payload: payload });
+        const res = await apiCall("guardarGestionConFoto", { payload: payload });
         btnGuardar.disabled = false;
         btnGuardar.innerText = "Guardar Gestión";
         
