@@ -956,7 +956,7 @@
         base64Compresion = null;
         const lbl = document.getElementById('label-archivo-elegido');
         lbl.className = "text-warning small fw-bold text-center";
-        lbl.innerText = "⏳ Optimizando imagen...";
+        lbl.innerText = "⏳ Optimizando evidencia...";
 
         if (input.id === 'modal-foto-camara') document.getElementById('modal-foto-galeria').value = '';
         if (input.id === 'modal-foto-galeria') document.getElementById('modal-foto-camara').value = '';
@@ -964,7 +964,7 @@
         convertirYComprimirFoto(archivoFotoSeleccionado).then(b64 => {
           base64Compresion = b64;
           lbl.className = "text-success small fw-bold text-center";
-          lbl.innerText = "✓ Listo: Imagen optimizada";
+          lbl.innerText = "✓ Listo: Imagen lista para enviar";
         }).catch(err => {
           lbl.className = "text-danger small fw-bold text-center";
           lbl.innerText = "Error al optimizar imagen.";
@@ -1057,6 +1057,7 @@
         btnGuardar.innerText = "Guardar Gestión";
         
         if (res && res.exito) {
+          alert("¡Gestión registrada con evidencia fotográfica exitosamente!");
           ocultarModalBS('modalGestion');
           const esRolTecnico = usuarioActual.esTecnico || (usuarioActual.rol && usuarioActual.rol.toLowerCase().includes('tec'));
           if (esRolTecnico) {
@@ -1065,7 +1066,7 @@
             cargarDashboard();
           }
         } else {
-          alert(res.mensaje || "Ocurrió un error al guardar la gestión.");
+          alert(res.mensaje || "Ocurrió un error al guardar.");
         }
       } catch(e) {
         btnGuardar.disabled = false;
