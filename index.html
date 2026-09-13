@@ -153,7 +153,7 @@
           </div>
         </div>
 
-        <!-- FILTROS REGIONALES (ADMIN NACIONAL / GENERAL) -->
+        <!-- FILTROS REGIONALES -->
         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary border-opacity-25">
           <div class="col-6 col-md-3">
             <label class="form-label text-secondary small m-0 mb-1" style="font-size: 0.7rem;"><i class="bi bi-geo-alt me-1"></i>Departamento:</label>
@@ -413,21 +413,12 @@
     });
 
     async function apiCall(accion, dataPayload = {}) {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 35000);
-      try {
-        const response = await fetch(WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ accion: accion, ...dataPayload }),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        return JSON.parse(await response.text());
-      } catch(e) {
-        clearTimeout(timeoutId);
-        throw e;
-      }
+      const response = await fetch(WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ accion: accion, ...dataPayload })
+      });
+      return JSON.parse(await response.text());
     }
 
     async function ejecutarLogin() {
@@ -654,9 +645,7 @@
       boxAcciones.innerHTML = '';
       if (item.telefono && item.telefono !== 'Sin Teléfono') {
         let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
-        let mensajeWs = `Estimado/a cliente, le saludo cordialmente del servicio técnico de Tigo por el trabajo realizado de su código ${item.codigoCliente}  (${item.nombreUsuario}).
-Esperando que todo marche excelente, quería consultarle si pudo responder la encuesta sobre nuestra atención. Si aún no lo ha hecho, le invitamos cordialmente a completarla para seguir mejorando.
-¡Muchas gracias por su tiempo y confianza!`;
+        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO...`;
         let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
         boxAcciones.innerHTML = `
           <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
@@ -959,6 +948,7 @@ Esperando que todo marche excelente, quería consultarle si pudo responder la en
       abrirModalBS('modalGestion');
     }
 
+    // PROCESAMIENTO PROMISIFICADO QUE GARANTIZA LA COMPRESIÓN
     function procesarFotoSeleccionada(input) {
       if (input.files && input.files[0]) {
         archivoFotoSeleccionado = input.files[0];
@@ -969,12 +959,25 @@ Esperando que todo marche excelente, quería consultarle si pudo responder la en
         if (input.id === 'modal-foto-camara') document.getElementById('modal-foto-galeria').value = '';
         if (input.id === 'modal-foto-galeria') document.getElementById('modal-foto-camara').value = '';
 
+        convertirYComprimirFoto(archivoFotoSeleccionado).then(b64 => {
+          base64Compresion = b64;
+          lbl.className = "text-success small fw-bold text-center";
+          lbl.innerText = "✓ Listo: Imagen optimizada";
+        }).catch(err => {
+          lbl.className = "text-danger small fw-bold text-center";
+          lbl.innerText = "Error optimizando imagen.";
+        });
+      }
+    }
+
+    function convertirYComprimirFoto(file) {
+      return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = function(e) {
           const img = new Image();
           img.onload = function() {
             const canvas = document.createElement('canvas');
-            let maxDimension = 1024;
+            let maxDimension = 1000;
             let width = img.width;
             let height = img.height;
 
@@ -995,14 +998,14 @@ Esperando que todo marche excelente, quería consultarle si pudo responder la en
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            base64Compresion = canvas.toDataURL('image/jpeg', 0.7);
-            lbl.className = "text-success small fw-bold text-center";
-            lbl.innerText = "✓ Listo: Imagen lista para subir";
+            resolve(canvas.toDataURL('image/jpeg', 0.65));
           };
+          img.onerror = reject;
           img.src = e.target.result;
         };
-        reader.readAsDataURL(archivoFotoSeleccionado);
-      }
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     }
 
     function evaluarEstado() {
@@ -1028,6 +1031,13 @@ Esperando que todo marche excelente, quería consultarle si pudo responder la en
       const btnGuardar = document.getElementById('btn-guardar');
       btnGuardar.disabled = true;
       btnGuardar.innerText = "Guardando...";
+
+      // Asegurarse de que si hay archivo, la promesa haya resuelto
+      if (archivoFotoSeleccionado && !base64Compresion) {
+        try {
+          base64Compresion = await convertirYComprimirFoto(archivoFotoSeleccionado);
+        } catch(e){}
+      }
 
       const payload = { 
         fila: fila, 
