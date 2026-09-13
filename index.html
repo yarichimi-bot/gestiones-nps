@@ -361,7 +361,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // ⚠️ REEMPLAZA ESTA URL CON TU URL REAL DE GOOGLE APPS SCRIPT TERMINADA EN /exec
+    // ⚠️ ASEGÚRATE DE QUE ESTA SEA TU URL DE GOOGLE APPS SCRIPT TERMINADA EN /exec
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
 
     let usuarioActual = null;
@@ -948,10 +948,10 @@
       abrirModalBS('modalGestion');
     }
 
-    // PROCESAMIENTO PROMISIFICADO QUE GARANTIZA LA COMPRESIÓN
     function procesarFotoSeleccionada(input) {
       if (input.files && input.files[0]) {
         archivoFotoSeleccionado = input.files[0];
+        base64Compresion = null;
         const lbl = document.getElementById('label-archivo-elegido');
         lbl.className = "text-warning small fw-bold text-center";
         lbl.innerText = "⏳ Optimizando imagen...";
@@ -965,7 +965,7 @@
           lbl.innerText = "✓ Listo: Imagen optimizada";
         }).catch(err => {
           lbl.className = "text-danger small fw-bold text-center";
-          lbl.innerText = "Error optimizando imagen.";
+          lbl.innerText = "Error al procesar foto.";
         });
       }
     }
@@ -977,7 +977,7 @@
           const img = new Image();
           img.onload = function() {
             const canvas = document.createElement('canvas');
-            let maxDimension = 1000;
+            let maxDimension = 900;
             let width = img.width;
             let height = img.height;
 
@@ -998,7 +998,7 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            resolve(canvas.toDataURL('image/jpeg', 0.65));
+            resolve(canvas.toDataURL('image/jpeg', 0.6));
           };
           img.onerror = reject;
           img.src = e.target.result;
@@ -1032,11 +1032,11 @@
       btnGuardar.disabled = true;
       btnGuardar.innerText = "Guardando...";
 
-      // Asegurarse de que si hay archivo, la promesa haya resuelto
+      // Asegurar resolución de imagen antes del payload
       if (archivoFotoSeleccionado && !base64Compresion) {
         try {
           base64Compresion = await convertirYComprimirFoto(archivoFotoSeleccionado);
-        } catch(e){}
+        } catch(e) {}
       }
 
       const payload = { 
@@ -1067,7 +1067,7 @@
       } catch(e) {
         btnGuardar.disabled = false;
         btnGuardar.innerText = "Guardar Gestión";
-        alert("Error de conexión. Por favor verifica tu señal móvil e intenta nuevamente.");
+        alert("Error de conexión al guardar.");
       }
     }
 
