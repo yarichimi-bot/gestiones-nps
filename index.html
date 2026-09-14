@@ -406,28 +406,75 @@
       }
     });
 
-    async function apiCall(accion, dataPayload = {}) {
-      const response = await fetch(WEB_APP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ accion: accion, ...dataPayload })
-      });
-      return JSON.parse(await response.text());
+    async function apiCall(accion, dataPayload = {}, reintentos = 2) {
+      for (let i = 0; i <= reintentos; i++) {
+        try {
+          const response = await fetch(WEB_APP_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ accion: accion, ...dataPayload })
+          });
+          if (response.ok) {
+            return JSON.parse(await response.text());
+          }
+        } catch (e) {
+          if (i === reintentos) throw e;
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
     }
 
     async function ejecutarLogin() {
       const u = document.getElementById('input-user').value;
       const p = document.getElementById('input-pass').value;
+      const alertBox = document.getElementById('login-alert');
+      const btnLogin = document.getElementById('btn-login-submit');
+
       if (!u || !p) return alert("Ingrese usuario y contraseña");
+
+      btnLogin.disabled = true;
+      btnLogin.innerText = "Verificando...";
+      if (alertBox) alertBox.classList.add('hidden');
 
       try {
         const res = await apiCall("loginUsuario", { usuario: u, password: p });
+        btnLogin.disabled = false;
+        btnLogin.innerText = "Iniciar Sesión";
+
         if (res && res.exito) {
           usuarioActual = res;
           localStorage.setItem("nps_user_profile", JSON.stringify(res));
-          location.reload();
-        } else alert(res.mensaje || "Credenciales no válidas");
-      } catch(e) { alert("Error de conexión"); }
+          
+          document.getElementById('view-login').classList.add('hidden');
+          
+          const esRolTecnico = res.esTecnico || (res.rol && res.rol.toLowerCase().includes('tec'));
+
+          if (esRolTecnico) {
+            document.getElementById('view-tecnico').classList.remove('hidden');
+            document.getElementById('view-admin').classList.add('hidden');
+            document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
+            document.getElementById('avatar-tec').innerText = (res.nombre || 'T').charAt(0).toUpperCase();
+            cargarPendientesTecnico();
+          } else {
+            document.getElementById('view-admin').classList.remove('hidden');
+            document.getElementById('view-tecnico').classList.add('hidden');
+            document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
+            document.getElementById('admin-header-region').innerText = `DEP: ${res.departamento} | CIUDAD: ${res.ciudad}`;
+            cargarDashboard();
+          }
+        } else {
+          if (alertBox) {
+            alertBox.innerText = res.mensaje || "Credenciales no válidas";
+            alertBox.classList.remove('hidden');
+          } else {
+            alert(res.mensaje || "Credenciales no válidas");
+          }
+        }
+      } catch(e) {
+        btnLogin.disabled = false;
+        btnLogin.innerText = "Iniciar Sesión";
+        alert("Iniciando servidor... Por favor presione 'Iniciar Sesión' nuevamente.");
+      }
     }
 
     function abrirModalCargaExcel() {
@@ -525,32 +572,44 @@
     }
 
     async function cargarPendientesTecnico() {
+      const contenedor = document.getElementById('lista-pendientes');
+      contenedor.innerHTML = '<div class="text-info text-center small py-3 col-12"><div class="spinner-border spinner-border-sm me-2"></div>Cargando pendientes...</div>';
+      
       try {
         const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
-        pendientesTecnicoActual = lista || [];
+        pendientesTecnicoActual = Array.isArray(lista) ? lista : [];
         renderizarPendientesTecnicoUI();
-      } catch(e) {}
+      } catch(e) {
+        contenedor.innerHTML = '<div class="alert alert-dark text-danger text-center small py-3 col-12">Error al cargar la lista. Intente de nuevo.</div>';
+      }
     }
 
     function renderizarPendientesTecnicoUI() {
       const contenedor = document.getElementById('lista-pendientes');
       contenedor.innerHTML = '';
-      if (pendientesTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes.</div>';
+
+      if (!pendientesTecnicoActual || pendientesTecnicoActual.length === 0) {
+        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes asignadas.</div>';
         return;
       }
 
       pendientesTecnicoActual.forEach((item, index) => {
-        let telLlamar = item.telefono && item.telefono !== 'Sin Teléfono' ? `<a href="tel:${item.telefono}" class="btn btn-xs btn-outline-warning p-1 px-2 small"><i class="bi bi-telephone-fill me-1"></i>${item.telefono}</a>` : '<span class="text-secondary small">Sin Tel.</span>';
+        let codigo = item.codigoCliente || item.idGestion || 'S/C';
+        let usuario = item.nombreUsuario || 'Cliente General';
+        let telefono = item.telefono || 'Sin Teléfono';
+        
+        let telLlamar = (telefono && telefono !== 'Sin Teléfono') ? 
+          `<a href="tel:${telefono}" class="btn btn-xs btn-outline-warning p-1 px-2 small"><i class="bi bi-telephone-fill me-1"></i>${telefono}</a>` : 
+          '<span class="text-secondary small">Sin Tel.</span>';
 
         contenedor.innerHTML += `
-          <div class="order-card">
+          <div class="order-card mb-2">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
-                <strong class="text-primary fs-6">${item.codigoCliente}</strong>
+                <strong class="text-primary fs-6">${codigo}</strong>
                 <span class="badge-subtle badge-pending">Pendiente</span>
               </div>
-              <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${item.nombreUsuario}</div>
+              <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${usuario}</div>
               <div class="d-flex justify-content-between align-items-center my-2 bg-dark p-2 rounded border border-secondary border-opacity-25">
                 <span class="text-secondary small">Teléfono NPS:</span>
                 ${telLlamar}
@@ -558,38 +617,43 @@
             </div>
             <div class="d-flex gap-2 mt-3">
               <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
-              <button class="btn btn-sm btn-success flex-fill fw-bold py-2" onclick="abrirModal(${item.fila}, '${item.numeroOT}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
+              <button class="btn btn-sm btn-success flex-fill fw-bold py-2" onclick="abrirModal(${item.fila}, '${item.numeroOT || ''}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
             </div>
           </div>`;
       });
     }
 
     async function cargarHistoricoTecnico() {
+      const contenedor = document.getElementById('lista-historico-tecnico');
+      contenedor.innerHTML = '<div class="text-info text-center small py-3 col-12"><div class="spinner-border spinner-border-sm me-2"></div>Cargando histórico...</div>';
+
       try {
         const lista = await apiCall("obtenerHistoricoTecnico", { correoTecnico: usuarioActual.usuario });
-        historicoTecnicoActual = lista || [];
-      } catch(e) { historicoTecnicoActual = []; }
+        historicoTecnicoActual = Array.isArray(lista) ? lista : [];
+      } catch(e) { 
+        historicoTecnicoActual = []; 
+      }
       
-      const contenedor = document.getElementById('lista-historico-tecnico');
       contenedor.innerHTML = '';
-      if (historicoTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes gestiones registradas.</div>';
+      if (!historicoTecnicoActual || historicoTecnicoActual.length === 0) {
+        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes gestiones en tu histórico.</div>';
         return;
       }
+
       historicoTecnicoActual.forEach((r, index) => {
         let isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
         let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
 
         contenedor.innerHTML += `
-          <div class="order-card ${isConflict ? 'conflictive' : ''}">
+          <div class="order-card mb-2 ${isConflict ? 'conflictive' : ''}">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
-                <strong class="text-primary fs-6">${r.codigoCliente}</strong>
+                <strong class="text-primary fs-6">${r.codigoCliente || 'S/C'}</strong>
                 <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
               </div>
-              <div class="fw-bold text-light mb-1" style="font-size: 0.85rem;">${r.nombreUsuario}</div>
+              <div class="fw-bold text-light mb-1" style="font-size: 0.85rem;">${r.nombreUsuario || 'Cliente'}</div>
               <div class="meta-grid">
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono || 'Sin Tel.'}</span></div>
                 <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">FECHA GESTIÓN</span><span class="text-light" style="font-size: 0.72rem;">${r.fechaGestion || 'N/A'}</span></div>
               </div>
             </div>
