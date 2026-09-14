@@ -130,9 +130,8 @@
       <div id="sec-tec-historico" class="hidden"><div id="lista-historico-tecnico" class="grid-dashboard"></div></div>
     </div>
 
-    <!-- VISTA ADMIN / SUPERVISOR / ENCARGADO -->
+    <!-- VISTA ADMIN -->
     <div id="view-admin" class="hidden">
-      
       <div class="bi-card-dark mb-3">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
           <div class="d-flex align-items-center gap-2">
@@ -153,7 +152,6 @@
           </div>
         </div>
 
-        <!-- FILTROS REGIONALES -->
         <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary border-opacity-25">
           <div class="col-6 col-md-3">
             <label class="form-label text-secondary small m-0 mb-1" style="font-size: 0.7rem;"><i class="bi bi-geo-alt me-1"></i>Departamento:</label>
@@ -171,36 +169,35 @@
 
         <div class="row g-2 text-center">
           <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl">TOTAL</div><div class="val text-light" id="kpi-total">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-success">PROMOTORES</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-warning">NEUTROS</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-danger">DETRACTORES</div><div class="val text-danger" id="kpi-conflictivos">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-info">% GESTIÓN</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip border-info"><div class="lbl text-info">NPS SCORE</div><div class="val text-info" id="kpi-nps-score">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-success">GESTIONADOS</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-secondary">SIN GESTIÓN (72H)</div><div class="val text-secondary" id="kpi-sin-gestion">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-danger">CONFLICTIVOS</div><div class="val text-danger" id="kpi-conflictivos">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip border-info"><div class="lbl text-info">% AVANCE</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
         </div>
       </div>
 
       <div class="segmented-control mb-3">
-        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-pie-chart-fill me-1"></i> Resumen Visual BI</button>
-        <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-card-checklist me-1"></i> Detalle por Cliente y Buscador</button>
+        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-pie-chart-fill me-1"></i> Resumen Visual</button>
+        <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-card-checklist me-1"></i> Detalle y Filtros</button>
       </div>
 
-      <!-- SECCIÓN VISUAL -->
       <div id="sec-tecnicos">
         <div class="row g-3 mb-3">
           <div class="col-12 col-md-5">
             <div class="bi-card-dark text-center h-100 d-flex flex-column justify-content-between">
-              <h6 class="fw-bold text-secondary small">ZONA DE CLASIFICACIÓN (NPS)</h6>
+              <h6 class="fw-bold text-secondary small">BALANCE GENERAL DE GESTIÓN</h6>
               <div style="position: relative; max-width: 240px; margin: auto;">
                 <canvas id="gaugeChart"></canvas>
                 <div style="position: absolute; bottom: 10px; left: 0; right: 0;">
-                  <h2 class="fw-bold m-0 text-white" id="gauge-score-val">0</h2>
-                  <span class="badge bg-success" id="gauge-score-lbl">Zona Promedio</span>
+                  <h2 class="fw-bold m-0 text-white" id="gauge-score-val">0%</h2>
+                  <span class="badge bg-success" id="gauge-score-lbl">Avance Global</span>
                 </div>
               </div>
               <div class="row g-1 pt-3 border-top border-secondary mt-2">
-                <div class="col-4"><small class="text-danger d-block fw-bold" id="pct-detractores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Detractores</span></div>
-                <div class="col-4"><small class="text-warning d-block fw-bold" id="pct-neutros">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Neutros</span></div>
-                <div class="col-4"><small class="text-success d-block fw-bold" id="pct-promotores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Promotores</span></div>
+                <div class="col-4"><small class="text-danger d-block fw-bold" id="pct-detractores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Conflictivos</span></div>
+                <div class="col-4"><small class="text-warning d-block fw-bold" id="pct-neutros">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Pendientes</span></div>
+                <div class="col-4"><small class="text-success d-block fw-bold" id="pct-promotores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Gestionados</span></div>
               </div>
             </div>
           </div>
@@ -209,7 +206,7 @@
             <div class="bi-card-dark h-100">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h6 class="fw-bold text-secondary small m-0">Rendimiento por Técnico</h6>
-                <button class="btn btn-xs btn-outline-success p-1 px-2" style="font-size: 0.75rem;" onclick="exportarExcelConImagenes()"><i class="bi bi-file-earmark-excel me-1"></i>Excel Fotos</button>
+                <button class="btn btn-xs btn-outline-success p-1 px-2" style="font-size: 0.75rem;" onclick="exportarExcelConImagenes()"><i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel</button>
               </div>
               <div style="position: relative; height: 220px;">
                 <canvas id="barTecnicosChart"></canvas>
@@ -219,7 +216,6 @@
         </div>
       </div>
 
-      <!-- SECCIÓN DETALLE Y BUSCADOR -->
       <div id="sec-general" class="hidden">
         <div class="bi-card-dark mb-3 p-3">
           <div class="row g-2">
@@ -235,6 +231,7 @@
                 <option value="TODOS">-- Todos los Estados --</option>
                 <option value="Gestionado">Gestionado</option>
                 <option value="Pendiente">Pendiente</option>
+                <option value="Sin Gestion">Sin Gestión (72h)</option>
                 <option value="UU conflictivo">UU conflictivo</option>
               </select>
             </div>
@@ -250,11 +247,10 @@
         
         <div id="contenedor-dashboard" class="grid-dashboard"></div>
       </div>
-
     </div>
   </div>
 
-  <!-- MODAL CARGA MASIVA EXCEL -->
+  <!-- MODAL CARGA EXCEL -->
   <div class="modal fade" id="modalCargaExcel" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -263,7 +259,7 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <p class="small text-secondary mb-3">Selecciona el archivo Excel (.xlsx o .csv) que contiene las órdenes de tu ciudad o departamento.</p>
+          <p class="small text-secondary mb-3">Selecciona el archivo Excel (.xlsx o .csv) con las órdenes.</p>
           <input type="file" id="input-file-excel" class="form-control bg-dark text-white border-secondary mb-3" accept=".xlsx, .xls, .csv">
           <div id="resultado-carga-excel" class="small hidden p-2 rounded"></div>
         </div>
@@ -287,7 +283,6 @@
             <label class="form-label small text-secondary">Estado de Gestión</label>
             <select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="evaluarEstado()">
               <option value="Gestionado">Gestionado</option>
-              <option value="Sin Gestion">Sin Gestión</option>
               <option value="UU conflictivo">UU conflictivo</option>
             </select>
           </div>
@@ -314,7 +309,7 @@
           </div>
           <div id="box-observacion" class="mb-3 hidden">
             <label class="form-label small text-danger fw-bold">Informe / Motivo (Obligatorio para UU conflictivo) *</label>
-            <textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Detalla aquí el informe del problema registrado..."></textarea>
+            <textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Detalla el motivo del informe..."></textarea>
           </div>
         </div>
         <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" id="btn-guardar" class="btn btn-sm btn-primary" onclick="guardarFormulario()">Guardar Gestión</button></div>
@@ -322,7 +317,7 @@
     </div>
   </div>
 
-  <!-- MODAL FICHA DETALLES -->
+  <!-- MODAL DETALLES -->
   <div class="modal fade" id="modalDetalleOrden" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -338,7 +333,7 @@
           <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-val" id="det-estado">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val" id="det-ot">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
-          <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Informe UU Conflictivo</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
+          <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Informe Observación</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
           
           <div class="mt-3 d-flex flex-column gap-2" id="box-btn-acciones"></div>
         </div>
@@ -362,7 +357,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // ⚠️ REEMPLAZA CON TU URL TERMINADA EN /exec
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
 
     let usuarioActual = null;
@@ -393,8 +387,7 @@
           usuarioActual = JSON.parse(perfilGuardado);
           document.getElementById('view-login').classList.add('hidden');
           
-          const esRolTecnico = usuarioActual.esTecnico || 
-                               (usuarioActual.rol && usuarioActual.rol.toLowerCase().includes('tec'));
+          const esRolTecnico = usuarioActual.esTecnico || (usuarioActual.rol && usuarioActual.rol.toLowerCase().includes('tec'));
 
           if (esRolTecnico) {
             document.getElementById('view-tecnico').classList.remove('hidden');
@@ -526,7 +519,7 @@
         document.getElementById('sec-tec-historico').classList.remove('hidden');
         document.getElementById('sec-tec-pendientes').classList.add('hidden');
         document.getElementById('tab-tec-historico-btn').classList.add('active');
-        document.getElementById('tab-tec-historico-btn').classList.remove('active');
+        document.getElementById('tab-tec-pendientes-btn').classList.remove('active');
         cargarHistoricoTecnico();
       }
     }
@@ -631,7 +624,7 @@
       document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
 
       let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
-      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : (item.estado === 'Sin Gestion' ? 'badge-expired' : 'badge-pending'));
       document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
 
       const boxObs = document.getElementById('det-box-obs');
@@ -646,7 +639,7 @@
       boxAcciones.innerHTML = '';
       if (item.telefono && item.telefono !== 'Sin Teléfono') {
         let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
-        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO...`;
+        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO...`;
         let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
         boxAcciones.innerHTML = `
           <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
@@ -695,7 +688,7 @@
       boxAcciones.innerHTML = '';
       if (item.telefono && item.telefono !== 'Sin Teléfono') {
         let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
-        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO, LA ENCUESTA ES SOBRE MI SERVICIO REALIZADO...`;
+        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO...`;
         let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
         boxAcciones.innerHTML = `
           <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
@@ -774,19 +767,17 @@
           });
         }
 
-        const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos;
+        const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos + (res.kpis.sinGestion || 0);
         
         document.getElementById('kpi-total').innerText = tot;
         document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
         document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
+        document.getElementById('kpi-sin-gestion').innerText = res.kpis.sinGestion || 0;
         document.getElementById('kpi-conflictivos').innerText = res.kpis.conflictivos;
 
         const pct = tot > 0 ? Math.round((res.kpis.gestionados / tot) * 100) : 0;
         document.getElementById('kpi-pct-prom').innerText = pct + "%";
-        
-        const scoreNps = tot > 0 ? Math.round(((res.kpis.gestionados - res.kpis.conflictivos) / tot) * 100) : 0;
-        document.getElementById('kpi-nps-score').innerText = scoreNps;
-        document.getElementById('gauge-score-val').innerText = scoreNps;
+        document.getElementById('gauge-score-val').innerText = pct + "%";
 
         document.getElementById('pct-promotores').innerText = pct + "%";
         document.getElementById('pct-neutros').innerText = (tot > 0 ? Math.round((res.kpis.pendientes / tot) * 100) : 0) + "%";
@@ -798,7 +789,7 @@
           selectFiltroTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
         });
 
-        renderizarGraficoGauge(scoreNps);
+        renderizarGraficoGauge(pct);
         renderizarGraficoBarras(res.tecnicos);
 
         todosLosRegistros = res.registros;
@@ -806,17 +797,17 @@
       } catch(e) { console.log("Error dashboard", e); }
     }
 
-    function renderizarGraficoGauge(score) {
+    function renderizarGraficoGauge(pctVal) {
       const ctx = document.getElementById('gaugeChart').getContext('2d');
       if (chartGauge) chartGauge.destroy();
 
       chartGauge = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: ['Detractores', 'Neutros', 'Promotores'],
+          labels: ['Completado', 'Pendiente'],
           datasets: [{
-            data: [25, 25, 50],
-            backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+            data: [pctVal, 100 - pctVal],
+            backgroundColor: ['#10b981', '#334155'],
             borderWidth: 0
           }]
         },
@@ -891,6 +882,19 @@
       renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
     }
 
+    async function reasignarOrdenPendiente(fila) {
+      if (!confirm("¿Desea reasignar esta orden a estado Pendiente para que el técnico pueda registrarla?")) return;
+      try {
+        const res = await apiCall("reasignarPendienteAdmin", { fila: fila });
+        if (res && res.exito) {
+          alert("Orden reasignada a Pendiente.");
+          cargarDashboard();
+        } else {
+          alert("No se pudo reasignar la orden.");
+        }
+      } catch(e) { alert("Error de conexión al reasignar."); }
+    }
+
     function renderizarTarjetasAdmin(lista, idContenedor) {
       const contenedor = document.getElementById(idContenedor);
       contenedor.innerHTML = '';
@@ -901,11 +905,17 @@
 
       lista.forEach(r => {
         const isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
-        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+        const isSinGestion = r.estado === 'Sin Gestion' || r.estado === 'Sin gestion';
+        
+        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : (isSinGestion ? 'badge-expired' : 'badge-pending'));
         const indexOriginal = todosLosRegistros.indexOf(r);
 
-        let fechaGestionMostrar = r.fechaGestion;
-        let subtextoFecha = fechaGestionMostrar ? `<span class="text-info" style="font-size: 0.68rem;">Gestión: ${fechaGestionMostrar}</span>` : '<span class="text-secondary" style="font-size: 0.68rem;">Sin gestión</span>';
+        let subtextoFecha = r.fechaGestion ? 
+          `<span class="text-info" style="font-size: 0.68rem;">Gestión: ${r.fechaGestion}</span>` : 
+          '<span class="text-secondary" style="font-size: 0.68rem;">Sin fecha de gestión</span>';
+
+        let botonReasignar = (usuarioActual && (usuarioActual.rol === 'Administrador' || usuarioActual.rol === 'Supervisor') && isSinGestion) ?
+          `<button class="btn btn-xs btn-outline-warning p-1 px-2 small ms-1" style="font-size: 0.72rem;" onclick="reasignarOrdenPendiente(${r.fila})">Reasignar a Pendiente</button>` : '';
 
         contenedor.innerHTML += `
           <div class="order-card ${isConflict ? 'conflictive' : ''}">
@@ -930,6 +940,7 @@
               <div class="d-flex gap-1">
                 <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenAdmin(${indexOriginal})"><i class="bi bi-eye me-1"></i>Detalles</button>
                 ${r.evidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')">Foto</button>` : ''}
+                ${botonReasignar}
               </div>
             </div>
           </div>`;
@@ -1116,7 +1127,7 @@
 
       for (let i = 0; i < todosLosRegistros.length; i++) {
         const item = todosLosRegistros[i];
-        const row = worksheet.addRow({
+        worksheet.addRow({
           idGestion: item.idGestion,
           codigoCliente: item.codigoCliente,
           nombreUsuario: item.nombreUsuario,
@@ -1127,16 +1138,8 @@
           numeroOT: item.numeroOT,
           telefono: item.telefono,
           observacion: item.observacion,
-          evidencia: ''
+          evidencia: item.evidencia ? 'Sí' : 'No'
         });
-
-        if (item.evidenciaBase64) {
-          try {
-            const imageId = workbook.addImage({ base64: item.evidenciaBase64, extension: 'jpeg' });
-            worksheet.addImage(imageId, { tl: { col: 10, row: row.number - 1 }, ext: { width: 100, height: 75 } });
-            worksheet.getRow(row.number).height = 60;
-          } catch (e) {}
-        }
       }
 
       const buffer = await workbook.xlsx.writeBuffer();
