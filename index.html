@@ -132,7 +132,7 @@
       <div id="sec-tec-historico" class="hidden"><div id="lista-historico-tecnico" class="grid-dashboard"></div></div>
     </div>
 
-    <!-- VISTA ADMIN -->
+    <!-- VISTA ADMIN / SUPERVISOR -->
     <div id="view-admin" class="hidden">
       <div class="bi-card-dark mb-3">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -401,7 +401,7 @@
             document.getElementById('view-admin').classList.remove('hidden');
             document.getElementById('view-tecnico').classList.add('hidden');
             document.getElementById('admin-header-titulo').innerText = `${usuarioActual.nombre} (${usuarioActual.rol})`;
-            document.getElementById('admin-header-region').innerText = `DEP: ${usuarioActual.departamento} | CIUDAD: ${usuarioActual.ciudad}`;
+            document.getElementById('admin-header-region').innerText = `ÁREA: ${usuarioActual.area || 'REGIONAL'} | DEP: ${usuarioActual.departamento}`;
             cargarDashboard();
           }
         } catch(e) { cerrarSesion(); }
@@ -462,7 +462,7 @@
             document.getElementById('view-admin').classList.remove('hidden');
             document.getElementById('view-tecnico').classList.add('hidden');
             document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
-            document.getElementById('admin-header-region').innerText = `DEP: ${res.departamento} | CIUDAD: ${res.ciudad}`;
+            document.getElementById('admin-header-region').innerText = `ÁREA: ${res.area || 'REGIONAL'} | DEP: ${res.departamento}`;
             cargarDashboard();
           }
         } else {
@@ -823,6 +823,23 @@
       const filtroDeptEl = document.getElementById('select-filtro-dept');
       const filtroCiuEl = document.getElementById('select-filtro-ciudad');
 
+      const esNacional = usuarioActual.area && usuarioActual.area.toUpperCase().includes('NACIONAL');
+      const esDepartamental = usuarioActual.area && usuarioActual.area.toUpperCase().includes('DEPARTAMENTAL');
+
+      if (!esNacional) {
+        if (filtroDeptEl) {
+          filtroDeptEl.innerHTML = `<option value="${usuarioActual.departamento}">${usuarioActual.departamento}</option>`;
+          filtroDeptEl.disabled = true;
+        }
+      }
+
+      if (!esNacional && !esDepartamental) {
+        if (filtroCiuEl) {
+          filtroCiuEl.innerHTML = `<option value="${usuarioActual.ciudad}">${usuarioActual.ciudad}</option>`;
+          filtroCiuEl.disabled = true;
+        }
+      }
+
       const deptVal = filtroDeptEl ? filtroDeptEl.value : usuarioActual.departamento;
       const ciuVal = filtroCiuEl ? filtroCiuEl.value : usuarioActual.ciudad;
 
@@ -835,7 +852,7 @@
           periodo: per
         });
 
-        if (filtroDeptEl && res.departamentos) {
+        if (esNacional && filtroDeptEl && res.departamentos) {
           let currDept = filtroDeptEl.value;
           filtroDeptEl.innerHTML = '<option value="TODOS">-- Todos los Departamentos --</option>';
           res.departamentos.forEach(d => {
@@ -843,7 +860,7 @@
           });
         }
 
-        if (filtroCiuEl && res.ciudades) {
+        if ((esNacional || esDepartamental) && filtroCiuEl && res.ciudades) {
           let currCiu = filtroCiuEl.value;
           filtroCiuEl.innerHTML = '<option value="TODAS">-- Todas las Ciudades --</option>';
           res.ciudades.forEach(c => {
@@ -1157,7 +1174,6 @@
         } catch(e) {}
       }
 
-      // Guardar la foto de forma local en el teléfono utilizando la OT como clave
       if (b64Foto) {
         try {
           localStorage.setItem(`evidencia_ot_${numeroOT}`, b64Foto);
