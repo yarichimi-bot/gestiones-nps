@@ -171,7 +171,7 @@
           <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl">TOTAL</div><div class="val text-light" id="kpi-total">0</div></div></div>
           <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-success">GESTIONADOS</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
           <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-secondary">SIN GESTIÓN (72H)</div><div class="val text-secondary" id="kpi-sin-gestion">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-secondary">SIN GESTIÓN (144H)</div><div class="val text-secondary" id="kpi-sin-gestion">0</div></div></div>
           <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-danger">CONFLICTIVOS</div><div class="val text-danger" id="kpi-conflictivos">0</div></div></div>
           <div class="col-4 col-md-2"><div class="kpi-strip border-info"><div class="lbl text-info">% AVANCE</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
         </div>
@@ -231,7 +231,7 @@
                 <option value="TODOS">-- Todos los Estados --</option>
                 <option value="Gestionado">Gestionado</option>
                 <option value="Pendiente">Pendiente</option>
-                <option value="Sin Gestion">Sin Gestión (72h)</option>
+                <option value="Sin Gestion">Sin Gestión (144h)</option>
                 <option value="UU conflictivo">UU conflictivo</option>
               </select>
             </div>
@@ -412,7 +412,8 @@
           const response = await fetch(WEB_APP_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ accion: accion, ...dataPayload })
+            body: JSON.stringify({ accion: accion, ...dataPayload }),
+            redirect: "follow"
           });
           if (response.ok) {
             return JSON.parse(await response.text());
