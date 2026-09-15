@@ -137,7 +137,7 @@
           <div class="d-flex align-items-center gap-2">
             <div class="bg-primary bg-opacity-25 text-primary p-2 rounded-3 border border-primary border-opacity-25"><i class="bi bi-speedometer2 fs-4"></i></div>
             <div>
-              <h6 class="fw-bold m-0 text-white" id="admin-header-titulo">COMUNICA - PANEL EJECUTIVO</h6>
+              <h6 class="fw-bold m-0 text-white" id="admin-header-titulo">DATARED GLOBAL - PANEL EJECUTIVO</h6>
               <small class="text-info fw-bold" style="font-size: 0.72rem;" id="admin-header-region">ZONA: NACIONAL</small>
             </div>
           </div>
@@ -752,14 +752,40 @@
       const boxAcciones = document.getElementById('box-btn-acciones');
       boxAcciones.innerHTML = '';
       if (item.telefono && item.telefono !== 'Sin Teléfono') {
-        let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
-        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO...`;
-        let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
-        boxAcciones.innerHTML = `
-          <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
-          <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
-        `;
-      }
+  let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
+  
+  // 1. Obtener la hora actual para el saludo dinámico
+  let horaActual = new Date().getHours();
+  let saludoHora = "Estimado cliente, buenas tardes. 👋"; // Por defecto
+
+  if (horaActual >= 0 && horaActual < 12) {
+    saludoHora = "Estimado cliente, buenos días. ☀️";
+  } else if (horaActual >= 12 && horaActual < 19) {
+    saludoHora = "Estimado cliente, buenas tardes. 👋";
+  } else {
+    saludoHora = "Estimado cliente, buenas noches. 🌙";
+  }
+
+  // 2. Datos dinámicos de la orden y el técnico
+  let nombreTecnicoActual = (usuarioActual && usuarioActual.nombre) ? usuarioActual.nombre : (item.tecnico || item.tecnicoAsignado || 'Servicio Técnico');
+  let codigoCli = item.codigoCliente || 'N/A';
+  let nombreCli = item.nombreUsuario || 'Estimado Cliente';
+
+  // 3. Construcción del mensaje con saltos de línea (%0A) y negritas (*)
+  let mensajeWs = `${saludoHora}%0A%0A` +
+    `Le escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codigoCli}* (${nombreCli}).%0A%0A` +
+    `Mi nombre es *${nombreTecnicoActual}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.%0A%0A` +
+    `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo porfavor un *10* 😁. Su calificación y opinión son muy importantes para nosotros, ya que nos ayudan a evaluar y mejorar la calidad de nuestro servicio.%0A%0A` +
+    `Adicional me podria enviar la captura al final de la encuesta porfavor.%0A%0A` +
+    `Muchas gracias por su tiempo y colaboración. 🙌`;
+
+  let urlWs = `https://wa.me/591${numLimpio}?text=${mensajeWs}`;
+  
+  boxAcciones.innerHTML = `
+    <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
+    <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
+  `;
+}
 
       abrirModalBS('modalDetalleOrden');
     }
