@@ -206,7 +206,7 @@
             <div class="bi-card-dark h-100">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h6 class="fw-bold text-secondary small m-0">Rendimiento por Técnico</h6>
-                <button class="btn btn-xs btn-outline-success p-1 px-2" style="font-size: 0.75rem;" onclick="exportarExcelConImagenes()"><i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel</button>
+                <button class="btn btn-xs btn-outline-success p-1 px-2" style="font-size: 0.75rem;" onclick="exportarExcelConImagenes(event)"><i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel</button>
               </div>
               <div style="position: relative; height: 220px;">
                 <canvas id="barTecnicosChart"></canvas>
@@ -666,6 +666,41 @@
       });
     }
 
+    function construirBotoneraWhatsApp(item) {
+      if (!item.telefono || item.telefono === 'Sin Teléfono') return '';
+
+      let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
+      
+      let horaActual = new Date().getHours();
+      let saludoHora = "Estimado cliente, buenas tardes. 👋";
+
+      if (horaActual >= 0 && horaActual < 12) {
+        saludoHora = "Estimado cliente, buenos días. ☀️";
+      } else if (horaActual >= 12 && horaActual < 19) {
+        saludoHora = "Estimado cliente, buenas tardes. 👋";
+      } else {
+        saludoHora = "Estimado cliente, buenas noches. 🌙";
+      }
+
+      let nombreTecnicoActual = (usuarioActual && usuarioActual.nombre) ? usuarioActual.nombre : (item.tecnico || item.tecnicoAsignado || 'Servicio Técnico');
+      let codigoCli = item.codigoCliente || 'N/A';
+      let nombreCli = item.nombreUsuario || 'Estimado Cliente';
+
+      let mensajeWs = `${saludoHora}%0A%0A` +
+        `Le escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codigoCli}* (${nombreCli}).%0A%0A` +
+        `Mi nombre es *${nombreTecnicoActual}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.%0A%0A` +
+        `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo porfavor un *10* 😁. Su calificación y opinión son muy importantes para nosotros, ya que nos ayudan a evaluar y mejorar la calidad de nuestro servicio.%0A%0A` +
+        `Adicional me podria enviar la captura al final de la encuesta porfavor.%0A%0A` +
+        `Muchas gracias por su tiempo y colaboración. 🙌`;
+
+      let urlWs = `https://wa.me/591${numLimpio}?text=${mensajeWs}`;
+
+      return `
+        <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
+        <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
+      `;
+    }
+
     function verDetallesOrdenAdmin(index) {
       let item = todosLosRegistros[index];
       if (!item) return;
@@ -700,18 +735,7 @@
         boxObs.classList.add('hidden');
       }
 
-      const boxAcciones = document.getElementById('box-btn-acciones');
-      boxAcciones.innerHTML = '';
-      if (item.telefono && item.telefono !== 'Sin Teléfono') {
-        let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
-        let mensajeWs = `ESTIMADO CLIENTE, LE HABLO DEL SERVICIO TECNICO TIGO, REALIZE UN TRABAJO RECIENTE DE SU CODIGO ${item.codigoCliente} (${item.nombreUsuario}) CONSULTARLE SI PUDO LLENAR LA ENCUESTA QUE LE MENCIONE AL FINALIZAR MI TRABAJO...`;
-        let urlWs = `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
-        boxAcciones.innerHTML = `
-          <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
-          <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
-        `;
-      }
-
+      document.getElementById('box-btn-acciones').innerHTML = construirBotoneraWhatsApp(item);
       abrirModalBS('modalDetalleOrden');
     }
 
@@ -749,44 +773,7 @@
         boxObs.classList.add('hidden');
       }
 
-      const boxAcciones = document.getElementById('box-btn-acciones');
-      boxAcciones.innerHTML = '';
-      if (item.telefono && item.telefono !== 'Sin Teléfono') {
-  let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
-  
-  // 1. Obtener la hora actual para el saludo dinámico
-  let horaActual = new Date().getHours();
-  let saludoHora = "Estimado cliente, buenas tardes. 👋"; // Por defecto
-
-  if (horaActual >= 0 && horaActual < 12) {
-    saludoHora = "Estimado cliente, buenos días. ☀️";
-  } else if (horaActual >= 12 && horaActual < 19) {
-    saludoHora = "Estimado cliente, buenas tardes. 👋";
-  } else {
-    saludoHora = "Estimado cliente, buenas noches. 🌙";
-  }
-
-  // 2. Datos dinámicos de la orden y el técnico
-  let nombreTecnicoActual = (usuarioActual && usuarioActual.nombre) ? usuarioActual.nombre : (item.tecnico || item.tecnicoAsignado || 'Servicio Técnico');
-  let codigoCli = item.codigoCliente || 'N/A';
-  let nombreCli = item.nombreUsuario || 'Estimado Cliente';
-
-  // 3. Construcción del mensaje con saltos de línea (%0A) y negritas (*)
-  let mensajeWs = `${saludoHora}%0A%0A` +
-    `Le escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codigoCli}* (${nombreCli}).%0A%0A` +
-    `Mi nombre es *${nombreTecnicoActual}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.%0A%0A` +
-    `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo porfavor un *10* 😁. Su calificación y opinión son muy importantes para nosotros, ya que nos ayudan a evaluar y mejorar la calidad de nuestro servicio.%0A%0A` +
-    `Adicional me podria enviar la captura al final de la encuesta porfavor.%0A%0A` +
-    `Muchas gracias por su tiempo y colaboración. 🙌`;
-
-  let urlWs = `https://wa.me/591${numLimpio}?text=${mensajeWs}`;
-  
-  boxAcciones.innerHTML = `
-    <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
-    <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
-  `;
-}
-
+      document.getElementById('box-btn-acciones').innerHTML = construirBotoneraWhatsApp(item);
       abrirModalBS('modalDetalleOrden');
     }
 
@@ -1068,7 +1055,7 @@
         btnG.disabled = true;
         btnG.innerText = "⏳ Procesando evidencia...";
         lbl.className = "text-warning small fw-bold text-center";
-        lbl.innerText = "⏳ Optimizando imagen para Drive...";
+        lbl.innerText = "⏳ Optimizando imagen...";
 
         if (input.id === 'modal-foto-camara') document.getElementById('modal-foto-galeria').value = '';
         if (input.id === 'modal-foto-galeria') document.getElementById('modal-foto-camara').value = '';
@@ -1078,7 +1065,7 @@
           btnG.disabled = false;
           btnG.innerText = "Guardar Gestión";
           lbl.className = "text-success small fw-bold text-center";
-          lbl.innerText = "✓ Listo: Imagen lista para subir";
+          lbl.innerText = "✓ Listo: Imagen lista para guardar";
         }).catch(err => {
           btnG.disabled = false;
           btnG.innerText = "Guardar Gestión";
@@ -1193,81 +1180,106 @@
       }
     }
 
-    async function exportarExcelConImagenes() {
-      if (!todosLosRegistros || todosLosRegistros.length === 0) return alert("No hay registros para exportar.");
-
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Reporte Gestiones NPS');
-
-      worksheet.columns = [
-        { header: 'ID Gestión', key: 'idGestion', width: 12 },
-        { header: 'Código Cliente', key: 'codigoCliente', width: 15 },
-        { header: 'Nombre Usuario', key: 'nombreUsuario', width: 25 },
-        { header: 'Técnico', key: 'tecnico', width: 22 },
-        { header: 'Fecha Asignación', key: 'fechaAsignacion', width: 16 },
-        { header: 'Fecha Gestión', key: 'fechaGestion', width: 16 },
-        { header: 'Estado', key: 'estado', width: 15 },
-        { header: 'Número OT', key: 'numeroOT', width: 22 },
-        { header: 'Teléfono', key: 'telefono', width: 15 },
-        { header: 'Informe Observación', key: 'observacion', width: 30 },
-        { header: 'Foto Evidencia', key: 'evidencia', width: 20 }
-      ];
-
-      worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
-      worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '0F172A' } };
-
-      for (let i = 0; i < todosLosRegistros.length; i++) {
-        const item = todosLosRegistros[i];
-        worksheet.addRow({
-          idGestion: item.idGestion,
-          codigoCliente: item.codigoCliente,
-          nombreUsuario: item.nombreUsuario,
-          tecnico: item.tecnico,
-          fechaAsignacion: item.fechaAsignacion,
-          fechaGestion: item.fechaGestion || 'Sin Gestión',
-          estado: item.estado,
-          numeroOT: item.numeroOT,
-          telefono: item.telefono,
-          observacion: item.observacion,
-          evidencia: item.evidencia ? 'Sí' : 'No'
-        });
+    async function exportarExcelConImagenes(evt) {
+      if (!todosLosRegistros || todosLosRegistros.length === 0) {
+        return alert("No hay registros para exportar.");
       }
 
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `Reporte_Gestiones_NPS_${Date.now()}.xlsx`;
-      link.click();
+      const btnExport = evt ? evt.target : document.activeElement;
+      const textoOriginal = btnExport.innerHTML;
+      btnExport.disabled = true;
+      btnExport.innerHTML = "⏳ Generando Excel...";
+
+      try {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Reporte Gestiones NPS');
+
+        worksheet.columns = [
+          { header: 'ID Gestión', key: 'idGestion', width: 14 },
+          { header: 'Código Cliente', key: 'codigoCliente', width: 16 },
+          { header: 'Nombre Usuario', key: 'nombreUsuario', width: 28 },
+          { header: 'Técnico', key: 'tecnico', width: 22 },
+          { header: 'Fecha Asignación', key: 'fechaAsignacion', width: 18 },
+          { header: 'Fecha Gestión', key: 'fechaGestion', width: 18 },
+          { header: 'Estado', key: 'estado', width: 15 },
+          { header: 'Número OT', key: 'numeroOT', width: 20 },
+          { header: 'Teléfono', key: 'telefono', width: 16 },
+          { header: 'Informe Observación', key: 'observacion', width: 32 },
+          { header: 'Captura_Evidencia', key: 'evidencia', width: 22 }
+        ];
+
+        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+        worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '0F172A' } };
+
+        for (let i = 0; i < todosLosRegistros.length; i++) {
+          const item = todosLosRegistros[i];
+          const numFila = i + 2;
+
+          const row = worksheet.addRow({
+            idGestion: item.idGestion,
+            codigoCliente: item.codigoCliente,
+            nombreUsuario: item.nombreUsuario,
+            tecnico: item.tecnico,
+            fechaAsignacion: item.fechaAsignacion,
+            fechaGestion: item.fechaGestion || 'Sin Gestión',
+            estado: item.estado,
+            numeroOT: item.numeroOT,
+            telefono: item.telefono,
+            observacion: item.observacion,
+            evidencia: ''
+          });
+
+          if (item.evidencia && item.evidencia.length > 50) {
+            row.height = 65; 
+
+            let cleanB64 = item.evidencia.includes(',') ? item.evidencia.split(',')[1] : item.evidencia;
+
+            const imageId = workbook.addImage({
+              base64: cleanB64,
+              extension: 'jpeg',
+            });
+
+            worksheet.addImage(imageId, {
+              tl: { col: 10, row: numFila - 1 },
+              ext: { width: 80, height: 75 }
+            });
+          }
+        }
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Reporte_Gestiones_NPS_${Date.now()}.xlsx`;
+        link.click();
+
+        btnExport.disabled = false;
+        btnExport.innerHTML = textoOriginal;
+      } catch(e) {
+        btnExport.disabled = false;
+        btnExport.innerHTML = textoOriginal;
+        alert("Error al generar el archivo Excel: " + e.toString());
+      }
     }
 
-    async function verFotoModal(url) {
-      if (!url) return alert("No hay foto registrada para esta gestión.");
+    function verFotoModal(b64Data) {
+      if (!b64Data) return alert("No hay foto registrada para esta gestión.");
       
       const imgElement = document.getElementById('visor-img');
       const loadingElement = document.getElementById('visor-loading');
       const errorElement = document.getElementById('visor-error');
       
-      imgElement.classList.add('hidden');
       errorElement.classList.add('hidden');
-      loadingElement.classList.remove('hidden');
-      abrirModalBS('modalVisorFoto');
+      loadingElement.classList.add('hidden');
       
-      try {
-        const res = await apiCall("obtenerImagenEnBase64", { url: url });
-        loadingElement.classList.add('hidden');
-        if (res && res.exito) {
-          imgElement.src = res.dataUri;
-          imgElement.classList.remove('hidden');
-        } else {
-          errorElement.innerText = "No se pudo cargar la imagen.";
-          errorElement.classList.remove('hidden');
-        }
-      } catch(e) {
-        loadingElement.classList.add('hidden');
-        errorElement.innerText = "Error de conexión con Google Drive.";
-        errorElement.classList.remove('hidden');
+      if (b64Data.startsWith("data:image")) {
+        imgElement.src = b64Data;
+      } else {
+        imgElement.src = "data:image/jpeg;base64," + b64Data;
       }
+      
+      imgElement.classList.remove('hidden');
+      abrirModalBS('modalVisorFoto');
     }
 
     function cerrarSesion() {
