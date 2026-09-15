@@ -644,6 +644,10 @@
       historicoTecnicoActual.forEach((r, index) => {
         let isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
         let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
+        
+        let otClave = r.numeroOT || r.codigoCliente || '';
+        let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
+        let tieneEvidencia = r.evidencia === 'Sí' || (fotoLocal && fotoLocal.length > 50);
 
         contenedor.innerHTML += `
           <div class="order-card mb-2 ${isConflict ? 'conflictive' : ''}">
@@ -660,7 +664,7 @@
             </div>
             <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
               <button class="btn btn-xs btn-outline-info p-1 px-2 small" onclick="verDetallesOrdenTecnico(${index}, 'HISTORICO')">Detalles</button>
-              ${r.evidencia ? `<button class="btn btn-xs btn-outline-info p-1 px-2 small" onclick="verFotoModal('${r.evidencia}')">Ver Foto</button>` : '<span class="text-secondary small">Sin Foto</span>'}
+              ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-info p-1 px-2 small" onclick="verFotoModal('${otClave}')">Ver Foto</button>` : '<span class="text-secondary small">Sin Foto</span>'}
             </div>
           </div>`;
       });
@@ -995,6 +999,10 @@
         let botonReasignar = (usuarioActual && (usuarioActual.rol === 'Administrador' || usuarioActual.rol === 'Supervisor') && isSinGestion) ?
           `<button class="btn btn-xs btn-outline-warning p-1 px-2 small ms-1" style="font-size: 0.72rem;" onclick="reasignarOrdenPendiente(${r.fila})">Reasignar a Pendiente</button>` : '';
 
+        let otClave = r.numeroOT || r.codigoCliente || '';
+        let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
+        let tieneEvidencia = r.evidencia === 'Sí' || (fotoLocal && fotoLocal.length > 50);
+
         contenedor.innerHTML += `
           <div class="order-card ${isConflict ? 'conflictive' : ''}">
             <div>
@@ -1017,7 +1025,7 @@
               <span class="text-secondary fw-bold" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
               <div class="d-flex gap-1">
                 <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenAdmin(${indexOriginal})"><i class="bi bi-eye me-1"></i>Detalles</button>
-                ${r.evidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia}')">Foto</button>` : ''}
+                ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${otClave}')">Foto</button>` : ''}
                 ${botonReasignar}
               </div>
             </div>
@@ -1138,13 +1146,22 @@
       btnGuardar.disabled = true;
       btnGuardar.innerText = "Enviando datos...";
 
-      let b64Foto = base64Compresion;
+      let b64Foto = base64Compresion || "";
 
       if (archivoFotoSeleccionado && !b64Foto) {
         btnGuardar.innerText = "Optimizando foto...";
         try {
           b64Foto = await convertirYComprimirFoto(archivoFotoSeleccionado);
         } catch(e) {}
+      }
+
+      // Guardar la foto de forma local en el teléfono utilizando la OT como clave
+      if (b64Foto) {
+        try {
+          localStorage.setItem(`evidencia_ot_${numeroOT}`, b64Foto);
+        } catch(e) {
+          console.log("Almacenamiento local lleno", e);
+        }
       }
 
       const payload = { 
@@ -1164,9 +1181,13 @@
         if (res && res.exito) {
           alert("¡Gestión y evidencia registradas con éxito!");
           ocultarModalBS('modalGestion');
+          
+          archivoFotoSeleccionado = null;
+          base64Compresion = null;
+
           const esRolTecnico = usuarioActual.esTecnico || (usuarioActual.rol && usuarioActual.rol.toLowerCase().includes('tec'));
           if (esRolTecnico) {
-            cargarPendientesTecnico();
+            cargarHistoricoTecnico();
           } else {
             cargarDashboard();
           }
@@ -1229,10 +1250,13 @@
             evidencia: ''
           });
 
-          if (item.evidencia && item.evidencia.length > 50) {
+          let otClave = item.numeroOT || item.codigoCliente || '';
+          let b64Evidencia = localStorage.getItem(`evidencia_ot_${otClave}`);
+
+          if (b64Evidencia && b64Evidencia.length > 50) {
             row.height = 65; 
 
-            let cleanB64 = item.evidencia.includes(',') ? item.evidencia.split(',')[1] : item.evidencia;
+            let cleanB64 = b64Evidencia.includes(',') ? b64Evidencia.split(',')[1] : b64Evidencia;
 
             const imageId = workbook.addImage({
               base64: cleanB64,
@@ -1262,8 +1286,10 @@
       }
     }
 
-    function verFotoModal(b64Data) {
-      if (!b64Data) return alert("No hay foto registrada para esta gestión.");
+    function verFotoModal(otClave) {
+      let b64Data = localStorage.getItem(`evidencia_ot_${otClave}`);
+
+      if (!b64Data) return alert("La foto no se encuentra guardada en la memoria local de este dispositivo.");
       
       const imgElement = document.getElementById('visor-img');
       const loadingElement = document.getElementById('visor-loading');
