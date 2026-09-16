@@ -170,7 +170,7 @@
             <input type="checkbox" class="form-check-input" id="check-remember" checked>
             <label class="form-check-label text-secondary small" for="check-remember">Recordarme</label>
           </div>
-          <span class="text-info small fw-semibold" style="cursor: pointer;"><i class="bi bi-fingerprint me-1"></i>Huella digital</span>
+          <span class="text-info small fw-semibold" style="cursor: pointer;" onclick="autenticarConHuella()"><i class="bi bi-fingerprint me-1"></i>Huella digital</span>
         </div>
 
         <button type="button" id="btn-login-submit" onclick="ejecutarLogin()" class="btn btn-primary w-100 fw-bold py-2 shadow-lg" style="border-radius: 12px;">Iniciar Sesión</button>
@@ -503,6 +503,16 @@
       }
     }
 
+    async function autenticarConHuella() {
+      const perfilGuardado = localStorage.getItem("nps_user_profile");
+      if (perfilGuardado) {
+        usuarioActual = JSON.parse(perfilGuardado);
+        iniciarVistaSegunRol(usuarioActual);
+      } else {
+        alert("Inicie sesión con usuario y contraseña primero para activar el acceso con huella.");
+      }
+    }
+
     function navegarBottom(seccion) {
       document.querySelectorAll('.nav-item-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById('bnav-' + seccion).classList.add('active');
@@ -514,8 +524,11 @@
 
       if (seccion === 'inicio') {
         document.getElementById('sec-tec-inicio').classList.remove('hidden');
+        cargarPendientesTecnico();
+        cargarHistoricoTecnico();
       } else if (seccion === 'pendientes') {
         document.getElementById('sec-tec-pendientes').classList.remove('hidden');
+        cargarPendientesTecnico();
       } else if (seccion === 'historico') {
         document.getElementById('sec-tec-historico').classList.remove('hidden');
         cargarHistoricoTecnico();
@@ -546,34 +559,37 @@
       if (perfilGuardado) {
         try {
           usuarioActual = JSON.parse(perfilGuardado);
-          document.getElementById('view-login').classList.add('hidden');
-          
-          const esRolTecnico = usuarioActual.esTecnico || (usuarioActual.rol && usuarioActual.rol.toLowerCase().includes('tec'));
-
-          if (esRolTecnico) {
-            document.getElementById('view-tecnico').classList.remove('hidden');
-            document.getElementById('view-admin').classList.add('hidden');
-            document.getElementById('app-bottom-nav').classList.remove('hidden');
-            
-            document.getElementById('label-nombre-tec').innerText = usuarioActual.nombre || 'Técnico';
-            document.getElementById('avatar-tec').innerText = (usuarioActual.nombre || 'T').charAt(0).toUpperCase();
-            document.getElementById('perfil-nombre').innerText = usuarioActual.nombre || 'Técnico';
-            document.getElementById('perfil-correo').innerText = usuarioActual.usuario || '';
-            document.getElementById('perfil-avatar').innerText = (usuarioActual.nombre || 'T').charAt(0).toUpperCase();
-            
-            cargarPendientesTecnico();
-          } else {
-            document.getElementById('view-admin').classList.remove('hidden');
-            document.getElementById('view-tecnico').classList.add('hidden');
-            document.getElementById('app-bottom-nav').classList.add('hidden');
-            
-            document.getElementById('admin-header-titulo').innerText = `${usuarioActual.nombre} (${usuarioActual.rol})`;
-            document.getElementById('admin-header-region').innerText = `ÁREA: ${usuarioActual.area || 'REGIONAL'} | DEP: ${usuarioActual.departamento}`;
-            cargarDashboard();
-          }
+          iniciarVistaSegunRol(usuarioActual);
         } catch(e) { cerrarSesion(); }
       }
     });
+
+    function iniciarVistaSegunRol(res) {
+      document.getElementById('view-login').classList.add('hidden');
+      const esRolTecnico = res.esTecnico || (res.rol && res.rol.toLowerCase().includes('tec'));
+
+      if (esRolTecnico) {
+        document.getElementById('view-tecnico').classList.remove('hidden');
+        document.getElementById('view-admin').classList.add('hidden');
+        document.getElementById('app-bottom-nav').classList.remove('hidden');
+
+        document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
+        document.getElementById('avatar-tec').innerText = (res.nombre || 'T').charAt(0).toUpperCase();
+        document.getElementById('perfil-nombre').innerText = res.nombre || 'Técnico';
+        document.getElementById('perfil-correo').innerText = res.usuario || '';
+        document.getElementById('perfil-avatar').innerText = (res.nombre || 'T').charAt(0).toUpperCase();
+
+        navegarBottom('inicio');
+      } else {
+        document.getElementById('view-admin').classList.remove('hidden');
+        document.getElementById('view-tecnico').classList.add('hidden');
+        document.getElementById('app-bottom-nav').classList.add('hidden');
+
+        document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
+        document.getElementById('admin-header-region').innerText = `ÁREA: ${res.area || 'REGIONAL'} | DEP: ${res.departamento}`;
+        cargarDashboard();
+      }
+    }
 
     async function apiCall(accion, dataPayload = {}, reintentos = 2) {
       for (let i = 0; i <= reintentos; i++) {
@@ -614,32 +630,7 @@
         if (res && res.exito) {
           usuarioActual = res;
           localStorage.setItem("nps_user_profile", JSON.stringify(res));
-          
-          document.getElementById('view-login').classList.add('hidden');
-          
-          const esRolTecnico = res.esTecnico || (res.rol && res.rol.toLowerCase().includes('tec'));
-
-          if (esRolTecnico) {
-            document.getElementById('view-tecnico').classList.remove('hidden');
-            document.getElementById('view-admin').classList.add('hidden');
-            document.getElementById('app-bottom-nav').classList.remove('hidden');
-
-            document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
-            document.getElementById('avatar-tec').innerText = (res.nombre || 'T').charAt(0).toUpperCase();
-            document.getElementById('perfil-nombre').innerText = res.nombre || 'Técnico';
-            document.getElementById('perfil-correo').innerText = res.usuario || '';
-            document.getElementById('perfil-avatar').innerText = (res.nombre || 'T').charAt(0).toUpperCase();
-
-            cargarPendientesTecnico();
-          } else {
-            document.getElementById('view-admin').classList.remove('hidden');
-            document.getElementById('view-tecnico').classList.add('hidden');
-            document.getElementById('app-bottom-nav').classList.add('hidden');
-
-            document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
-            document.getElementById('admin-header-region').innerText = `ÁREA: ${res.area || 'REGIONAL'} | DEP: ${res.departamento}`;
-            cargarDashboard();
-          }
+          iniciarVistaSegunRol(res);
         } else {
           if (alertBox) {
             alertBox.innerText = res.mensaje || "Credenciales no válidas";
