@@ -15,7 +15,6 @@
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
     :root { 
@@ -135,7 +134,7 @@
 
   <div class="container-custom">
 
-    <!-- LOGIN MEJORADO -->
+    <!-- LOGIN -->
     <div id="view-login" class="login-container">
       <div class="login-card">
         <div class="text-center mb-4">
@@ -225,14 +224,14 @@
         </div>
 
         <div class="bi-card-dark mb-3">
-          <h6 class="fw-bold text-secondary small mb-3">AJUSTES Y CUENTA</h6>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Opción en desarrollo')">
-            <span><i class="bi bi-person-gear me-2 text-info"></i>Información Personal</span>
+          <h6 class="fw-bold text-secondary small mb-3">AJUSTES Y NOTIFICACIONES</h6>
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="solicitarPermisoNotificaciones()">
+            <span><i class="bi bi-bell-fill me-2 text-warning"></i>Activar Notificaciones Nativas</span>
             <i class="bi bi-chevron-right text-secondary"></i>
           </div>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 1.2.0 - Activa')">
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 2.0.0 - Edición Pro Campo')">
             <span><i class="bi bi-info-circle me-2 text-warning"></i>Versión del Sistema</span>
-            <small class="text-secondary">v1.2.0</small>
+            <small class="text-secondary">v2.0.0 Pro</small>
           </div>
           <button class="btn btn-outline-danger w-100 fw-bold mt-3 py-2" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
         </div>
@@ -251,28 +250,12 @@
             </div>
           </div>
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <button class="btn btn-sm btn-outline-info fw-bold" onclick="abrirModalCargaExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Cargar Excel</button>
             <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
               <option value="dia">Hoy / 24h</option>
               <option value="semana">Últimos 7 días</option>
               <option value="mes" selected>Últimos 30 días</option>
             </select>
             <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
-          </div>
-        </div>
-
-        <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary border-opacity-25">
-          <div class="col-6 col-md-3">
-            <label class="form-label text-secondary small m-0 mb-1" style="font-size: 0.7rem;"><i class="bi bi-geo-alt me-1"></i>Departamento:</label>
-            <select id="select-filtro-dept" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="cargarDashboard()">
-              <option value="TODOS">-- Todos los Departamentos --</option>
-            </select>
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label text-secondary small m-0 mb-1" style="font-size: 0.7rem;"><i class="bi bi-building me-1"></i>Ciudad:</label>
-            <select id="select-filtro-ciudad" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="cargarDashboard()">
-              <option value="TODAS">-- Todas las Ciudades --</option>
-            </select>
           </div>
         </div>
 
@@ -286,46 +269,7 @@
         </div>
       </div>
 
-      <div class="segmented-control mb-3">
-        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-pie-chart-fill me-1"></i> Resumen Visual</button>
-        <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-card-checklist me-1"></i> Detalle y Filtros</button>
-      </div>
-
-      <div id="sec-tecnicos">
-        <div class="row g-3 mb-3">
-          <div class="col-12 col-md-5">
-            <div class="bi-card-dark text-center h-100 d-flex flex-column justify-content-between">
-              <h6 class="fw-bold text-secondary small">BALANCE GENERAL DE GESTIÓN</h6>
-              <div style="position: relative; max-width: 240px; margin: auto;">
-                <canvas id="gaugeChart"></canvas>
-                <div style="position: absolute; bottom: 10px; left: 0; right: 0;">
-                  <h2 class="fw-bold m-0 text-white" id="gauge-score-val">0%</h2>
-                  <span class="badge bg-success" id="gauge-score-lbl">Avance Global</span>
-                </div>
-              </div>
-              <div class="row g-1 pt-3 border-top border-secondary mt-2">
-                <div class="col-4"><small class="text-danger d-block fw-bold" id="pct-detractores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Conflictivos</span></div>
-                <div class="col-4"><small class="text-warning d-block fw-bold" id="pct-neutros">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Pendientes</span></div>
-                <div class="col-4"><small class="text-success d-block fw-bold" id="pct-promotores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Gestionados</span></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-md-7">
-            <div class="bi-card-dark h-100">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="fw-bold text-secondary small m-0">Rendimiento por Técnico</h6>
-                <button class="btn btn-xs btn-outline-success p-1 px-2" style="font-size: 0.75rem;" onclick="exportarExcelConImagenes(event)"><i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel</button>
-              </div>
-              <div style="position: relative; height: 220px;">
-                <canvas id="barTecnicosChart"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="sec-general" class="hidden">
+      <div id="sec-general">
         <div class="bi-card-dark mb-3 p-3">
           <div class="row g-2">
             <div class="col-12 col-md-4">
@@ -340,16 +284,13 @@
                 <option value="TODOS">-- Todos los Estados --</option>
                 <option value="Gestionado">Gestionado</option>
                 <option value="Pendiente">Pendiente</option>
-                <option value="Sin Gestion">Sin Gestión (144h)</option>
+                <option value="No le llego la encuesta">No le llegó la encuesta</option>
                 <option value="UU conflictivo">UU conflictivo</option>
               </select>
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-search me-1"></i> Búsqueda rápida:</label>
-              <div class="input-group input-group-sm">
-                <span class="input-group-text bg-dark text-secondary border-secondary"><i class="bi bi-search"></i></span>
-                <input type="text" id="input-buscar" class="form-control bg-dark text-white border-secondary" placeholder="Buscar OT, cliente, teléfono..." onkeyup="aplicarFiltrosDetalle()">
-              </div>
+              <input type="text" id="input-buscar" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Buscar OT, cliente..." onkeyup="aplicarFiltrosDetalle()">
             </div>
           </div>
         </div>
@@ -359,7 +300,7 @@
     </div>
   </div>
 
-  <!-- NAVEGACIÓN INFERIOR (BOTTOM NAV) PARA TÉCNICOS -->
+  <!-- NAVEGACIÓN INFERIOR PARA TÉCNICOS -->
   <div class="bottom-nav hidden" id="app-bottom-nav">
     <button class="nav-item-btn active" id="bnav-inicio" onclick="navegarBottom('inicio')">
       <i class="bi bi-grid-1x2-fill"></i>
@@ -380,76 +321,77 @@
     </button>
   </div>
 
-  <!-- MODALES -->
-  <div class="modal fade" id="modalCargaExcel" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary">
-          <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Cargar Excel de Órdenes</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <p class="small text-secondary mb-3">Selecciona el archivo Excel (.xlsx o .csv) con las órdenes.</p>
-          <input type="file" id="input-file-excel" class="form-control bg-dark text-white border-secondary mb-3" accept=".xlsx, .xls, .csv">
-          <div id="resultado-carga-excel" class="small hidden p-2 rounded"></div>
-        </div>
-        <div class="modal-footer border-secondary">
-          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" id="btn-procesar-excel" class="btn btn-sm btn-primary fw-bold" onclick="procesarArchivoExcel()"><i class="bi bi-cloud-upload me-1"></i> Subir a Base General</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <!-- MODAL DE GESTIÓN CON RESPALDO FOTOGRÁFICO OBLIGATORIO -->
   <div class="modal fade" id="modalGestion" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Registrar Gestión</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title fw-bold"><i class="bi bi-shield-check text-primary me-2"></i>Registrar Gestión de Campo</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
         <div class="modal-body">
           <input type="hidden" id="modal-fila">
           <input type="hidden" id="modal-ot">
+          
           <div class="mb-3">
-            <label class="form-label small text-secondary">Estado de Gestión</label>
-            <select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="evaluarEstado()">
-              <option value="Gestionado">Gestionado</option>
+            <label class="form-label small text-secondary fw-semibold">Estado de la Gestión *</label>
+            <select id="modal-estado" class="form-select bg-dark text-white border-secondary">
+              <option value="Gestionado">Gestionado (Encuesta enviada)</option>
+              <option value="No le llego la encuesta">No le llegó la encuesta</option>
+              <option value="Telefono no corresponde / Apagado">Teléfono no corresponde / Apagado</option>
               <option value="UU conflictivo">UU conflictivo</option>
             </select>
           </div>
+
           <div class="mb-3">
-            <label class="form-label small text-secondary">Resultado</label>
+            <label class="form-label small text-secondary fw-semibold">Resultado de Contacto</label>
             <select id="modal-resultado" class="form-select bg-dark text-white border-secondary">
-              <option value="Exitoso">Exitoso</option>
-              <option value="Sin respuesta">Sin respuesta</option>
+              <option value="Exitoso">Exitoso (Contacto directo)</option>
+              <option value="Sin respuesta">Sin respuesta (Llamada no atendida)</option>
             </select>
           </div>
+
+          <!-- OBSERVACIÓN PERMANENTE -->
           <div class="mb-3">
-            <label class="form-label small text-secondary">Evidencia Fotográfica</label>
+            <label class="form-label small text-warning fw-bold"><i class="bi bi-pencil-square me-1"></i>Observación / Comentario de Campo</label>
+            <textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Escriba aquí detalles relevantes de la visita o contacto..."></textarea>
+          </div>
+
+          <!-- FOTO OBLIGATORIA -->
+          <div class="mb-3 p-3 rounded border border-warning border-opacity-25 bg-dark bg-opacity-50">
+            <label class="form-label small text-warning fw-bold d-block text-center mb-2">
+              <i class="bi bi-camera-fill me-1"></i>Respaldo Fotográfico OBLIGATORIO *
+            </label>
             <div class="d-flex gap-2 mb-2">
               <label class="btn btn-outline-info btn-sm flex-fill fw-bold mb-0 py-2" style="font-size: 0.78rem; cursor: pointer;">
                 <i class="bi bi-camera-fill me-1"></i> Tomar Foto
                 <input type="file" id="modal-foto-camara" class="hidden" accept="image/*" capture="environment" onchange="procesarFotoSeleccionada(this)">
               </label>
               <label class="btn btn-outline-warning btn-sm flex-fill fw-bold mb-0 py-2" style="font-size: 0.78rem; cursor: pointer;">
-                <i class="bi bi-image-fill me-1"></i> Elegir Galería
+                <i class="bi bi-image-fill me-1"></i> Galería
                 <input type="file" id="modal-foto-galeria" class="hidden" accept="image/*" onchange="procesarFotoSeleccionada(this)">
               </label>
             </div>
-            <div id="label-archivo-elegido" class="text-success small fw-bold text-center"></div>
+            <div id="label-archivo-elegido" class="text-danger small fw-bold text-center">⚠ Falta adjuntar foto de respaldo</div>
           </div>
-          <div id="box-observacion" class="mb-3 hidden">
-            <label class="form-label small text-danger fw-bold">Informe / Motivo (Obligatorio para UU conflictivo) *</label>
-            <textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Detalla el motivo del informe..."></textarea>
-          </div>
+
         </div>
-        <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" id="btn-guardar" class="btn btn-sm btn-primary" onclick="guardarFormulario()">Guardar Gestión</button></div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="btn-guardar" class="btn btn-sm btn-primary fw-bold" onclick="guardarFormulario()">Guardar Gestión</button>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- MODAL DE DETALLES LIMPIO (SIN REPETIR LLAMAR/WHATSAPP) -->
   <div class="modal fade" id="modalDetalleOrden" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Ficha de Gestión NPS</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-person me-2 text-info"></i>Ficha de Gestión NPS</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
         <div class="modal-body">
           <div class="detail-row"><div class="detail-label">ID Gestión</div><div class="detail-val" id="det-id">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Código Cliente</div><div class="detail-val text-primary" id="det-codigo">N/A</div></div>
@@ -462,10 +404,10 @@
           <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val" id="det-ot">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
           <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Informe Observación</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
-          
-          <div class="mt-3 d-flex flex-column gap-2" id="box-btn-acciones"></div>
         </div>
-        <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button></div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar Ficha</button>
+        </div>
       </div>
     </div>
   </div>
@@ -489,7 +431,8 @@
 
     let usuarioActual = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [];
-    let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
+    let archivoFotoSeleccionado = null, base64Compresion = null;
+    let conteoAnteriorPendientes = -1;
 
     function togglePasswordVisibility() {
       const inputPass = document.getElementById('input-pass');
@@ -510,6 +453,26 @@
         iniciarVistaSegunRol(usuarioActual);
       } else {
         alert("Inicie sesión con usuario y contraseña primero para activar el acceso con huella.");
+      }
+    }
+
+    function solicitarPermisoNotificaciones() {
+      if ("Notification" in window) {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            alert("Notificaciones activadas con éxito.");
+          } else {
+            alert("Las notificaciones fueron denegadas.");
+          }
+        });
+      } else {
+        alert("Este dispositivo no soporta notificaciones automáticas.");
+      }
+    }
+
+    function emitirNotificacionNativa(titulo, mensaje) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(titulo, { body: mensaje, icon: 'logo.png' });
       }
     }
 
@@ -555,6 +518,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      solicitarPermisoNotificaciones();
       const perfilGuardado = localStorage.getItem("nps_user_profile");
       if (perfilGuardado) {
         try {
@@ -579,7 +543,16 @@
         document.getElementById('perfil-correo').innerText = res.usuario || '';
         document.getElementById('perfil-avatar').innerText = (res.nombre || 'T').charAt(0).toUpperCase();
 
+        // Cargar caché local primero para velocidad
+        const cachePendientes = localStorage.getItem(`cache_pendientes_${res.usuario}`);
+        if (cachePendientes) {
+          pendientesTecnicoActual = JSON.parse(cachePendientes);
+          renderizarPendientesTecnicoUI();
+        }
+
         navegarBottom('inicio');
+        // Polling para notificaciones
+        setInterval(cargarPendientesTecnico, 45000);
       } else {
         document.getElementById('view-admin').classList.remove('hidden');
         document.getElementById('view-tecnico').classList.add('hidden');
@@ -646,14 +619,34 @@
       }
     }
 
+    function formatearFechaCorta(fechaStr) {
+      if (!fechaStr) return 'Hoy';
+      try {
+        if (fechaStr.includes('GMT') || fechaStr.includes('00:00:00')) {
+          const d = new Date(fechaStr);
+          if (!isNaN(d.getTime())) {
+            return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          }
+        }
+        return fechaStr;
+      } catch(e) {
+        return fechaStr;
+      }
+    }
+
     async function cargarPendientesTecnico() {
-      const contenedor = document.getElementById('lista-pendientes');
-      contenedor.innerHTML = '<div class="text-info text-center small py-3 col-12"><div class="spinner-border spinner-border-sm me-2"></div>Cargando pendientes...</div>';
-      
       try {
         const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
         pendientesTecnicoActual = Array.isArray(lista) ? lista : [];
         
+        localStorage.setItem(`cache_pendientes_${usuarioActual.usuario}`, JSON.stringify(pendientesTecnicoActual));
+
+        // Detectar nuevos códigos asignados para enviar notificación
+        if (conteoAnteriorPendientes !== -1 && pendientesTecnicoActual.length > conteoAnteriorPendientes) {
+          emitirNotificacionNativa("Nuevos Códigos Asignados", `Tiene ${pendientesTecnicoActual.length} órdenes pendientes por gestionar.`);
+        }
+        conteoAnteriorPendientes = pendientesTecnicoActual.length;
+
         document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
         document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
         
@@ -666,9 +659,7 @@
         }
 
         renderizarPendientesTecnicoUI();
-      } catch(e) {
-        contenedor.innerHTML = '<div class="alert alert-dark text-danger text-center small py-3 col-12">Error al cargar la lista.</div>';
-      }
+      } catch(e) {}
     }
 
     function renderizarPendientesTecnicoUI() {
@@ -705,7 +696,7 @@
               <div class="meta-grid mb-2">
                 <div class="meta-item">
                   <span class="text-secondary d-block" style="font-size: 0.65rem;">ASIGNACIÓN</span>
-                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${item.fechaAsignacion || 'Hoy'}</span>
+                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${formatearFechaCorta(item.fechaAsignacion)}</span>
                 </div>
                 <div class="meta-item">
                   <span class="text-secondary d-block" style="font-size: 0.65rem;">TELÉFONO</span>
@@ -729,8 +720,6 @@
 
     async function cargarHistoricoTecnico() {
       const contenedor = document.getElementById('lista-historico-tecnico');
-      contenedor.innerHTML = '<div class="text-info text-center small py-3 col-12"><div class="spinner-border spinner-border-sm me-2"></div>Cargando histórico...</div>';
-
       try {
         const lista = await apiCall("obtenerHistoricoTecnico", { correoTecnico: usuarioActual.usuario });
         historicoTecnicoActual = Array.isArray(lista) ? lista : [];
@@ -770,7 +759,7 @@
                 </div>
                 <div class="meta-item">
                   <span class="text-secondary d-block" style="font-size: 0.65rem;">FECHA GESTIÓN</span>
-                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${r.fechaGestion || 'N/A'}</span>
+                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${formatearFechaCorta(r.fechaGestion)}</span>
                 </div>
               </div>
             </div>
@@ -783,77 +772,6 @@
       });
     }
 
-    function construirBotoneraWhatsApp(item) {
-      if (!item.telefono || item.telefono === 'Sin Teléfono') return '';
-
-      let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
-      let horaActual = new Date().getHours();
-      let saludoHora = "Estimado cliente, buenas tardes. 👋";
-
-      if (horaActual >= 0 && horaActual < 12) {
-        saludoHora = "Estimado cliente, buenos días. ☀️";
-      } else if (horaActual >= 12 && horaActual < 19) {
-        saludoHora = "Estimado cliente, buenas tardes. 👋";
-      } else {
-        saludoHora = "Estimado cliente, buenas noches. 🌙";
-      }
-
-      let nombreTecnicoActual = (usuarioActual && usuarioActual.nombre) ? usuarioActual.nombre : (item.tecnico || item.tecnicoAsignado || 'Servicio Técnico');
-      let codigoCli = item.codigoCliente || 'N/A';
-      let nombreCli = item.nombreUsuario || 'Estimado Cliente';
-
-      let mensajeWs = `${saludoHora}%0A%0A` +
-        `Le escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codigoCli}* (${nombreCli}).%0A%0A` +
-        `Mi nombre es *${nombreTecnicoActual}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.%0A%0A` +
-        `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo porfavor un *10* 😁. Su calificación y opinión son muy importantes para nosotros.%0A%0A` +
-        `Muchas gracias por su tiempo y colaboración. 🙌`;
-
-      let urlWs = `https://wa.me/591${numLimpio}?text=${mensajeWs}`;
-
-      return `
-        <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
-        <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
-      `;
-    }
-
-    function verDetallesOrdenAdmin(index) {
-      let item = todosLosRegistros[index];
-      if (!item) return;
-
-      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
-      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
-      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
-      document.getElementById('det-tecnico').innerText = item.tecnico || 'Sin Asignar';
-      document.getElementById('det-fecha').innerText = item.fechaAsignacion || 'N/A';
-      
-      const fechaG = item.fechaGestion;
-      document.getElementById('det-fecha-gestion').innerText = fechaG ? fechaG : 'Pendiente de Gestión';
-
-      let tiempoTexto = "En proceso / Pendiente";
-      if (item.fechaAsignacion && fechaG) {
-        tiempoTexto = calcularTiempoDiferencia(item.fechaAsignacion, fechaG);
-      }
-      document.getElementById('det-tiempo-respuesta').innerText = tiempoTexto;
-
-      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
-      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
-
-      let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
-      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : (item.estado === 'Sin Gestion' ? 'badge-expired' : 'badge-pending'));
-      document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
-
-      const boxObs = document.getElementById('det-box-obs');
-      if (item.observacion) {
-        document.getElementById('det-observacion').innerText = item.observacion;
-        boxObs.classList.remove('hidden');
-      } else {
-        boxObs.classList.add('hidden');
-      }
-
-      document.getElementById('box-btn-acciones').innerHTML = construirBotoneraWhatsApp(item);
-      abrirModalBS('modalDetalleOrden');
-    }
-
     function verDetallesOrdenTecnico(index, origen) {
       let item = (origen === 'PENDIENTE') ? pendientesTecnicoActual[index] : historicoTecnicoActual[index];
       if (!item) return;
@@ -862,16 +780,11 @@
       document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
       document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
       document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || usuarioActual.nombre;
-      document.getElementById('det-fecha').innerText = item.fechaAsignacion || 'N/A';
+      document.getElementById('det-fecha').innerText = formatearFechaCorta(item.fechaAsignacion);
       
       const fechaG = item.fechaGestion;
-      document.getElementById('det-fecha-gestion').innerText = fechaG ? fechaG : 'Pendiente de Gestión';
-
-      let tiempoTexto = "En proceso / Pendiente";
-      if (item.fechaAsignacion && fechaG) {
-        tiempoTexto = calcularTiempoDiferencia(item.fechaAsignacion, fechaG);
-      }
-      document.getElementById('det-tiempo-respuesta').innerText = tiempoTexto;
+      document.getElementById('det-fecha-gestion').innerText = fechaG ? formatearFechaCorta(fechaG) : 'Pendiente de Gestión';
+      document.getElementById('det-tiempo-respuesta').innerText = fechaG ? "Gestionado" : "En proceso";
 
       document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
       document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
@@ -888,277 +801,7 @@
         boxObs.classList.add('hidden');
       }
 
-      document.getElementById('box-btn-acciones').innerHTML = construirBotoneraWhatsApp(item);
       abrirModalBS('modalDetalleOrden');
-    }
-
-    function calcularTiempoDiferencia(fechaInicioStr, fechaFinStr) {
-      try {
-        const f1 = parseFechaLocal(fechaInicioStr);
-        const f2 = parseFechaLocal(fechaFinStr);
-        if (!f1 || !f2) return "Registrado";
-        
-        const diffMs = Math.abs(f2 - f1);
-        const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-        if (diffHoras > 24) {
-          const dias = Math.floor(diffHoras / 24);
-          return `${dias} día(s) y ${diffHoras % 24} hr(s)`;
-        }
-        return `${diffHoras} hr(s) y ${diffMinutos} min`;
-      } catch(e) {
-        return "Registrado";
-      }
-    }
-
-    function parseFechaLocal(fStr) {
-      if (!fStr) return null;
-      const parts = fStr.split(" ");
-      if (parts.length < 1) return null;
-      const dateParts = parts[0].split("/");
-      if (dateParts.length < 3) return null;
-      let hh = 0, mm = 0;
-      if (parts.length > 1) {
-        const timeParts = parts[1].split(":");
-        hh = parseInt(timeParts[0]) || 0;
-        mm = parseInt(timeParts[1]) || 0;
-      }
-      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], hh, mm);
-    }
-
-    async function cargarDashboard() {
-      const per = document.getElementById('select-periodo').value;
-      const filtroDeptEl = document.getElementById('select-filtro-dept');
-      const filtroCiuEl = document.getElementById('select-filtro-ciudad');
-
-      const esNacional = usuarioActual.area && usuarioActual.area.toUpperCase().includes('NACIONAL');
-      const esDepartamental = usuarioActual.area && usuarioActual.area.toUpperCase().includes('DEPARTAMENTAL');
-
-      if (!esNacional) {
-        if (filtroDeptEl) {
-          filtroDeptEl.innerHTML = `<option value="${usuarioActual.departamento}">${usuarioActual.departamento}</option>`;
-          filtroDeptEl.disabled = true;
-        }
-      }
-
-      if (!esNacional && !esDepartamental) {
-        if (filtroCiuEl) {
-          filtroCiuEl.innerHTML = `<option value="${usuarioActual.ciudad}">${usuarioActual.ciudad}</option>`;
-          filtroCiuEl.disabled = true;
-        }
-      }
-
-      const deptVal = filtroDeptEl ? filtroDeptEl.value : usuarioActual.departamento;
-      const ciuVal = filtroCiuEl ? filtroCiuEl.value : usuarioActual.ciudad;
-
-      try {
-        const res = await apiCall("obtenerDatosDashboard", {
-          usuario: usuarioActual.usuario,
-          rol: usuarioActual.rol,
-          departamento: deptVal,
-          ciudad: ciuVal,
-          periodo: per
-        });
-
-        if (esNacional && filtroDeptEl && res.departamentos) {
-          let currDept = filtroDeptEl.value;
-          filtroDeptEl.innerHTML = '<option value="TODOS">-- Todos los Departamentos --</option>';
-          res.departamentos.forEach(d => {
-            filtroDeptEl.innerHTML += `<option value="${d}" ${d === currDept ? 'selected' : ''}>${d}</option>`;
-          });
-        }
-
-        if ((esNacional || esDepartamental) && filtroCiuEl && res.ciudades) {
-          let currCiu = filtroCiuEl.value;
-          filtroCiuEl.innerHTML = '<option value="TODAS">-- Todas las Ciudades --</option>';
-          res.ciudades.forEach(c => {
-            filtroCiuEl.innerHTML += `<option value="${c}" ${c === currCiu ? 'selected' : ''}>${c}</option>`;
-          });
-        }
-
-        const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos + (res.kpis.sinGestion || 0);
-        
-        document.getElementById('kpi-total').innerText = tot;
-        document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
-        document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
-        document.getElementById('kpi-sin-gestion').innerText = res.kpis.sinGestion || 0;
-        document.getElementById('kpi-conflictivos').innerText = res.kpis.conflictivos;
-
-        const pct = tot > 0 ? Math.round((res.kpis.gestionados / tot) * 100) : 0;
-        document.getElementById('kpi-pct-prom').innerText = pct + "%";
-        document.getElementById('gauge-score-val').innerText = pct + "%";
-
-        document.getElementById('pct-promotores').innerText = pct + "%";
-        document.getElementById('pct-neutros').innerText = (tot > 0 ? Math.round((res.kpis.pendientes / tot) * 100) : 0) + "%";
-        document.getElementById('pct-detractores').innerText = (tot > 0 ? Math.round((res.kpis.conflictivos / tot) * 100) : 0) + "%";
-
-        const selectFiltroTec = document.getElementById('select-filtro-tecnico');
-        selectFiltroTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
-        res.tecnicos.forEach(t => {
-          selectFiltroTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
-        });
-
-        renderizarGraficoGauge(pct);
-        renderizarGraficoBarras(res.tecnicos);
-
-        todosLosRegistros = res.registros;
-        aplicarFiltrosDetalle();
-      } catch(e) { console.log("Error dashboard", e); }
-    }
-
-    function renderizarGraficoGauge(pctVal) {
-      const ctx = document.getElementById('gaugeChart').getContext('2d');
-      if (chartGauge) chartGauge.destroy();
-
-      chartGauge = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Completado', 'Pendiente'],
-          datasets: [{
-            data: [pctVal, 100 - pctVal],
-            backgroundColor: ['#10b981', '#23335a'],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          rotation: -90,
-          circumference: 180,
-          cutout: '75%',
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-
-    function renderizarGraficoBarras(tecnicos) {
-      const ctx = document.getElementById('barTecnicosChart').getContext('2d');
-      if (chartBar) chartBar.destroy();
-
-      const nombres = tecnicos.map(t => t.nombre);
-      const avances = tecnicos.map(t => t.pctAvance);
-
-      chartBar = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: nombres,
-          datasets: [{
-            label: '% Cumplimiento',
-            data: avances,
-            backgroundColor: '#38bdf8',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { 
-            x: { max: 100, ticks: { color: '#8e9bb4', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-            y: { ticks: { color: '#f8fafc' }, grid: { display: false } }
-          }
-        }
-      });
-    }
-
-    function aplicarFiltrosDetalle() {
-      const tecSel = document.getElementById('select-filtro-tecnico').value.toLowerCase();
-      const estSel = document.getElementById('select-filtro-estado').value;
-      const q = document.getElementById('input-buscar').value.toLowerCase();
-
-      let resultado = todosLosRegistros;
-
-      if (tecSel !== 'todos') {
-        resultado = resultado.filter(r => r.tecnico && r.tecnico.toLowerCase() === tecSel);
-      }
-
-      if (estSel !== 'TODOS') {
-        resultado = resultado.filter(r => {
-          if (estSel === 'Sin Gestion') return r.estado === 'Sin Gestion' || r.estado === 'Sin gestion';
-          return r.estado === estSel;
-        });
-      }
-
-      if (q.trim()) {
-        resultado = resultado.filter(r => 
-          (r.tecnico && r.tecnico.toLowerCase().includes(q)) || 
-          (r.nombreUsuario && r.nombreUsuario.toLowerCase().includes(q)) || 
-          (r.codigoCliente && r.codigoCliente.toString().toLowerCase().includes(q)) || 
-          (r.telefono && r.telefono.toString().toLowerCase().includes(q)) || 
-          (r.numeroOT && r.numeroOT.toString().toLowerCase().includes(q))
-        );
-      }
-
-      renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
-    }
-
-    async function reasignarOrdenPendiente(fila) {
-      if (!confirm("¿Desea reasignar esta orden a estado Pendiente para que el técnico pueda registrarla?")) return;
-      try {
-        const res = await apiCall("reasignarPendienteAdmin", { fila: fila });
-        if (res && res.exito) {
-          alert("Orden reasignada a Pendiente.");
-          cargarDashboard();
-        } else {
-          alert("No se pudo reasignar la orden.");
-        }
-      } catch(e) { alert("Error de conexión al reasignar."); }
-    }
-
-    function renderizarTarjetasAdmin(lista, idContenedor) {
-      const contenedor = document.getElementById(idContenedor);
-      contenedor.innerHTML = '';
-      if (lista.length === 0) {
-        contenedor.innerHTML = '<div class="text-secondary text-center small py-4 col-12">No hay órdenes que coincidan con los filtros.</div>';
-        return;
-      }
-
-      lista.forEach(r => {
-        const isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
-        const isSinGestion = r.estado === 'Sin Gestion' || r.estado === 'Sin gestion';
-        
-        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : (isSinGestion ? 'badge-expired' : 'badge-pending'));
-        const indexOriginal = todosLosRegistros.indexOf(r);
-
-        let subtextoFecha = r.fechaGestion ? 
-          `<span class="text-info" style="font-size: 0.68rem;">Gestión: ${r.fechaGestion}</span>` : 
-          '<span class="text-secondary" style="font-size: 0.68rem;">Sin fecha de gestión</span>';
-
-        let botonReasignar = (usuarioActual && (usuarioActual.rol === 'Administrador' || usuarioActual.rol === 'Supervisor') && isSinGestion) ?
-          `<button class="btn btn-xs btn-outline-warning p-1 px-2 small ms-1" style="font-size: 0.72rem;" onclick="reasignarOrdenPendiente(${r.fila})">Reasignar a Pendiente</button>` : '';
-
-        let otClave = r.numeroOT || r.codigoCliente || '';
-        let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
-        let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
-
-        contenedor.innerHTML += `
-          <div class="order-card ${isConflict ? 'conflictive' : ''}">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
-                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT}</small>
-              </div>
-              <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombreUsuario}</div>
-              <div class="meta-grid">
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">CLIENTE</span><strong class="text-light">${r.codigoCliente}</strong></div>
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
-              </div>
-              <div class="mt-2 p-1 px-2 bg-dark rounded border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-                ${subtextoFecha}
-              </div>
-              ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Informe:</strong> ${r.observacion}</div>` : ''}
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
-              <span class="text-secondary fw-bold" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
-              <div class="d-flex gap-1">
-                <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenAdmin(${indexOriginal})"><i class="bi bi-eye me-1"></i>Detalles</button>
-                ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')">Foto</button>` : ''}
-                ${botonReasignar}
-              </div>
-            </div>
-          </div>`;
-      });
     }
 
     function abrirModal(fila, numeroOT) {
@@ -1173,10 +816,12 @@
       btnG.disabled = false;
       btnG.innerText = "Guardar Gestión";
 
-      document.getElementById('label-archivo-elegido').innerText = '';
+      const lbl = document.getElementById('label-archivo-elegido');
+      lbl.className = "text-danger small fw-bold text-center";
+      lbl.innerText = "⚠ Falta adjuntar foto de respaldo";
+
       document.getElementById('modal-foto-camara').value = '';
       document.getElementById('modal-foto-galeria').value = '';
-      evaluarEstado();
       abrirModalBS('modalGestion');
     }
 
@@ -1191,7 +836,7 @@
         btnG.disabled = true;
         btnG.innerText = "⏳ Procesando evidencia...";
         lbl.className = "text-warning small fw-bold text-center";
-        lbl.innerText = "⏳ Optimizando imagen...";
+        lbl.innerText = "⏳ Optimizando imagen de respaldo...";
 
         if (input.id === 'modal-foto-camara') document.getElementById('modal-foto-galeria').value = '';
         if (input.id === 'modal-foto-galeria') document.getElementById('modal-foto-camara').value = '';
@@ -1201,7 +846,7 @@
           btnG.disabled = false;
           btnG.innerText = "Guardar Gestión";
           lbl.className = "text-success small fw-bold text-center";
-          lbl.innerText = "✓ Listo: Imagen lista para guardar";
+          lbl.innerText = "✓ Respaldo fotográfico adjuntado correctamente";
         }).catch(err => {
           btnG.disabled = false;
           btnG.innerText = "Guardar Gestión";
@@ -1249,16 +894,6 @@
       });
     }
 
-    function evaluarEstado() {
-      const est = document.getElementById('modal-estado').value;
-      const boxObs = document.getElementById('box-observacion');
-      if (est === 'UU conflictivo' || est === 'Conflictivo') {
-        boxObs.classList.remove('hidden');
-      } else {
-        boxObs.classList.add('hidden');
-      }
-    }
-
     async function guardarFormulario() {
       const fila = document.getElementById('modal-fila').value;
       const numeroOT = document.getElementById('modal-ot').value;
@@ -1266,18 +901,19 @@
       const resultado = document.getElementById('modal-resultado').value;
       const obs = document.getElementById('modal-observacion').value;
 
-      if ((estado === 'UU conflictivo' || estado === 'Conflictivo') && !obs.trim()) {
-        return alert('Ingrese la observación / informe requerido para UU conflictivo.');
+      // VALIDACIÓN ESTRICTA DE FOTO OBLIGATORIA
+      if (!base64Compresion && !archivoFotoSeleccionado) {
+        alert("⚠ DEBE ADJUNTAR UNA FOTO DE RESPALDO OBLIGATORIAMENTE. No se puede guardar la gestión sin evidencia fotográfica.");
+        return;
       }
 
       const btnGuardar = document.getElementById('btn-guardar');
       btnGuardar.disabled = true;
-      btnGuardar.innerText = "Enviando datos...";
+      btnGuardar.innerText = "Enviando respaldo...";
 
       let b64Foto = base64Compresion || "";
 
       if (archivoFotoSeleccionado && !b64Foto) {
-        btnGuardar.innerText = "Optimizando foto...";
         try {
           b64Foto = await convertirYComprimirFoto(archivoFotoSeleccionado);
         } catch(e) {}
@@ -1286,7 +922,7 @@
       if (b64Foto) {
         try {
           localStorage.setItem(`evidencia_ot_${numeroOT}`, b64Foto);
-        } catch(e) { console.log("Memory full", e); }
+        } catch(e) {}
       }
 
       const payload = { 
@@ -1304,19 +940,14 @@
         btnGuardar.innerText = "Guardar Gestión";
         
         if (res && res.exito) {
-          alert("¡Gestión y evidencia registradas con éxito!");
+          alert("¡Gestión y foto de respaldo guardadas con éxito!");
           ocultarModalBS('modalGestion');
           
           archivoFotoSeleccionado = null;
           base64Compresion = null;
 
-          const esRolTecnico = usuarioActual.esTecnico || (usuarioActual.rol && usuarioActual.rol.toLowerCase().includes('tec'));
-          if (esRolTecnico) {
-            cargarHistoricoTecnico();
-            cargarPendientesTecnico();
-          } else {
-            cargarDashboard();
-          }
+          cargarHistoricoTecnico();
+          cargarPendientesTecnico();
         } else {
           alert(res.mensaje || "Ocurrió un error al guardar.");
         }
@@ -1324,91 +955,6 @@
         btnGuardar.disabled = false;
         btnGuardar.innerText = "Guardar Gestión";
         alert("Error de conexión al guardar.");
-      }
-    }
-
-    async function exportarExcelConImagenes(evt) {
-      if (!todosLosRegistros || todosLosRegistros.length === 0) {
-        return alert("No hay registros para exportar.");
-      }
-
-      const btnExport = evt ? evt.target : document.activeElement;
-      const textoOriginal = btnExport.innerHTML;
-      btnExport.disabled = true;
-      btnExport.innerHTML = "⏳ Generando Excel...";
-
-      try {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Reporte Gestiones NPS');
-
-        worksheet.columns = [
-          { header: 'ID Gestión', key: 'idGestion', width: 14 },
-          { header: 'Código Cliente', key: 'codigoCliente', width: 16 },
-          { header: 'Nombre Usuario', key: 'nombreUsuario', width: 28 },
-          { header: 'Técnico', key: 'tecnico', width: 22 },
-          { header: 'Fecha Asignación', key: 'fechaAsignacion', width: 18 },
-          { header: 'Fecha Gestión', key: 'fechaGestion', width: 18 },
-          { header: 'Estado', key: 'estado', width: 15 },
-          { header: 'Número OT', key: 'numeroOT', width: 20 },
-          { header: 'Teléfono', key: 'telefono', width: 16 },
-          { header: 'Informe Observación', key: 'observacion', width: 32 },
-          { header: 'Captura_Evidencia', key: 'evidencia', width: 22 }
-        ];
-
-        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
-        worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '0F172A' } };
-
-        for (let i = 0; i < todosLosRegistros.length; i++) {
-          const item = todosLosRegistros[i];
-          const numFila = i + 2;
-
-          worksheet.addRow({
-            idGestion: item.idGestion,
-            codigoCliente: item.codigoCliente,
-            nombreUsuario: item.nombreUsuario,
-            tecnico: item.tecnico,
-            fechaAsignacion: item.fechaAsignacion,
-            fechaGestion: item.fechaGestion || 'Sin Gestión',
-            estado: item.estado,
-            numeroOT: item.numeroOT,
-            telefono: item.telefono,
-            observacion: item.observacion,
-            evidencia: ''
-          });
-
-          let otClave = item.numeroOT || item.codigoCliente || '';
-          let b64Evidencia = (item.evidencia && item.evidencia.length > 50) ? item.evidencia : localStorage.getItem(`evidencia_ot_${otClave}`);
-
-          if (b64Evidencia && b64Evidencia.length > 50) {
-            worksheet.getRow(numFila).height = 65; 
-
-            let cleanB64 = b64Evidencia.includes(',') ? b64Evidencia.split(',')[1] : b64Evidencia;
-
-            const imageId = workbook.addImage({
-              base64: cleanB64,
-              extension: 'jpeg',
-            });
-
-            worksheet.addImage(imageId, {
-              tl: { col: 10, row: numFila - 1 },
-              ext: { width: 80, height: 75 }
-            });
-          }
-        }
-
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `Reporte_Gestiones_NPS_${Date.now()}.xlsx`;
-        link.click();
-
-        btnExport.disabled = false;
-        btnExport.innerHTML = textoOriginal;
-      } catch(e) {
-        btnExport.disabled = false;
-        btnExport.innerHTML = textoOriginal;
-        alert("Error al generar el archivo Excel: " + e.toString());
       }
     }
 
