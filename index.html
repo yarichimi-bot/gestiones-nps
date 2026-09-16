@@ -684,27 +684,44 @@
         let codigo = item.codigoCliente || item.idGestion || 'S/C';
         let usuario = item.nombreUsuario || 'Cliente General';
         let telefono = item.telefono || 'Sin Teléfono';
+        let otNum = item.numeroOT || 'Sin OT';
         
         let telLlamar = (telefono && telefono !== 'Sin Teléfono') ? 
-          `<a href="tel:${telefono}" class="btn btn-xs btn-outline-warning p-1 px-2 small"><i class="bi bi-telephone-fill me-1"></i>${telefono}</a>` : 
-          '<span class="text-secondary small">Sin Tel.</span>';
+          `<a href="tel:${telefono}" class="btn btn-sm btn-outline-warning fw-bold flex-fill"><i class="bi bi-telephone-fill me-1"></i>Llamar</a>` : '';
+
+        let btnWs = (telefono && telefono !== 'Sin Teléfono') ? 
+          `<a href="https://wa.me/591${telefono.toString().replace(/[^0-9]/g, '')}" target="_blank" class="btn btn-sm btn-success fw-bold flex-fill"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>` : '';
 
         contenedor.innerHTML += `
-          <div class="order-card mb-2">
+          <div class="order-card mb-3">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
-                <strong class="text-primary fs-6">${codigo}</strong>
                 <span class="badge-subtle badge-pending">Pendiente</span>
+                <span class="text-info fw-semibold" style="font-size: 0.72rem;"><i class="bi bi-hdd-network me-1"></i>HFC • En SLA</span>
               </div>
-              <div class="fw-bold text-light mb-1" style="font-size: 0.9rem;">${usuario}</div>
-              <div class="d-flex justify-content-between align-items-center my-2 bg-dark p-2 rounded border border-secondary border-opacity-25">
-                <span class="text-secondary small">Teléfono NPS:</span>
-                ${telLlamar}
+              <h6 class="fw-bold text-white m-0">Cliente #${codigo}</h6>
+              <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${usuario} • OT #${otNum}</small>
+              
+              <div class="meta-grid mb-2">
+                <div class="meta-item">
+                  <span class="text-secondary d-block" style="font-size: 0.65rem;">ASIGNACIÓN</span>
+                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${item.fechaAsignacion || 'Hoy'}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="text-secondary d-block" style="font-size: 0.65rem;">TELÉFONO</span>
+                  <span class="text-warning fw-semibold" style="font-size: 0.75rem;">${telefono}</span>
+                </div>
               </div>
             </div>
-            <div class="d-flex gap-2 mt-3">
+
+            <div class="d-flex gap-2 mt-2">
+              ${telLlamar}
+              ${btnWs}
+            </div>
+
+            <div class="d-flex gap-2 mt-2 border-top border-secondary border-opacity-25 pt-2">
               <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
-              <button class="btn btn-sm btn-success flex-fill fw-bold py-2" onclick="abrirModal(${item.fila}, '${item.numeroOT || ''}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
+              <button class="btn btn-sm btn-primary flex-fill fw-bold py-2" onclick="abrirModal(${item.fila}, '${otNum}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
             </div>
           </div>`;
       });
@@ -737,21 +754,30 @@
         let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
 
         contenedor.innerHTML += `
-          <div class="order-card mb-2 ${isConflict ? 'conflictive' : ''}">
+          <div class="order-card mb-3 ${isConflict ? 'conflictive' : ''}">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
-                <strong class="text-primary fs-6">${r.codigoCliente || 'S/C'}</strong>
                 <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
+                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT || 'S/N'}</small>
               </div>
-              <div class="fw-bold text-light mb-1" style="font-size: 0.85rem;">${r.nombreUsuario || 'Cliente'}</div>
-              <div class="meta-grid">
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono || 'Sin Tel.'}</span></div>
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">FECHA GESTIÓN</span><span class="text-light" style="font-size: 0.72rem;">${r.fechaGestion || 'N/A'}</span></div>
+              <h6 class="fw-bold text-white m-0">Cliente #${r.codigoCliente || 'S/C'}</h6>
+              <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${r.nombreUsuario || 'Cliente'}</small>
+
+              <div class="meta-grid mb-2">
+                <div class="meta-item">
+                  <span class="text-secondary d-block" style="font-size: 0.65rem;">TELÉFONO</span>
+                  <span class="text-warning fw-semibold" style="font-size: 0.75rem;">${r.telefono || 'Sin Tel.'}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="text-secondary d-block" style="font-size: 0.65rem;">FECHA GESTIÓN</span>
+                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${r.fechaGestion || 'N/A'}</span>
+                </div>
               </div>
             </div>
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
-              <button class="btn btn-xs btn-outline-info p-1 px-2 small" onclick="verDetallesOrdenTecnico(${index}, 'HISTORICO')">Detalles</button>
-              ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-info p-1 px-2 small" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')">Ver Foto</button>` : '<span class="text-secondary small">Sin Foto</span>'}
+
+            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary border-opacity-25">
+              <button class="btn btn-xs btn-outline-info p-1 px-3 small fw-bold" onclick="verDetallesOrdenTecnico(${index}, 'HISTORICO')"><i class="bi bi-eye me-1"></i>Detalles</button>
+              ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-3 small fw-bold" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')"><i class="bi bi-image me-1"></i>Ver Evidencia</button>` : '<span class="text-secondary small">Sin Foto</span>'}
             </div>
           </div>`;
       });
