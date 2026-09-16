@@ -15,6 +15,7 @@
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
     :root { 
@@ -127,6 +128,10 @@
     .form-control, .form-select { background-color: #0b1329 !important; border-color: var(--card-border) !important; color: #ffffff !important; }
     .form-control:focus, .form-select:focus { border-color: var(--accent-blue) !important; box-shadow: none !important; }
 
+    .segmented-control { display: flex; background: #0b1329; border: 1px solid var(--card-border); border-radius: 12px; padding: 4px; }
+    .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border: none; padding: 8px; font-weight: 600; font-size: 0.8rem; border-radius: 8px; }
+    .segmented-control .nav-link.active { background: var(--card-bg); color: #ffffff; }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -238,7 +243,7 @@
       </div>
     </div>
 
-    <!-- VISTA ADMIN / SUPERVISOR -->
+    <!-- VISTA ADMIN / SUPERVISOR COMPLETA -->
     <div id="view-admin" class="hidden">
       <div class="bi-card-dark mb-3">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -246,10 +251,11 @@
             <div class="bg-primary bg-opacity-25 text-primary p-2 rounded-3 border border-primary border-opacity-25"><i class="bi bi-speedometer2 fs-4"></i></div>
             <div>
               <h6 class="fw-bold m-0 text-white" id="admin-header-titulo">DATARED GLOBAL - PANEL EJECUTIVO</h6>
-              <small class="text-info fw-bold" style="font-size: 0.72rem;" id="admin-header-region">ZONA: NACIONAL</small>
+              <small class="text-info fw-bold" style="font-size: 0.72rem;" id="admin-header-region">ÁREA: CARGANDO... | DEP: TODO</small>
             </div>
           </div>
           <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button class="btn btn-sm btn-outline-info fw-bold" onclick="abrirModalCargaExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Cargar / Conciliar Excel</button>
             <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
               <option value="dia">Hoy / 24h</option>
               <option value="semana">Últimos 7 días</option>
@@ -259,17 +265,73 @@
           </div>
         </div>
 
+        <!-- FILTROS GEOGRÁFICOS -->
+        <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary border-opacity-25">
+          <div class="col-6 col-md-3">
+            <label class="form-label text-secondary small m-0 mb-1" style="font-size: 0.7rem;"><i class="bi bi-geo-alt me-1"></i>Departamento:</label>
+            <select id="select-filtro-dept" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="cargarDashboard()">
+              <option value="TODOS">-- Todos los Departamentos --</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label text-secondary small m-0 mb-1" style="font-size: 0.7rem;"><i class="bi bi-building me-1"></i>Ciudad:</label>
+            <select id="select-filtro-ciudad" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="cargarDashboard()">
+              <option value="TODAS">-- Todas las Ciudades --</option>
+            </select>
+          </div>
+        </div>
+
         <div class="row g-2 text-center">
           <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl">TOTAL</div><div class="val text-light" id="kpi-total">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-success">GESTIONADOS</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-secondary">SIN GESTIÓN (144H)</div><div class="val text-secondary" id="kpi-sin-gestion">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-danger">CONFLICTIVOS</div><div class="val text-danger" id="kpi-conflictivos">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip border-info"><div class="lbl text-info">% AVANCE</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-success">PROMOTORES (9-10)</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-warning">PASIVOS (7-8)</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-secondary">SIN GESTIÓN</div><div class="val text-secondary" id="kpi-sin-gestion">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-danger">DETRACTORES (0-6)</div><div class="val text-danger" id="kpi-conflictivos">0</div></div></div>
+          <div class="col-4 col-md-2"><div class="kpi-strip border-info"><div class="lbl text-info">% NPS ESTIMADO</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
         </div>
       </div>
 
-      <div id="sec-general">
+      <!-- CONTROL SEGMENTADO Y MEDIDORES RECONSTRUIDOS -->
+      <div class="segmented-control mb-3">
+        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-pie-chart-fill me-1"></i> Resumen Visual</button>
+        <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-card-checklist me-1"></i> Detalle y Filtros</button>
+      </div>
+
+      <div id="sec-tecnicos">
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-5">
+            <div class="bi-card-dark text-center h-100 d-flex flex-column justify-content-between">
+              <h6 class="fw-bold text-secondary small">BALANCE DE PUNTUACIÓN NPS</h6>
+              <div style="position: relative; max-width: 240px; margin: auto;">
+                <canvas id="gaugeChart"></canvas>
+                <div style="position: absolute; bottom: 10px; left: 0; right: 0;">
+                  <h2 class="fw-bold m-0 text-white" id="gauge-score-val">0%</h2>
+                  <span class="badge bg-success" id="gauge-score-lbl">Promotores</span>
+                </div>
+              </div>
+              <div class="row g-1 pt-3 border-top border-secondary mt-2">
+                <div class="col-4"><small class="text-danger d-block fw-bold" id="pct-detractores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Detractores</span></div>
+                <div class="col-4"><small class="text-warning d-block fw-bold" id="pct-neutros">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Pasivos</span></div>
+                <div class="col-4"><small class="text-success d-block fw-bold" id="pct-promotores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Promotores</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-7">
+            <div class="bi-card-dark h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-secondary small m-0">Rendimiento por Técnico</h6>
+                <button class="btn btn-xs btn-outline-success p-1 px-2" style="font-size: 0.75rem;" onclick="exportarExcelConImagenes(event)"><i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel</button>
+              </div>
+              <div style="position: relative; height: 220px;">
+                <canvas id="barTecnicosChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="sec-general" class="hidden">
         <div class="bi-card-dark mb-3 p-3">
           <div class="row g-2">
             <div class="col-12 col-md-4">
@@ -279,13 +341,13 @@
               </select>
             </div>
             <div class="col-12 col-md-4">
-              <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-tag-fill me-1"></i> Estado:</label>
+              <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-tag-fill me-1"></i> Estado / Puntuación:</label>
               <select id="select-filtro-estado" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosDetalle()">
                 <option value="TODOS">-- Todos los Estados --</option>
-                <option value="Gestionado">Gestionado</option>
+                <option value="Gestionado">Gestionado (Promotor)</option>
                 <option value="Pendiente">Pendiente</option>
                 <option value="No le llego la encuesta">No le llegó la encuesta</option>
-                <option value="UU conflictivo">UU conflictivo</option>
+                <option value="UU conflictivo">UU conflictivo (Detractor)</option>
               </select>
             </div>
             <div class="col-12 col-md-4">
@@ -321,7 +383,28 @@
     </button>
   </div>
 
-  <!-- MODAL DE GESTIÓN CON RESPALDO FOTOGRÁFICO OBLIGATORIO -->
+  <!-- MODAL DE CARGA / CONCILIACIÓN DE EXCEL NACIONAL -->
+  <div class="modal fade" id="modalCargaExcel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white border-secondary">
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Cargar Excel Nacional / Conciliar Encuestas</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-secondary mb-3">Sube el reporte nacional para cruzar la puntuación real de encuestas (0-10) con las gestiones realizadas.</p>
+          <input type="file" id="input-file-excel" class="form-control bg-dark text-white border-secondary mb-3" accept=".xlsx, .xls, .csv">
+          <div id="resultado-carga-excel" class="small hidden p-2 rounded"></div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="btn-procesar-excel" class="btn btn-sm btn-primary fw-bold" onclick="procesarArchivoExcel()"><i class="bi bi-cloud-upload me-1"></i> Procesar y Conciliar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE GESTIÓN DE CAMPO CON SELECCIÓN DE NOTA PROYECTADA -->
   <div class="modal fade" id="modalGestion" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -335,11 +418,23 @@
           
           <div class="mb-3">
             <label class="form-label small text-secondary fw-semibold">Estado de la Gestión *</label>
-            <select id="modal-estado" class="form-select bg-dark text-white border-secondary">
-              <option value="Gestionado">Gestionado (Encuesta enviada)</option>
+            <select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="actualizarScoreProyectado()">
+              <option value="Gestionado">Gestionado (Encuesta Enviada)</option>
               <option value="No le llego la encuesta">No le llegó la encuesta</option>
               <option value="Telefono no corresponde / Apagado">Teléfono no corresponde / Apagado</option>
-              <option value="UU conflictivo">UU conflictivo</option>
+              <option value="UU conflictivo">UU conflictivo (Reclamo)</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small text-secondary fw-semibold">Calificación Estimada del Cliente (0-10)</label>
+            <select id="modal-score-estimado" class="form-select bg-dark text-white border-secondary">
+              <option value="10">10 - Promotor Puro (Excelente)</option>
+              <option value="9">9 - Promotor (Muy Bueno)</option>
+              <option value="8">8 - Pasivo (Satisfecho)</option>
+              <option value="7">7 - Pasivo (Regular)</option>
+              <option value="5">5 - Detractor (Insatisfecho)</option>
+              <option value="0">0 - Detractor Severo</option>
             </select>
           </div>
 
@@ -351,13 +446,11 @@
             </select>
           </div>
 
-          <!-- OBSERVACIÓN PERMANENTE -->
           <div class="mb-3">
             <label class="form-label small text-warning fw-bold"><i class="bi bi-pencil-square me-1"></i>Observación / Comentario de Campo</label>
-            <textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Escriba aquí detalles relevantes de la visita o contacto..."></textarea>
+            <textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Escriba detalles relevantes..."></textarea>
           </div>
 
-          <!-- FOTO OBLIGATORIA -->
           <div class="mb-3 p-3 rounded border border-warning border-opacity-25 bg-dark bg-opacity-50">
             <label class="form-label small text-warning fw-bold d-block text-center mb-2">
               <i class="bi bi-camera-fill me-1"></i>Respaldo Fotográfico OBLIGATORIO *
@@ -384,7 +477,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE DETALLES LIMPIO (SIN REPETIR LLAMAR/WHATSAPP) -->
+  <!-- MODAL FICHA TÉCNICA Y SCORE REAL DE ENCUESTA -->
   <div class="modal fade" id="modalDetalleOrden" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -399,7 +492,7 @@
           <div class="detail-row"><div class="detail-label">Técnico Asignado</div><div class="detail-val fw-bold text-info" id="det-tecnico">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Fecha Asignación</div><div class="detail-val" id="det-fecha">N/A</div></div>
           <div class="detail-row"><div class="detail-label text-info">Fecha de Gestión</div><div class="detail-val text-info fw-bold" id="det-fecha-gestion">Pendiente</div></div>
-          <div class="detail-row"><div class="detail-label text-success">Tiempo de Respuesta</div><div class="detail-val text-success fw-bold" id="det-tiempo-respuesta">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-success">Puntuación Encuesta (0-10)</div><div class="detail-val text-success fw-bold" id="det-score-real">10 (Promotor Estimado)</div></div>
           <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-val" id="det-estado">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val" id="det-ot">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
@@ -431,7 +524,7 @@
 
     let usuarioActual = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [];
-    let archivoFotoSeleccionado = null, base64Compresion = null;
+    let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
     let conteoAnteriorPendientes = -1;
 
     function togglePasswordVisibility() {
@@ -459,20 +552,29 @@
     function solicitarPermisoNotificaciones() {
       if ("Notification" in window) {
         Notification.requestPermission().then(permission => {
-          if (permission === "granted") {
-            alert("Notificaciones activadas con éxito.");
-          } else {
-            alert("Las notificaciones fueron denegadas.");
-          }
+          if (permission === "granted") alert("Notificaciones activadas con éxito.");
         });
-      } else {
-        alert("Este dispositivo no soporta notificaciones automáticas.");
       }
     }
 
     function emitirNotificacionNativa(titulo, mensaje) {
       if ("Notification" in window && Notification.permission === "granted") {
         new Notification(titulo, { body: mensaje, icon: 'logo.png' });
+      }
+    }
+
+    function cambiarPestana(pestana) {
+      document.getElementById('tab-tecnicos-btn').classList.remove('active');
+      document.getElementById('tab-general-btn').classList.remove('active');
+
+      if (pestana === 'tecnicos') {
+        document.getElementById('tab-tecnicos-btn').classList.add('active');
+        document.getElementById('sec-tecnicos').classList.remove('hidden');
+        document.getElementById('sec-general').classList.add('hidden');
+      } else {
+        document.getElementById('tab-general-btn').classList.add('active');
+        document.getElementById('sec-tecnicos').classList.add('hidden');
+        document.getElementById('sec-general').classList.remove('hidden');
       }
     }
 
@@ -543,7 +645,6 @@
         document.getElementById('perfil-correo').innerText = res.usuario || '';
         document.getElementById('perfil-avatar').innerText = (res.nombre || 'T').charAt(0).toUpperCase();
 
-        // Cargar caché local primero para velocidad
         const cachePendientes = localStorage.getItem(`cache_pendientes_${res.usuario}`);
         if (cachePendientes) {
           pendientesTecnicoActual = JSON.parse(cachePendientes);
@@ -551,7 +652,6 @@
         }
 
         navegarBottom('inicio');
-        // Polling para notificaciones
         setInterval(cargarPendientesTecnico, 45000);
       } else {
         document.getElementById('view-admin').classList.remove('hidden');
@@ -559,7 +659,7 @@
         document.getElementById('app-bottom-nav').classList.add('hidden');
 
         document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
-        document.getElementById('admin-header-region').innerText = `ÁREA: ${res.area || 'REGIONAL'} | DEP: ${res.departamento}`;
+        document.getElementById('admin-header-region').innerText = `ÁREA: ${res.area || 'Encargado Nacional'} | DEP: ${res.departamento || 'TODOS'}`;
         cargarDashboard();
       }
     }
@@ -573,9 +673,7 @@
             body: JSON.stringify({ accion: accion, ...dataPayload }),
             redirect: "follow"
           });
-          if (response.ok) {
-            return JSON.parse(await response.text());
-          }
+          if (response.ok) return JSON.parse(await response.text());
         } catch (e) {
           if (i === reintentos) throw e;
           await new Promise(r => setTimeout(r, 1000));
@@ -608,9 +706,7 @@
           if (alertBox) {
             alertBox.innerText = res.mensaje || "Credenciales no válidas";
             alertBox.classList.remove('hidden');
-          } else {
-            alert(res.mensaje || "Credenciales no válidas");
-          }
+          } else { alert(res.mensaje || "Credenciales no válidas"); }
         }
       } catch(e) {
         btnLogin.disabled = false;
@@ -622,16 +718,38 @@
     function formatearFechaCorta(fechaStr) {
       if (!fechaStr) return 'Hoy';
       try {
-        if (fechaStr.includes('GMT') || fechaStr.includes('00:00:00')) {
-          const d = new Date(fechaStr);
-          if (!isNaN(d.getTime())) {
-            return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-          }
+        const parts = fechaStr.toString().split('T')[0].split(' ')[0].split('/');
+        if (parts.length === 3) return `${parts[0].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[2]}`;
+        const d = new Date(fechaStr);
+        if (!isNaN(d.getTime())) {
+          return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
         return fechaStr;
-      } catch(e) {
-        return fechaStr;
-      }
+      } catch(e) { return fechaStr; }
+    }
+
+    function generarUrlWhatsApp(telefono, codigoCliente, nombreUsuario, nombreTecnico) {
+      let numLimpio = telefono.toString().replace(/[^0-9]/g, '');
+      let horaActual = new Date().getHours();
+      let saludoHora = "Estimado cliente, buenas tardes. 👋";
+
+      if (horaActual >= 0 && horaActual < 12) saludoHora = "Estimado cliente, buenos días. ☀️";
+      else if (horaActual >= 12 && horaActual < 19) saludoHora = "Estimado cliente, buenas tardes. 👋";
+      else saludoHora = "Estimado cliente, buenas noches. 🌙";
+
+      let tecNombre = nombreTecnico || (usuarioActual ? usuarioActual.nombre : 'Servicio Técnico');
+      let mensajeWs = `${saludoHora}\n\nLe escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codigoCliente || 'N/A'}* (${nombreUsuario || 'Estimado Cliente'}).\n\nMi nombre es *${tecNombre}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.\n\nEn caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo por favor un *10* 😁. Su calificación es muy importante para mí.\n\n¡Muchas gracias por su apoyo! 🙌`;
+
+      return `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
+    }
+
+    function actualizarScoreProyectado() {
+      const est = document.getElementById('modal-estado').value;
+      const scoreSelect = document.getElementById('modal-score-estimado');
+      if (est === 'Gestionado') scoreSelect.value = "10";
+      else if (est === 'No le llego la encuesta') scoreSelect.value = "8";
+      else if (est === 'UU conflictivo') scoreSelect.value = "5";
+      else scoreSelect.value = "7";
     }
 
     async function cargarPendientesTecnico() {
@@ -641,7 +759,6 @@
         
         localStorage.setItem(`cache_pendientes_${usuarioActual.usuario}`, JSON.stringify(pendientesTecnicoActual));
 
-        // Detectar nuevos códigos asignados para enviar notificación
         if (conteoAnteriorPendientes !== -1 && pendientesTecnicoActual.length > conteoAnteriorPendientes) {
           emitirNotificacionNativa("Nuevos Códigos Asignados", `Tiene ${pendientesTecnicoActual.length} órdenes pendientes por gestionar.`);
         }
@@ -654,9 +771,7 @@
         if (pendientesTecnicoActual.length > 0) {
           badgeEl.innerText = pendientesTecnicoActual.length;
           badgeEl.classList.remove('hidden');
-        } else {
-          badgeEl.classList.add('hidden');
-        }
+        } else { badgeEl.classList.add('hidden'); }
 
         renderizarPendientesTecnicoUI();
       } catch(e) {}
@@ -680,8 +795,9 @@
         let telLlamar = (telefono && telefono !== 'Sin Teléfono') ? 
           `<a href="tel:${telefono}" class="btn btn-sm btn-outline-warning fw-bold flex-fill"><i class="bi bi-telephone-fill me-1"></i>Llamar</a>` : '';
 
+        let urlWs = (telefono && telefono !== 'Sin Teléfono') ? generarUrlWhatsApp(telefono, codigo, usuario, item.tecnicoAsignado) : '#';
         let btnWs = (telefono && telefono !== 'Sin Teléfono') ? 
-          `<a href="https://wa.me/591${telefono.toString().replace(/[^0-9]/g, '')}" target="_blank" class="btn btn-sm btn-success fw-bold flex-fill"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>` : '';
+          `<a href="${urlWs}" target="_blank" class="btn btn-sm btn-success fw-bold flex-fill"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>` : '';
 
         contenedor.innerHTML += `
           <div class="order-card mb-3">
@@ -724,9 +840,7 @@
         const lista = await apiCall("obtenerHistoricoTecnico", { correoTecnico: usuarioActual.usuario });
         historicoTecnicoActual = Array.isArray(lista) ? lista : [];
         document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
-      } catch(e) { 
-        historicoTecnicoActual = []; 
-      }
+      } catch(e) { historicoTecnicoActual = []; }
       
       contenedor.innerHTML = '';
       if (!historicoTecnicoActual || historicoTecnicoActual.length === 0) {
@@ -772,6 +886,219 @@
       });
     }
 
+    async function cargarDashboard() {
+      const per = document.getElementById('select-periodo').value;
+      const filtroDeptEl = document.getElementById('select-filtro-dept');
+      const filtroCiuEl = document.getElementById('select-filtro-ciudad');
+
+      const esNacional = usuarioActual.area && usuarioActual.area.toUpperCase().includes('NACIONAL');
+      const esDepartamental = usuarioActual.area && usuarioActual.area.toUpperCase().includes('DEPARTAMENTAL');
+
+      if (!esNacional && filtroDeptEl) {
+        filtroDeptEl.innerHTML = `<option value="${usuarioActual.departamento}">${usuarioActual.departamento}</option>`;
+        filtroDeptEl.disabled = true;
+      }
+
+      if (!esNacional && !esDepartamental && filtroCiuEl) {
+        filtroCiuEl.innerHTML = `<option value="${usuarioActual.ciudad}">${usuarioActual.ciudad}</option>`;
+        filtroCiuEl.disabled = true;
+      }
+
+      const deptVal = filtroDeptEl ? filtroDeptEl.value : usuarioActual.departamento;
+      const ciuVal = filtroCiuEl ? filtroCiuEl.value : usuarioActual.ciudad;
+
+      try {
+        const res = await apiCall("obtenerDatosDashboard", {
+          usuario: usuarioActual.usuario,
+          rol: usuarioActual.rol,
+          departamento: deptVal,
+          ciudad: ciuVal,
+          periodo: per
+        });
+
+        if (esNacional && filtroDeptEl && res.departamentos) {
+          let currDept = filtroDeptEl.value;
+          filtroDeptEl.innerHTML = '<option value="TODOS">-- Todos los Departamentos --</option>';
+          res.departamentos.forEach(d => {
+            filtroDeptEl.innerHTML += `<option value="${d}" ${d === currDept ? 'selected' : ''}>${d}</option>`;
+          });
+        }
+
+        if ((esNacional || esDepartamental) && filtroCiuEl && res.ciudades) {
+          let currCiu = filtroCiuEl.value;
+          filtroCiuEl.innerHTML = '<option value="TODAS">-- Todas las Ciudades --</option>';
+          res.ciudades.forEach(c => {
+            filtroCiuEl.innerHTML += `<option value="${c}" ${c === currCiu ? 'selected' : ''}>${c}</option>`;
+          });
+        }
+
+        const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos + (res.kpis.sinGestion || 0);
+        
+        document.getElementById('kpi-total').innerText = tot;
+        document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
+        document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
+        document.getElementById('kpi-sin-gestion').innerText = res.kpis.sinGestion || 0;
+        document.getElementById('kpi-conflictivos').innerText = res.kpis.conflictivos;
+
+        const pct = tot > 0 ? Math.round((res.kpis.gestionados / tot) * 100) : 0;
+        document.getElementById('kpi-pct-prom').innerText = pct + "%";
+        document.getElementById('gauge-score-val').innerText = pct + "%";
+
+        document.getElementById('pct-promotores').innerText = pct + "%";
+        document.getElementById('pct-neutros').innerText = (tot > 0 ? Math.round((res.kpis.pendientes / tot) * 100) : 0) + "%";
+        document.getElementById('pct-detractores').innerText = (tot > 0 ? Math.round((res.kpis.conflictivos / tot) * 100) : 0) + "%";
+
+        const selectFiltroTec = document.getElementById('select-filtro-tecnico');
+        selectFiltroTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
+        res.tecnicos.forEach(t => {
+          selectFiltroTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
+        });
+
+        renderizarGraficoGauge(pct);
+        renderizarGraficoBarras(res.tecnicos);
+
+        todosLosRegistros = res.registros;
+        aplicarFiltrosDetalle();
+      } catch(e) { console.log("Error dashboard", e); }
+    }
+
+    function renderizarGraficoGauge(pctVal) {
+      const ctx = document.getElementById('gaugeChart').getContext('2d');
+      if (chartGauge) chartGauge.destroy();
+
+      chartGauge = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Promotores', 'Pasivos/Detractores'],
+          datasets: [{
+            data: [pctVal, 100 - pctVal],
+            backgroundColor: ['#10b981', '#23335a'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          rotation: -90,
+          circumference: 180,
+          cutout: '75%',
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderizarGraficoBarras(tecnicos) {
+      const ctx = document.getElementById('barTecnicosChart').getContext('2d');
+      if (chartBar) chartBar.destroy();
+
+      const nombres = tecnicos.map(t => t.nombre);
+      const avances = tecnicos.map(t => t.pctAvance);
+
+      chartBar = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: nombres,
+          datasets: [{
+            label: '% Cumplimiento',
+            data: avances,
+            backgroundColor: '#38bdf8',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { 
+            x: { max: 100, ticks: { color: '#8e9bb4', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#f8fafc' }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function aplicarFiltrosDetalle() {
+      const tecSel = document.getElementById('select-filtro-tecnico').value.toLowerCase();
+      const estSel = document.getElementById('select-filtro-estado').value;
+      const q = document.getElementById('input-buscar').value.toLowerCase();
+
+      let resultado = todosLosRegistros;
+
+      if (tecSel !== 'todos') {
+        resultado = resultado.filter(r => r.tecnico && r.tecnico.toLowerCase() === tecSel);
+      }
+
+      if (estSel !== 'TODOS') {
+        resultado = resultado.filter(r => {
+          if (estSel === 'Sin Gestion') return r.estado === 'Sin Gestion' || r.estado === 'Sin gestion';
+          return r.estado === estSel;
+        });
+      }
+
+      if (q.trim()) {
+        resultado = resultado.filter(r => 
+          (r.tecnico && r.tecnico.toLowerCase().includes(q)) || 
+          (r.nombreUsuario && r.nombreUsuario.toLowerCase().includes(q)) || 
+          (r.codigoCliente && r.codigoCliente.toString().toLowerCase().includes(q)) || 
+          (r.telefono && r.telefono.toString().toLowerCase().includes(q)) || 
+          (r.numeroOT && r.numeroOT.toString().toLowerCase().includes(q))
+        );
+      }
+
+      renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
+    }
+
+    function renderizarTarjetasAdmin(lista, idContenedor) {
+      const contenedor = document.getElementById(idContenedor);
+      contenedor.innerHTML = '';
+      if (lista.length === 0) {
+        contenedor.innerHTML = '<div class="text-secondary text-center small py-4 col-12">No hay órdenes que coincidan con los filtros.</div>';
+        return;
+      }
+
+      lista.forEach(r => {
+        const isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
+        const isSinGestion = r.estado === 'Sin Gestion' || r.estado === 'Sin gestion';
+        
+        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : (isSinGestion ? 'badge-expired' : 'badge-pending'));
+        const indexOriginal = todosLosRegistros.indexOf(r);
+
+        let subtextoFecha = r.fechaGestion ? 
+          `<span class="text-info" style="font-size: 0.68rem;">Gestión: ${formatearFechaCorta(r.fechaGestion)}</span>` : 
+          '<span class="text-secondary" style="font-size: 0.68rem;">Sin fecha de gestión</span>';
+
+        let otClave = r.numeroOT || r.codigoCliente || '';
+        let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
+        let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
+
+        contenedor.innerHTML += `
+          <div class="order-card ${isConflict ? 'conflictive' : ''}">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
+                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT}</small>
+              </div>
+              <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombreUsuario}</div>
+              <div class="meta-grid">
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">CLIENTE</span><strong class="text-light">${r.codigoCliente}</strong></div>
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
+              </div>
+              <div class="mt-2 p-1 px-2 bg-dark rounded border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                ${subtextoFecha}
+              </div>
+              ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Informe:</strong> ${r.observacion}</div>` : ''}
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
+              <span class="text-secondary fw-bold" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
+              <div class="d-flex gap-1">
+                <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenAdmin(${indexOriginal})"><i class="bi bi-eye me-1"></i>Detalles</button>
+                ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')">Foto</button>` : ''}
+              </div>
+            </div>
+          </div>`;
+      });
+    }
+
     function verDetallesOrdenTecnico(index, origen) {
       let item = (origen === 'PENDIENTE') ? pendientesTecnicoActual[index] : historicoTecnicoActual[index];
       if (!item) return;
@@ -784,7 +1111,13 @@
       
       const fechaG = item.fechaGestion;
       document.getElementById('det-fecha-gestion').innerText = fechaG ? formatearFechaCorta(fechaG) : 'Pendiente de Gestión';
-      document.getElementById('det-tiempo-respuesta').innerText = fechaG ? "Gestionado" : "En proceso";
+      
+      let notaTexto = "10 (Promotor Estimado)";
+      if (item.scoreReal) notaTexto = `${item.scoreReal} (Real Nacional)`;
+      else if (item.estado === 'No le llego la encuesta') notaTexto = "8 (Pasivo Estimado)";
+      else if (item.estado === 'UU conflictivo') notaTexto = "5 (Detractor Estimado)";
+
+      document.getElementById('det-score-real').innerText = notaTexto;
 
       document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
       document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
@@ -797,9 +1130,43 @@
       if (item.observacion) {
         document.getElementById('det-observacion').innerText = item.observacion;
         boxObs.classList.remove('hidden');
-      } else {
-        boxObs.classList.add('hidden');
-      }
+      } else { boxObs.classList.add('hidden'); }
+
+      abrirModalBS('modalDetalleOrden');
+    }
+
+    function verDetallesOrdenAdmin(index) {
+      let item = todosLosRegistros[index];
+      if (!item) return;
+
+      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
+      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
+      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
+      document.getElementById('det-tecnico').innerText = item.tecnico || 'Sin Asignar';
+      document.getElementById('det-fecha').innerText = formatearFechaCorta(item.fechaAsignacion);
+      
+      const fechaG = item.fechaGestion;
+      document.getElementById('det-fecha-gestion').innerText = fechaG ? formatearFechaCorta(fechaG) : 'Pendiente de Gestión';
+      
+      let notaTexto = "10 (Promotor Estimado)";
+      if (item.scoreReal) notaTexto = `${item.scoreReal} (Real Nacional)`;
+      else if (item.estado === 'No le llego la encuesta') notaTexto = "8 (Pasivo Estimado)";
+      else if (item.estado === 'UU conflictivo') notaTexto = "5 (Detractor Estimado)";
+
+      document.getElementById('det-score-real').innerText = notaTexto;
+
+      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
+      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
+
+      let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
+      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+      document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
+
+      const boxObs = document.getElementById('det-box-obs');
+      if (item.observacion) {
+        document.getElementById('det-observacion').innerText = item.observacion;
+        boxObs.classList.remove('hidden');
+      } else { boxObs.classList.add('hidden'); }
 
       abrirModalBS('modalDetalleOrden');
     }
@@ -808,6 +1175,7 @@
       document.getElementById('modal-fila').value = fila;
       document.getElementById('modal-ot').value = numeroOT || '';
       document.getElementById('modal-estado').value = 'Gestionado';
+      document.getElementById('modal-score-estimado').value = '10';
       document.getElementById('modal-observacion').value = '';
       archivoFotoSeleccionado = null;
       base64Compresion = null;
@@ -898,10 +1266,10 @@
       const fila = document.getElementById('modal-fila').value;
       const numeroOT = document.getElementById('modal-ot').value;
       const estado = document.getElementById('modal-estado').value;
+      const scoreEstimado = document.getElementById('modal-score-estimado').value;
       const resultado = document.getElementById('modal-resultado').value;
       const obs = document.getElementById('modal-observacion').value;
 
-      // VALIDACIÓN ESTRICTA DE FOTO OBLIGATORIA
       if (!base64Compresion && !archivoFotoSeleccionado) {
         alert("⚠ DEBE ADJUNTAR UNA FOTO DE RESPALDO OBLIGATORIAMENTE. No se puede guardar la gestión sin evidencia fotográfica.");
         return;
@@ -914,21 +1282,18 @@
       let b64Foto = base64Compresion || "";
 
       if (archivoFotoSeleccionado && !b64Foto) {
-        try {
-          b64Foto = await convertirYComprimirFoto(archivoFotoSeleccionado);
-        } catch(e) {}
+        try { b64Foto = await convertirYComprimirFoto(archivoFotoSeleccionado); } catch(e) {}
       }
 
       if (b64Foto) {
-        try {
-          localStorage.setItem(`evidencia_ot_${numeroOT}`, b64Foto);
-        } catch(e) {}
+        try { localStorage.setItem(`evidencia_ot_${numeroOT}`, b64Foto); } catch(e) {}
       }
 
       const payload = { 
         fila: fila, 
         numeroOT: numeroOT,
         estado: estado, 
+        scoreEstimado: scoreEstimado,
         resultado: resultado, 
         observacion: obs, 
         fotoBase64: b64Foto
@@ -978,6 +1343,10 @@
       
       imgElement.classList.remove('hidden');
       abrirModalBS('modalVisorFoto');
+    }
+
+    function abrirModalCargaExcel() {
+      abrirModalBS('modalCargaExcel');
     }
 
     function cerrarSesion() {
