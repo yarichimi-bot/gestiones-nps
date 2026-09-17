@@ -377,7 +377,6 @@
             </div>
           </div>
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <button class="btn btn-sm btn-outline-info fw-bold" onclick="abrirModalCargaExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Cargar / Conciliar Excel</button>
             <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
               <option value="dia">Hoy / 24h</option>
               <option value="semana">Últimos 7 días</option>
@@ -588,7 +587,7 @@
     </div>
   </div>
 
-  <!-- MODAL GESTIÓN -->
+  <!-- MODAL GESTIÓN CON FOTO OBLIGATORIA -->
   <div class="modal fade" id="modalGestion" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -603,7 +602,7 @@
           
           <div class="mb-3">
             <label class="form-label small text-secondary fw-semibold">Estado de la Gestión *</label>
-            <select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="actualizarScoreProyectado()">
+            <select id="modal-estado" class="form-select bg-dark text-white border-secondary">
               <option value="Gestionado">Gestionado (Encuesta Enviada)</option>
               <option value="No le llego la encuesta">No le llegó la encuesta</option>
               <option value="Telefono no corresponde / Apagado">Teléfono no corresponde / Apagado</option>
