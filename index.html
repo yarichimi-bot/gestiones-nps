@@ -572,7 +572,7 @@
               <div class="mb-1"><b>2.</b> En su bandeja ubique la cuenta correspondiente: para líneas Tigo le llega desde la cuenta <b>TIGO</b> y para otras compañías desde la cuenta <b>2820</b>.</div>
               <div class="mb-1"><b>3.</b> Ingrese al mensaje de texto y toque el enlace.</div>
               <div class="mb-1"><b>4.</b> En el mensaje de seguridad marque la casilla <b>"No soy un robot"</b>.</div>
-              <div class="mb-1"><b>5.</b> Califique al técnico con un <b>10</b> si su trabajo fue excelente (si tiene observaciones las anota abajo).</div>
+              <div class="mb-1"><b>5.</b> Califica al técnico con un <b>10</b> si su trabajo fue excelente (si tiene observaciones las anota abajo).</div>
               <div class="mb-1"><b>6.</b> Siga los pasos que le aparecen en pantalla para finalizar.</div>
             </div>
             <div class="text-warning small fw-bold text-center border-top border-secondary pt-2 mt-2">
@@ -897,33 +897,38 @@
     });
 
     function iniciarVistaSegunRol(res) {
-      document.getElementById('view-login').classList.add('hidden');
-      const esRolTecnico = res.esTecnico || (res.rol && res.rol.toLowerCase().includes('tec'));
+  document.getElementById('view-login').classList.add('hidden');
+  const esRolTecnico = res.esTecnico || (res.rol && res.rol.toLowerCase().includes('tec'));
 
-      if (esRolTecnico) {
-        document.getElementById('view-tecnico').classList.remove('hidden');
-        document.getElementById('view-admin').classList.add('hidden');
-        document.getElementById('app-bottom-nav').classList.remove('hidden');
+  if (esRolTecnico) {
+    document.getElementById('view-tecnico').classList.remove('hidden');
+    document.getElementById('view-admin').classList.add('hidden');
+    document.getElementById('app-bottom-nav').classList.remove('hidden');
 
-        document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
-        document.getElementById('perfil-nombre').innerText = res.nombre || 'Técnico';
-        document.getElementById('perfil-correo').innerText = res.usuario || '';
+    document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
+    document.getElementById('perfil-nombre').innerText = res.nombre || 'Técnico';
+    document.getElementById('perfil-correo').innerText = res.usuario || '';
 
-        cargarAvatarYDatosTecnico();
-        actualizarSaludoHora();
-        navegarBottom('inicio');
-        setInterval(cargarPendientesTecnico, 45000);
-      } else {
-        document.getElementById('view-admin').classList.remove('hidden');
-        document.getElementById('view-tecnico').classList.add('hidden');
-        document.getElementById('app-bottom-nav').classList.add('hidden');
+    cargarAvatarYDatosTecnico();
+    actualizarSaludoHora();
+    navegarBottom('inicio');
+    setInterval(cargarPendientesTecnico, 45000);
+  } else {
+    document.getElementById('view-admin').classList.remove('hidden');
+    document.getElementById('view-tecnico').classList.add('hidden');
+    document.getElementById('app-bottom-nav').classList.add('hidden');
 
-        document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
-        cargarDashboard();
-        cargarDirectorioTecnicosAdmin();
-      }
-    }
+    // Mapeo con el ROL y el AREA exactos de la hoja USUARIOS
+    let areaTexto = res.area || "Encargado Nacional";
+    let depTexto = res.departamento || "TODOS";
+    
+    document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
+    document.getElementById('admin-header-region').innerText = `ÁREA: ${areaTexto.toUpperCase()} | DEP: ${depTexto.toUpperCase()}`;
 
+    cargarDashboard();
+    cargarDirectorioTecnicosAdmin();
+  }
+}
     async function apiCall(accion, dataPayload = {}, reintentos = 2) {
       for (let i = 0; i <= reintentos; i++) {
         try {
