@@ -273,7 +273,7 @@
             <small class="text-info fw-bold" id="label-reloj-hora">--:--</small>
           </div>
           <h4 class="fw-extrabold text-white mb-1" id="label-saludo-animado">¡Hola! 👋</h4>
-          <p class="text-secondary small mb-3" id="label-sub-saludo">Listo para gestionar tus encuestas NPS de hoy.</p>
+          <p class="text-secondary small mb-3">Listo para gestionar tus encuestas NPS de hoy.</p>
           
           <div class="d-flex gap-2">
             <button class="btn btn-sm btn-primary fw-bold flex-fill py-2" onclick="navegarBottom('pendientes')">
@@ -373,7 +373,7 @@
             <div class="bg-primary bg-opacity-25 text-primary p-2 rounded-3 border border-primary border-opacity-25"><i class="bi bi-speedometer2 fs-4"></i></div>
             <div>
               <h6 class="fw-bold m-0 text-white" id="admin-header-titulo">DATARED GLOBAL - PANEL EJECUTIVO</h6>
-              <small class="text-info fw-bold" style="font-size: 0.72rem;" id="admin-header-region">ÁREA: CARGANDO... | DEP: TODO</small>
+              <small class="text-info fw-bold" style="font-size: 0.72rem;" id="admin-header-region">ÁREA: ENCARGADO NACIONAL | DEP: TODOS</small>
             </div>
           </div>
           <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -383,21 +383,6 @@
               <option value="mes" selected>Últimos 30 días</option>
             </select>
             <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
-          </div>
-        </div>
-
-        <div class="row g-2 mb-3 bg-dark p-2 rounded border border-secondary border-opacity-25">
-          <div class="col-6 col-md-3">
-            <label class="form-label text-secondary small m-0 mb-1" style="font-size: 0.7rem;"><i class="bi bi-geo-alt me-1"></i>Departamento:</label>
-            <select id="select-filtro-dept" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="cargarDashboard()">
-              <option value="TODOS">-- Todos los Departamentos --</option>
-            </select>
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label text-secondary small m-0 mb-1" style="font-size: 0.7rem;"><i class="bi bi-building me-1"></i>Ciudad:</label>
-            <select id="select-filtro-ciudad" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="cargarDashboard()">
-              <option value="TODAS">-- Todas las Ciudades --</option>
-            </select>
           </div>
         </div>
 
@@ -440,11 +425,6 @@
                   <span class="badge bg-success" id="gauge-score-lbl">NPS Neto</span>
                 </div>
               </div>
-              <div class="row g-1 pt-3 border-top border-secondary mt-2">
-                <div class="col-4"><small class="text-danger d-block fw-bold" id="pct-detractores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Detractores</span></div>
-                <div class="col-4"><small class="text-warning d-block fw-bold" id="pct-neutros">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Pasivos</span></div>
-                <div class="col-4"><small class="text-success d-block fw-bold" id="pct-promotores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Promotores</span></div>
-              </div>
             </div>
           </div>
 
@@ -469,29 +449,12 @@
       <div id="sec-general" class="hidden">
         <div class="bi-card-dark mb-3 p-3">
           <div class="row g-2">
-            <div class="col-12 col-md-4">
-              <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-person-fill me-1"></i> Técnico:</label>
-              <select id="select-filtro-tecnico" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosDetalle()">
-                <option value="TODOS">-- Todos los Técnicos --</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-tag-fill me-1"></i> Estado / Puntuación:</label>
-              <select id="select-filtro-estado" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosDetalle()">
-                <option value="TODOS">-- Todos los Estados --</option>
-                <option value="Gestionado">Gestionado (Promotor)</option>
-                <option value="Pendiente">Pendiente</option>
-                <option value="No le llego la encuesta">No le llegó la encuesta</option>
-                <option value="UU conflictivo">UU conflictivo (Detractor)</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-6">
               <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-search me-1"></i> Búsqueda rápida:</label>
               <input type="text" id="input-buscar" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Buscar OT, cliente..." onkeyup="aplicarFiltrosDetalle()">
             </div>
           </div>
         </div>
-        
         <div id="contenedor-dashboard" class="grid-dashboard"></div>
       </div>
     </div>
@@ -565,18 +528,11 @@
               <div class="text-light fw-bold" style="font-size: 0.8rem;">
                 "Para Tigo tu opinión es muy importante, ayúdanos contestando la siguiente encuesta: <span class="text-info text-decoration-underline">https://b.tigo.com/...</span>"
               </div>
-              <small class="text-success fw-bold d-block mt-1" style="font-size: 0.7rem;">Remitente: TIGO (Líneas Tigo) o 2820 (Otras empresas)</small>
             </div>
             <div class="text-start small text-light space-y-1 mb-2" style="font-size: 0.78rem;">
-              <div class="mb-1"><b>1.</b> Ingrese a su pantalla de inicio y busque su app de <b>Mensajes de Texto (SMS)</b> (no WhatsApp).</div>
-              <div class="mb-1"><b>2.</b> En su bandeja ubique la cuenta correspondiente: para líneas Tigo le llega desde la cuenta <b>TIGO</b> y para otras compañías desde la cuenta <b>2820</b>.</div>
-              <div class="mb-1"><b>3.</b> Ingrese al mensaje de texto y toque el enlace.</div>
-              <div class="mb-1"><b>4.</b> En el mensaje de seguridad marque la casilla <b>"No soy un robot"</b>.</div>
-              <div class="mb-1"><b>5.</b> Califica al técnico con un <b>10</b> si su trabajo fue excelente (si tiene observaciones las anota abajo).</div>
-              <div class="mb-1"><b>6.</b> Siga los pasos que le aparecen en pantalla para finalizar.</div>
-            </div>
-            <div class="text-warning small fw-bold text-center border-top border-secondary pt-2 mt-2">
-              🙌 ¡MUCHAS GRACIAS POR SU TIEMPO! ESTAREMOS ATENTOS A CUALQUIER CONSULTA.
+              <div class="mb-1"><b>1.</b> Ingrese a sus <b>Mensajes de Texto (SMS)</b>.</div>
+              <div class="mb-1"><b>2.</b> Abra la conversación remitida por <b>TIGO</b> o <b>2820</b>.</div>
+              <div class="mb-1"><b>3.</b> Presione el enlace, marque "No soy un robot" y califique con un <b>10</b>.</div>
             </div>
           </div>
           <button type="button" class="btn btn-sm btn-success fw-bold w-100 py-2" onclick="compartirGuiaWhatsAppDirecto()">
@@ -587,7 +543,7 @@
     </div>
   </div>
 
-  <!-- MODAL GESTIÓN CON FOTO OBLIGATORIA -->
+  <!-- MODAL GESTIÓN CON FOTO -->
   <div class="modal fade" id="modalGestion" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -607,26 +563,6 @@
               <option value="No le llego la encuesta">No le llegó la encuesta</option>
               <option value="Telefono no corresponde / Apagado">Teléfono no corresponde / Apagado</option>
               <option value="UU conflictivo">UU conflictivo (Reclamo)</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label small text-secondary fw-semibold">Calificación Estimada del Cliente (0-10)</label>
-            <select id="modal-score-estimado" class="form-select bg-dark text-white border-secondary">
-              <option value="10">10 - Promotor Puro (Excelente)</option>
-              <option value="9">9 - Promotor (Muy Bueno)</option>
-              <option value="8">8 - Pasivo (Satisfecho)</option>
-              <option value="7">7 - Pasivo (Regular)</option>
-              <option value="5">5 - Detractor (Insatisfecho)</option>
-              <option value="0">0 - Detractor Severo</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label small text-secondary fw-semibold">Resultado de Contacto</label>
-            <select id="modal-resultado" class="form-select bg-dark text-white border-secondary">
-              <option value="Exitoso">Exitoso (Contacto directo)</option>
-              <option value="Sin respuesta">Sin respuesta (Llamada no atendida)</option>
             </select>
           </div>
 
@@ -675,12 +611,8 @@
           <div class="detail-row"><div class="detail-label">Nombre Usuario</div><div class="detail-val fw-bold" id="det-nombre">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Técnico Asignado</div><div class="detail-val fw-bold text-info" id="det-tecnico">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Fecha Asignación</div><div class="detail-val" id="det-fecha">N/A</div></div>
-          <div class="detail-row"><div class="detail-label text-info">Fecha de Gestión</div><div class="detail-val text-info fw-bold" id="det-fecha-gestion">Pendiente</div></div>
-          <div class="detail-row"><div class="detail-label text-success">Puntuación Encuesta (0-10)</div><div class="detail-val text-success fw-bold" id="det-score-real">10 (Promotor Estimado)</div></div>
-          <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-val" id="det-estado">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val" id="det-ot">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
-          <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Informe Observación</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
         </div>
         <div class="modal-footer border-secondary">
           <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar Ficha</button>
@@ -695,9 +627,7 @@
       <div class="modal-content bg-dark text-white border-secondary">
         <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Evidencia Fotográfica</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body text-center p-3">
-          <div id="visor-loading" class="spinner-border text-info my-4"></div>
           <img id="visor-img" class="img-fluid rounded hidden">
-          <div id="visor-error" class="text-danger small hidden my-3">No se pudo cargar la imagen.</div>
         </div>
       </div>
     </div>
@@ -862,7 +792,7 @@
         btnG.innerText = "Guardar y Sincronizar en la Nube";
 
         if (res && res.exito) alert("¡Perfil sincronizado en la nube!");
-        else alert("Guardado localmente. " + (res.mensaje || ""));
+        else alert("Guardado localmente.");
       } catch(e) {
         btnG.disabled = false;
         btnG.innerText = "Guardar y Sincronizar en la Nube";
@@ -897,38 +827,38 @@
     });
 
     function iniciarVistaSegunRol(res) {
-  document.getElementById('view-login').classList.add('hidden');
-  const esRolTecnico = res.esTecnico || (res.rol && res.rol.toLowerCase().includes('tec'));
+      document.getElementById('view-login').classList.add('hidden');
+      const esRolTecnico = res.esTecnico || (res.rol && res.rol.toLowerCase().includes('tec'));
 
-  if (esRolTecnico) {
-    document.getElementById('view-tecnico').classList.remove('hidden');
-    document.getElementById('view-admin').classList.add('hidden');
-    document.getElementById('app-bottom-nav').classList.remove('hidden');
+      if (esRolTecnico) {
+        document.getElementById('view-tecnico').classList.remove('hidden');
+        document.getElementById('view-admin').classList.add('hidden');
+        document.getElementById('app-bottom-nav').classList.remove('hidden');
 
-    document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
-    document.getElementById('perfil-nombre').innerText = res.nombre || 'Técnico';
-    document.getElementById('perfil-correo').innerText = res.usuario || '';
+        document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
+        document.getElementById('perfil-nombre').innerText = res.nombre || 'Técnico';
+        document.getElementById('perfil-correo').innerText = res.usuario || '';
 
-    cargarAvatarYDatosTecnico();
-    actualizarSaludoHora();
-    navegarBottom('inicio');
-    setInterval(cargarPendientesTecnico, 45000);
-  } else {
-    document.getElementById('view-admin').classList.remove('hidden');
-    document.getElementById('view-tecnico').classList.add('hidden');
-    document.getElementById('app-bottom-nav').classList.add('hidden');
+        cargarAvatarYDatosTecnico();
+        actualizarSaludoHora();
+        navegarBottom('inicio');
+        setInterval(cargarPendientesTecnico, 45000);
+      } else {
+        document.getElementById('view-admin').classList.remove('hidden');
+        document.getElementById('view-tecnico').classList.add('hidden');
+        document.getElementById('app-bottom-nav').classList.add('hidden');
 
-    // Mapeo con el ROL y el AREA exactos de la hoja USUARIOS
-    let areaTexto = res.area || "Encargado Nacional";
-    let depTexto = res.departamento || "TODOS";
-    
-    document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
-    document.getElementById('admin-header-region').innerText = `ÁREA: ${areaTexto.toUpperCase()} | DEP: ${depTexto.toUpperCase()}`;
+        let areaTexto = res.area || "Encargado Nacional";
+        let depTexto = res.departamento || "TODOS";
+        
+        document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
+        document.getElementById('admin-header-region').innerText = `ÁREA: ${areaTexto.toUpperCase()} | DEP: ${depTexto.toUpperCase()}`;
 
-    cargarDashboard();
-    cargarDirectorioTecnicosAdmin();
-  }
-}
+        cargarDashboard();
+        cargarDirectorioTecnicosAdmin();
+      }
+    }
+
     async function apiCall(accion, dataPayload = {}, reintentos = 2) {
       for (let i = 0; i <= reintentos; i++) {
         try {
@@ -992,6 +922,7 @@
       } catch(e) { return fechaStr; }
     }
 
+    // FIRMA DE WHATSAPP CON EL NOMBRE REAL DEL TÉCNICO LOGUEADO
     function generarUrlWhatsApp(telefono, codigoCliente, nombreUsuario, nombreTecnico) {
       let numLimpio = telefono.toString().replace(/[^0-9]/g, '');
       let horaActual = new Date().getHours();
@@ -1001,7 +932,7 @@
       else if (horaActual >= 12 && horaActual < 19) saludoHora = "Estimado cliente, buenas tardes. 👋";
       else saludoHora = "Estimado cliente, buenas noches. 🌙";
 
-      let tecNombre = nombreTecnico || (usuarioActual ? usuarioActual.nombre : 'Servicio Técnico');
+      let tecNombre = (usuarioActual && usuarioActual.nombre) ? usuarioActual.nombre : (nombreTecnico || 'Servicio Técnico');
       let clienteNombre = nombreUsuario || 'Estimado Cliente';
       let codCliente = codigoCliente || 'N/A';
 
@@ -1207,18 +1138,11 @@
 
     async function cargarDashboard() {
       const per = document.getElementById('select-periodo').value;
-      const filtroDeptEl = document.getElementById('select-filtro-dept');
-      const filtroCiuEl = document.getElementById('select-filtro-ciudad');
-
-      const deptVal = filtroDeptEl ? filtroDeptEl.value : (usuarioActual.departamento || "TODOS");
-      const ciuVal = filtroCiuEl ? filtroCiuEl.value : (usuarioActual.ciudad || "TODAS");
 
       try {
         const res = await apiCall("obtenerDatosDashboard", {
           usuario: usuarioActual.usuario,
           rol: usuarioActual.rol,
-          departamento: deptVal,
-          ciudad: ciuVal,
           periodo: per
         });
 
@@ -1312,7 +1236,11 @@
     }
 
     function aplicarFiltrosDetalle() {
-      let resultado = todosLosRegistros;
+      let filtroBusqueda = (document.getElementById('input-buscar').value || '').toLowerCase();
+      let resultado = todosLosRegistros.filter(r => {
+        let textoCompleto = (r.nombreUsuario + ' ' + r.numeroOT + ' ' + r.codigoCliente + ' ' + r.tecnico).toLowerCase();
+        return textoCompleto.indexOf(filtroBusqueda) !== -1;
+      });
       renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
     }
 
@@ -1457,8 +1385,6 @@
       const numeroOT = document.getElementById('modal-ot').value;
       const codigoCliente = document.getElementById('modal-codigo').value;
       const estado = document.getElementById('modal-estado').value;
-      const scoreEstimado = document.getElementById('modal-score-estimado').value;
-      const resultado = document.getElementById('modal-resultado').value;
       const obs = document.getElementById('modal-observacion').value;
 
       if (!base64Compresion && !archivoFotoSeleccionado) {
@@ -1486,8 +1412,6 @@
         fila: fila, 
         numeroOT: numeroOT,
         estado: estado, 
-        scoreEstimado: scoreEstimado,
-        resultado: resultado, 
         observacion: obs, 
         fotoBase64: b64Foto
       };
@@ -1520,12 +1444,6 @@
       if (!b64Data) return alert("La evidencia fotográfica no se encuentra disponible.");
       
       const imgElement = document.getElementById('visor-img');
-      const loadingElement = document.getElementById('visor-loading');
-      const errorElement = document.getElementById('visor-error');
-      
-      errorElement.classList.add('hidden');
-      loadingElement.classList.add('hidden');
-      
       if (b64Data.startsWith("data:image")) imgElement.src = b64Data;
       else imgElement.src = "data:image/jpeg;base64," + b64Data;
       
