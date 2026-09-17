@@ -724,7 +724,7 @@
       selTec.innerHTML = '<option value="TODOS">Técnico: TODOS</option>';
 
       tecnicosLista.forEach(t => {
-        let nombreTec = typeof t === 'object' ? t.nombre : t;
+        let nombreTec = typeof t === 'object' ? (t.nombre || t.email) : t;
         if (nombreTec) {
           let opt = document.createElement('option');
           opt.value = nombreTec;
@@ -750,7 +750,8 @@
 
         let coincideTecnico = true;
         if (filtroTecnico !== "TODOS") {
-          coincideTecnico = (r.tecnico && r.tecnico.toLowerCase() === filtroTecnico.toLowerCase());
+          let tecSelected = filtroTecnico.toLowerCase();
+          coincideTecnico = (r.tecnico && r.tecnico.toLowerCase() === tecSelected) || (r.tecnicoEmail && r.tecnicoEmail.toLowerCase() === tecSelected);
         }
 
         let coincideEstado = true;
