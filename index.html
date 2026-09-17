@@ -43,9 +43,9 @@
       body { padding-bottom: 0px; }
     }
 
-    .fade-in-view { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    .fade-in-view { animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -199,6 +199,17 @@
       color: #ffffff;
     }
 
+    .sync-spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(56, 189, 248, 0.3);
+      border-radius: 50%;
+      border-top-color: #38bdf8;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -257,7 +268,10 @@
           </div>
           <div>
             <h6 class="m-0 text-white fw-bold" id="label-nombre-tec">Técnico</h6>
-            <small class="text-info fw-semibold" style="font-size: 0.75rem;" id="label-sub-tec">Tigo Datared • Operaciones</small>
+            <small class="text-info fw-semibold d-flex align-items-center gap-1" style="font-size: 0.75rem;">
+              <span>Tigo Datared</span> • <span id="label-sync-status">Sincronizado</span>
+              <span id="icon-sync-spinner" class="sync-spinner hidden"></span>
+            </small>
           </div>
         </div>
         <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i></button>
@@ -356,9 +370,9 @@
             <span><i class="bi bi-image-fill me-2 text-info"></i>Ver Guía SMS para Clientes</span>
             <i class="bi bi-chevron-right text-secondary"></i>
           </div>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 2.0.0 - Edición Pro Campo')">
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 2.0.0 Pro Ultra Fast')">
             <span><i class="bi bi-info-circle me-2 text-warning"></i>Versión del Sistema</span>
-            <small class="text-secondary">v2.0.0 Pro</small>
+            <small class="text-secondary">v2.0.0 Ultra</small>
           </div>
           <button class="btn btn-outline-danger w-100 fw-bold mt-3 py-2" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
         </div>
@@ -377,11 +391,12 @@
             </div>
           </div>
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
+            <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
               <option value="dia">Hoy / 24h</option>
               <option value="semana">Últimos 7 días</option>
               <option value="mes" selected>Últimos 30 días</option>
             </select>
+            <button onclick="cargarDashboard(true)" class="btn btn-outline-info btn-sm" title="Refrescar datos de la nube"><i class="bi bi-arrow-clockwise"></i></button>
             <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
           </div>
         </div>
@@ -841,8 +856,25 @@
 
         cargarAvatarYDatosTecnico();
         actualizarSaludoHora();
+
+        // CACHÉ INSTANTÁNEO TÉCNICO
+        const cachePend = localStorage.getItem(`cache_pendientes_${res.usuario}`);
+        if (cachePend) {
+          pendientesTecnicoActual = JSON.parse(cachePend);
+          renderizarPendientesTecnicoUI();
+        }
+        const cacheHist = localStorage.getItem(`cache_historico_${res.usuario}`);
+        if (cacheHist) {
+          historicoTecnicoActual = JSON.parse(cacheHist);
+          renderizarHistoricoTecnicoUI();
+        }
+
         navegarBottom('inicio');
-        setInterval(cargarPendientesTecnico, 45000);
+        
+        // Carga en segundo plano
+        cargarPendientesTecnico();
+        cargarHistoricoTecnico();
+        setInterval(cargarPendientesTecnico, 30000);
       } else {
         document.getElementById('view-admin').classList.remove('hidden');
         document.getElementById('view-tecnico').classList.add('hidden');
@@ -853,6 +885,12 @@
         
         document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
         document.getElementById('admin-header-region').innerText = `ÁREA: ${areaTexto.toUpperCase()} | DEP: ${depTexto.toUpperCase()}`;
+
+        // CACHÉ INSTANTÁNEO ADMIN
+        const cacheDash = localStorage.getItem(`cache_admin_dashboard_${res.usuario}`);
+        if (cacheDash) {
+          procesarYRenderizarDashboard(JSON.parse(cacheDash));
+        }
 
         cargarDashboard();
         cargarDirectorioTecnicosAdmin();
@@ -871,7 +909,7 @@
           if (response.ok) return JSON.parse(await response.text());
         } catch (e) {
           if (i === reintentos) throw e;
-          await new Promise(r => setTimeout(r, 1000));
+          await new Promise(r => setTimeout(r, 800));
         }
       }
     }
@@ -922,7 +960,6 @@
       } catch(e) { return fechaStr; }
     }
 
-    // FIRMA DE WHATSAPP CON EL NOMBRE REAL DEL TÉCNICO LOGUEADO
     function generarUrlWhatsApp(telefono, codigoCliente, nombreUsuario, nombreTecnico) {
       let numLimpio = telefono.toString().replace(/[^0-9]/g, '');
       let horaActual = new Date().getHours();
@@ -949,7 +986,21 @@
       return `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
     }
 
+    function mostrarSyncStatus(sincronizando) {
+      const lbl = document.getElementById('label-sync-status');
+      const sp = document.getElementById('icon-sync-spinner');
+      if (!lbl || !sp) return;
+      if (sincronizando) {
+        lbl.innerText = "Sincronizando...";
+        sp.classList.remove('hidden');
+      } else {
+        lbl.innerText = "Sincronizado";
+        sp.classList.add('hidden');
+      }
+    }
+
     async function cargarPendientesTecnico() {
+      mostrarSyncStatus(true);
       try {
         const lista = await apiCall("obtenerPendientesTecnico", { 
           correoTecnico: usuarioActual.usuario,
@@ -957,24 +1008,29 @@
         });
         pendientesTecnicoActual = Array.isArray(lista) ? lista : [];
         
-        document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
-        document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
-        
-        const badgeEl = document.getElementById('bnav-badge-count');
-        if (pendientesTecnicoActual.length > 0) {
-          badgeEl.innerText = pendientesTecnicoActual.length;
-          badgeEl.classList.remove('hidden');
-        } else {
-          badgeEl.classList.add('hidden');
-        }
+        // Guardar en caché local
+        localStorage.setItem(`cache_pendientes_${usuarioActual.usuario}`, JSON.stringify(pendientesTecnicoActual));
 
         renderizarPendientesTecnicoUI();
       } catch(e) {}
+      mostrarSyncStatus(false);
     }
 
     function renderizarPendientesTecnicoUI() {
       const contenedor = document.getElementById('lista-pendientes');
       if (!contenedor) return;
+
+      document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
+      document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
+      
+      const badgeEl = document.getElementById('bnav-badge-count');
+      if (pendientesTecnicoActual.length > 0) {
+        badgeEl.innerText = pendientesTecnicoActual.length;
+        badgeEl.classList.remove('hidden');
+      } else {
+        badgeEl.classList.add('hidden');
+      }
+
       contenedor.innerHTML = '';
 
       if (!pendientesTecnicoActual || pendientesTecnicoActual.length === 0) {
@@ -1031,7 +1087,10 @@
           nombreTecnico: usuarioActual.nombre
         });
         historicoTecnicoActual = Array.isArray(lista) ? lista : [];
-        document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
+        
+        // Guardar en caché local
+        localStorage.setItem(`cache_historico_${usuarioActual.usuario}`, JSON.stringify(historicoTecnicoActual));
+
         renderizarHistoricoTecnicoUI();
       } catch(e) {}
     }
@@ -1039,6 +1098,8 @@
     function renderizarHistoricoTecnicoUI() {
       const contenedor = document.getElementById('lista-historico-tecnico');
       if (!contenedor) return;
+
+      document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
       contenedor.innerHTML = '';
 
       if (!historicoTecnicoActual || historicoTecnicoActual.length === 0) {
@@ -1136,7 +1197,7 @@
       abrirModalBS('modalFichaTecnico');
     }
 
-    async function cargarDashboard() {
+    async function cargarDashboard(forzarNube = false) {
       const per = document.getElementById('select-periodo').value;
 
       try {
@@ -1146,11 +1207,16 @@
           periodo: per
         });
 
+        // Guardar en caché local de la App
+        localStorage.setItem(`cache_admin_dashboard_${usuarioActual.usuario}`, JSON.stringify(res));
+
         procesarYRenderizarDashboard(res);
       } catch(e) {}
     }
 
     function procesarYRenderizarDashboard(res) {
+      if (!res || !res.kpis) return;
+
       const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos;
       document.getElementById('kpi-total').innerText = tot;
       document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
@@ -1173,9 +1239,9 @@
       document.getElementById('gauge-score-val').innerText = (scoreNpsNeto > 0 ? '+' : '') + scoreNpsNeto + "%";
 
       renderizarGraficoGauge(scoreNpsNeto);
-      renderizarGraficoBarras(res.tecnicos);
+      renderizarGraficoBarras(res.tecnicos || []);
 
-      todosLosRegistros = res.registros;
+      todosLosRegistros = res.registros || [];
       aplicarFiltrosDetalle();
     }
 
@@ -1413,8 +1479,13 @@
         numeroOT: numeroOT,
         estado: estado, 
         observacion: obs, 
-        fotoBase64: b64Foto
+        fotoBase64: b64Foto,
+        usuario: usuarioActual.usuario
       };
+
+      // Actualizar vista local inmediatamente (Optimistic UI)
+      pendientesTecnicoActual = pendientesTecnicoActual.filter(item => item.fila != fila);
+      renderizarPendientesTecnicoUI();
 
       try {
         const res = await apiCall("guardarGestionConFoto", { payload: payload });
