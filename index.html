@@ -39,7 +39,7 @@
     
     .container-custom { max-width: 650px; margin: auto; padding: 14px; transition: all 0.2s ease-in-out; }
     @media (min-width: 992px) {
-      .container-custom { max-width: 1250px; padding: 24px; }
+      .container-custom { max-width: 1350px; padding: 24px; }
       body { padding-bottom: 0px; }
     }
 
@@ -390,12 +390,46 @@
               <small class="text-info fw-bold" style="font-size: 0.72rem;" id="admin-header-region">ÁREA: ENCARGADO NACIONAL | DEP: TODOS</small>
             </div>
           </div>
+          
+          <!-- BARRA COMPLETA DE FILTROS EN HEADER ADMIN -->
           <div class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- FILTRO DEPARTAMENTO -->
+            <select id="select-filtro-dept" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="alCambiarDepartamentoFiltro()">
+              <option value="TODOS">Dep: TODOS</option>
+              <option value="TARIJA">Tarija</option>
+              <option value="POTOSI">Potosí</option>
+              <option value="SANTA CRUZ">Santa Cruz</option>
+              <option value="COCHABAMBA">Cochabamba</option>
+              <option value="SUCRE">Sucre</option>
+              <option value="LA PAZ">La Paz</option>
+            </select>
+
+            <!-- FILTRO CIUDAD -->
+            <select id="select-filtro-ciudad" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="aplicarFiltrosMultiples()">
+              <option value="TODAS">Ciudad: TODAS</option>
+            </select>
+
+            <!-- FILTRO TÉCNICO -->
+            <select id="select-filtro-tecnico" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="aplicarFiltrosMultiples()">
+              <option value="TODOS">Técnico: TODOS</option>
+            </select>
+
+            <!-- FILTRO ESTADO -->
+            <select id="select-filtro-estado" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="aplicarFiltrosMultiples()">
+              <option value="TODOS">Estado: TODOS</option>
+              <option value="Gestionado">Gestionado</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="UU conflictivo">UU conflictivo</option>
+              <option value="No le llego la encuesta">No le llegó encuesta</option>
+            </select>
+
+            <!-- FILTRO PERIODO -->
             <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
               <option value="dia">Hoy / 24h</option>
               <option value="semana">Últimos 7 días</option>
               <option value="mes" selected>Últimos 30 días</option>
             </select>
+
             <button onclick="cargarDashboard(true)" class="btn btn-outline-info btn-sm" title="Refrescar datos de la nube"><i class="bi bi-arrow-clockwise"></i></button>
             <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
           </div>
@@ -466,7 +500,7 @@
           <div class="row g-2">
             <div class="col-12 col-md-6">
               <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-search me-1"></i> Búsqueda rápida:</label>
-              <input type="text" id="input-buscar" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Buscar OT, cliente..." onkeyup="aplicarFiltrosDetalle()">
+              <input type="text" id="input-buscar" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Buscar OT, cliente..." onkeyup="aplicarFiltrosMultiples()">
             </div>
           </div>
         </div>
@@ -655,6 +689,88 @@
     let usuarioActual = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
     let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
+
+    const MAPA_CIUDADES = {
+      "TODOS": ["TODAS"],
+      "TARIJA": ["TODAS", "Tarija", "Yacuiba", "Villamontes"],
+      "POTOSI": ["TODAS", "Potosí", "Villazón", "Tupiza"],
+      "SANTA CRUZ": ["TODAS", "Santa Cruz", "Montero", "Camiri"],
+      "COCHABAMBA": ["TODAS", "Cochabamba", "Quillacollo", "Sacaba"],
+      "SUCRE": ["TODAS", "Sucre"],
+      "LA PAZ": ["TODAS", "La Paz", "El Alto"]
+    };
+
+    function alCambiarDepartamentoFiltro() {
+      const depSel = document.getElementById('select-filtro-dept').value;
+      const ciuSelect = document.getElementById('select-filtro-ciudad');
+      ciuSelect.innerHTML = '';
+
+      const ciudades = MAPA_CIUDADES[depSel] || ["TODAS"];
+      ciudades.forEach(c => {
+        let opt = document.createElement('option');
+        opt.value = c.toUpperCase();
+        opt.innerText = c === "TODAS" ? "Ciudad: TODAS" : c;
+        ciuSelect.appendChild(opt);
+      });
+
+      cargarDashboard(true);
+    }
+
+    function poblarSelectorTecnicos(tecnicosLista) {
+      const selTec = document.getElementById('select-filtro-tecnico');
+      if (!selTec) return;
+      
+      let valorActual = selTec.value || "TODOS";
+      selTec.innerHTML = '<option value="TODOS">Técnico: TODOS</option>';
+
+      tecnicosLista.forEach(t => {
+        let nombreTec = typeof t === 'object' ? t.nombre : t;
+        if (nombreTec) {
+          let opt = document.createElement('option');
+          opt.value = nombreTec;
+          opt.innerText = nombreTec;
+          selTec.appendChild(opt);
+        }
+      });
+
+      selTec.value = valorActual;
+    }
+
+    function aplicarFiltrosMultiples() {
+      let filtroBusqueda = (document.getElementById('input-buscar') ? document.getElementById('input-buscar').value : '').toLowerCase();
+      let filtroTecnico = (document.getElementById('select-filtro-tecnico') ? document.getElementById('select-filtro-tecnico').value : 'TODOS');
+      let filtroEstado = (document.getElementById('select-filtro-estado') ? document.getElementById('select-filtro-estado').value : 'TODOS');
+
+      let resultado = todosLosRegistros.filter(r => {
+        let coincideBusqueda = true;
+        if (filtroBusqueda) {
+          let textoCompleto = (r.nombreUsuario + ' ' + r.numeroOT + ' ' + r.codigoCliente + ' ' + r.tecnico).toLowerCase();
+          coincideBusqueda = textoCompleto.indexOf(filtroBusqueda) !== -1;
+        }
+
+        let coincideTecnico = true;
+        if (filtroTecnico !== "TODOS") {
+          coincideTecnico = (r.tecnico && r.tecnico.toLowerCase() === filtroTecnico.toLowerCase());
+        }
+
+        let coincideEstado = true;
+        if (filtroEstado !== "TODOS") {
+          if (filtroEstado === "Gestionado") {
+            coincideEstado = (r.estado === "Gestionado");
+          } else if (filtroEstado === "Pendiente") {
+            coincideEstado = (r.estado === "Pendiente" || r.estado === "");
+          } else if (filtroEstado === "UU conflictivo") {
+            coincideEstado = (r.estado === "UU conflictivo" || r.estado === "Conflictivo");
+          } else {
+            coincideEstado = (r.estado === filtroEstado);
+          }
+        }
+
+        return coincideBusqueda && coincideTecnico && coincideEstado;
+      });
+
+      renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
+    }
 
     function obtenerClaveLimpiaOT(otTexto, codCliente) {
       if (!otTexto) return codCliente || '';
@@ -857,7 +973,6 @@
         cargarAvatarYDatosTecnico();
         actualizarSaludoHora();
 
-        // CACHÉ INSTANTÁNEO TÉCNICO
         const cachePend = localStorage.getItem(`cache_pendientes_${res.usuario}`);
         if (cachePend) {
           pendientesTecnicoActual = JSON.parse(cachePend);
@@ -871,7 +986,6 @@
 
         navegarBottom('inicio');
         
-        // Carga en segundo plano
         cargarPendientesTecnico();
         cargarHistoricoTecnico();
         setInterval(cargarPendientesTecnico, 30000);
@@ -882,11 +996,21 @@
 
         let areaTexto = res.area || "Encargado Nacional";
         let depTexto = res.departamento || "TODOS";
+        let ciuTexto = res.ciudad || "TODAS";
         
         document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
         document.getElementById('admin-header-region').innerText = `ÁREA: ${areaTexto.toUpperCase()} | DEP: ${depTexto.toUpperCase()}`;
 
-        // CACHÉ INSTANTÁNEO ADMIN
+        const selDept = document.getElementById('select-filtro-dept');
+        if (selDept && depTexto !== "TODOS") {
+          selDept.value = depTexto.toUpperCase();
+          alCambiarDepartamentoFiltro();
+          const selCiu = document.getElementById('select-filtro-ciudad');
+          if (selCiu && ciuTexto !== "TODAS") {
+            selCiu.value = ciuTexto.toUpperCase();
+          }
+        }
+
         const cacheDash = localStorage.getItem(`cache_admin_dashboard_${res.usuario}`);
         if (cacheDash) {
           procesarYRenderizarDashboard(JSON.parse(cacheDash));
@@ -1008,7 +1132,6 @@
         });
         pendientesTecnicoActual = Array.isArray(lista) ? lista : [];
         
-        // Guardar en caché local
         localStorage.setItem(`cache_pendientes_${usuarioActual.usuario}`, JSON.stringify(pendientesTecnicoActual));
 
         renderizarPendientesTecnicoUI();
@@ -1088,7 +1211,6 @@
         });
         historicoTecnicoActual = Array.isArray(lista) ? lista : [];
         
-        // Guardar en caché local
         localStorage.setItem(`cache_historico_${usuarioActual.usuario}`, JSON.stringify(historicoTecnicoActual));
 
         renderizarHistoricoTecnicoUI();
@@ -1199,15 +1321,18 @@
 
     async function cargarDashboard(forzarNube = false) {
       const per = document.getElementById('select-periodo').value;
+      const dept = document.getElementById('select-filtro-dept') ? document.getElementById('select-filtro-dept').value : 'TODOS';
+      const ciu = document.getElementById('select-filtro-ciudad') ? document.getElementById('select-filtro-ciudad').value : 'TODAS';
 
       try {
         const res = await apiCall("obtenerDatosDashboard", {
           usuario: usuarioActual.usuario,
           rol: usuarioActual.rol,
-          periodo: per
+          periodo: per,
+          departamento: dept,
+          ciudad: ciu
         });
 
-        // Guardar en caché local de la App
         localStorage.setItem(`cache_admin_dashboard_${usuarioActual.usuario}`, JSON.stringify(res));
 
         procesarYRenderizarDashboard(res);
@@ -1242,7 +1367,9 @@
       renderizarGraficoBarras(res.tecnicos || []);
 
       todosLosRegistros = res.registros || [];
-      aplicarFiltrosDetalle();
+      
+      poblarSelectorTecnicos(res.tecnicos || []);
+      aplicarFiltrosMultiples();
     }
 
     function renderizarGraficoGauge(scoreVal) {
@@ -1299,15 +1426,6 @@
           }
         }
       });
-    }
-
-    function aplicarFiltrosDetalle() {
-      let filtroBusqueda = (document.getElementById('input-buscar').value || '').toLowerCase();
-      let resultado = todosLosRegistros.filter(r => {
-        let textoCompleto = (r.nombreUsuario + ' ' + r.numeroOT + ' ' + r.codigoCliente + ' ' + r.tecnico).toLowerCase();
-        return textoCompleto.indexOf(filtroBusqueda) !== -1;
-      });
-      renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
     }
 
     function renderizarTarjetasAdmin(lista, idContenedor) {
@@ -1483,7 +1601,6 @@
         usuario: usuarioActual.usuario
       };
 
-      // Actualizar vista local inmediatamente (Optimistic UI)
       pendientesTecnicoActual = pendientesTecnicoActual.filter(item => item.fila != fila);
       renderizarPendientesTecnicoUI();
 
