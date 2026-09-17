@@ -453,7 +453,6 @@
             <div class="bi-card-dark h-100">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h6 class="fw-bold text-secondary small m-0">Rendimiento por Técnico</h6>
-                <button class="btn btn-xs btn-outline-success p-1 px-2" style="font-size: 0.75rem;" onclick="exportarExcelConImagenes(event)"><i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel</button>
               </div>
               <div style="position: relative; height: 220px;">
                 <canvas id="barTecnicosChart"></canvas>
@@ -589,27 +588,6 @@
     </div>
   </div>
 
-  <!-- MODAL EXCEL -->
-  <div class="modal fade" id="modalCargaExcel" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary">
-          <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Cargar Excel Nacional / Conciliar Encuestas</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <p class="small text-secondary mb-3">Sube el reporte nacional para cruzar la puntuación real de encuestas (0-10) con las gestiones realizadas.</p>
-          <input type="file" id="input-file-excel" class="form-control bg-dark text-white border-secondary mb-3" accept=".xlsx, .xls, .csv">
-          <div id="resultado-carga-excel" class="small hidden p-2 rounded"></div>
-        </div>
-        <div class="modal-footer border-secondary">
-          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" id="btn-procesar-excel" class="btn btn-sm btn-primary fw-bold" onclick="procesarArchivoExcel()"><i class="bi bi-cloud-upload me-1"></i> Procesar y Conciliar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- MODAL GESTIÓN -->
   <div class="modal fade" id="modalGestion" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -734,7 +712,6 @@
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
     let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
 
-    // LIMPIEZA DE OT PARA COINCIDENCIA DE FOTO
     function obtenerClaveLimpiaOT(otTexto, codCliente) {
       if (!otTexto) return codCliente || '';
       let partes = otTexto.toString().split('_');
@@ -1039,8 +1016,23 @@
 
     async function cargarPendientesTecnico() {
       try {
-        const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
+        const lista = await apiCall("obtenerPendientesTecnico", { 
+          correoTecnico: usuarioActual.usuario,
+          nombreTecnico: usuarioActual.nombre
+        });
         pendientesTecnicoActual = Array.isArray(lista) ? lista : [];
+        
+        document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
+        document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
+        
+        const badgeEl = document.getElementById('bnav-badge-count');
+        if (pendientesTecnicoActual.length > 0) {
+          badgeEl.innerText = pendientesTecnicoActual.length;
+          badgeEl.classList.remove('hidden');
+        } else {
+          badgeEl.classList.add('hidden');
+        }
+
         renderizarPendientesTecnicoUI();
       } catch(e) {}
     }
@@ -1099,8 +1091,12 @@
 
     async function cargarHistoricoTecnico() {
       try {
-        const lista = await apiCall("obtenerHistoricoTecnico", { correoTecnico: usuarioActual.usuario });
+        const lista = await apiCall("obtenerHistoricoTecnico", { 
+          correoTecnico: usuarioActual.usuario,
+          nombreTecnico: usuarioActual.nombre
+        });
         historicoTecnicoActual = Array.isArray(lista) ? lista : [];
+        document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
         renderizarHistoricoTecnicoUI();
       } catch(e) {}
     }
