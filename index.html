@@ -453,6 +453,7 @@
             <div class="bi-card-dark h-100">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h6 class="fw-bold text-secondary small m-0">Rendimiento por Técnico</h6>
+                <button class="btn btn-xs btn-outline-success p-1 px-2" style="font-size: 0.75rem;" onclick="exportarExcelConImagenes(event)"><i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel</button>
               </div>
               <div style="position: relative; height: 220px;">
                 <canvas id="barTecnicosChart"></canvas>
@@ -588,7 +589,28 @@
     </div>
   </div>
 
-  <!-- MODAL GESTIÓN CON FOTO OBLIGATORIA -->
+  <!-- MODAL EXCEL -->
+  <div class="modal fade" id="modalCargaExcel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white border-secondary">
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Cargar Excel Nacional / Conciliar Encuestas</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-secondary mb-3">Sube el reporte nacional para cruzar la puntuación real de encuestas (0-10) con las gestiones realizadas.</p>
+          <input type="file" id="input-file-excel" class="form-control bg-dark text-white border-secondary mb-3" accept=".xlsx, .xls, .csv">
+          <div id="resultado-carga-excel" class="small hidden p-2 rounded"></div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="btn-procesar-excel" class="btn btn-sm btn-primary fw-bold" onclick="procesarArchivoExcel()"><i class="bi bi-cloud-upload me-1"></i> Procesar y Conciliar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL GESTIÓN -->
   <div class="modal fade" id="modalGestion" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -712,7 +734,7 @@
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
     let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
 
-    // EXTRAER CLAVE LIMPIA DE OT (EVITA ERRORES CON PREFIJOS BO_FS_)
+    // LIMPIEZA DE OT PARA COINCIDENCIA DE FOTO
     function obtenerClaveLimpiaOT(otTexto, codCliente) {
       if (!otTexto) return codCliente || '';
       let partes = otTexto.toString().split('_');
@@ -744,7 +766,7 @@
     function solicitarPermisoNotificaciones() {
       if ("Notification" in window) {
         Notification.requestPermission().then(permission => {
-          if (permission === "granted") alert("Notificaciones activadas con éxito.");
+          if (permission === "granted") alert("Notificaciones activadas.");
         });
       }
     }
@@ -816,7 +838,6 @@
 
     function cargarAvatarYDatosTecnico() {
       if (!usuarioActual) return;
-      
       const fotoGuardada = localStorage.getItem(`foto_avatar_${usuarioActual.usuario}`);
       const primerLetra = (usuarioActual.nombre || 'T').charAt(0).toUpperCase();
 
@@ -839,7 +860,7 @@
           localStorage.setItem(`foto_avatar_${usuarioActual.usuario}`, b64);
           cargarAvatarYDatosTecnico();
           alert("¡Foto cargada! Presione 'Guardar y Sincronizar en la Nube'.");
-        }).catch(() => alert("No se pudo procesar la foto."));
+        }).catch(() => alert("Error al procesar la foto."));
       }
     }
 
@@ -864,12 +885,12 @@
         btnG.disabled = false;
         btnG.innerText = "Guardar y Sincronizar en la Nube";
 
-        if (res && res.exito) alert("¡Perfil sincronizado en la nube correctamente!");
+        if (res && res.exito) alert("¡Perfil sincronizado en la nube!");
         else alert("Guardado localmente. " + (res.mensaje || ""));
       } catch(e) {
         btnG.disabled = false;
         btnG.innerText = "Guardar y Sincronizar en la Nube";
-        alert("Guardado localmente en el teléfono.");
+        alert("Guardado localmente en el dispositivo.");
       }
     }
 
@@ -990,6 +1011,32 @@
       } catch(e) { return fechaStr; }
     }
 
+    function generarUrlWhatsApp(telefono, codigoCliente, nombreUsuario, nombreTecnico) {
+      let numLimpio = telefono.toString().replace(/[^0-9]/g, '');
+      let horaActual = new Date().getHours();
+      let saludoHora = "Estimado cliente, buenas tardes. 👋";
+
+      if (horaActual >= 0 && horaActual < 12) saludoHora = "Estimado cliente, buenos días. ☀️";
+      else if (horaActual >= 12 && horaActual < 19) saludoHora = "Estimado cliente, buenas tardes. 👋";
+      else saludoHora = "Estimado cliente, buenas noches. 🌙";
+
+      let tecNombre = nombreTecnico || (usuarioActual ? usuarioActual.nombre : 'Servicio Técnico');
+      let clienteNombre = nombreUsuario || 'Estimado Cliente';
+      let codCliente = codigoCliente || 'N/A';
+
+      let mensajeWs = `${saludoHora}\n\n` +
+        `Le escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codCliente}* (${clienteNombre}).\n\n` +
+        `Mi nombre es *${tecNombre}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.\n\n` +
+        `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo por favor un *10* 😁. Su calificación es muy importante para mí.\n\n` +
+        `📲 *GUÍA PARA INGRESAR Y LLENAR LA ENCUESTA:*\n` +
+        `1. Ingrese a sus Mensajes de Texto (SMS).\n` +
+        `2. Ubique la cuenta TIGO o el número 2820.\n` +
+        `3. Abra el link, marque "No soy un robot" y califique con 10.\n\n` +
+        `MUCHAS GRACIAS POR SU TIEMPO! 🙌`;
+
+      return `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
+    }
+
     async function cargarPendientesTecnico() {
       try {
         const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
@@ -1014,6 +1061,13 @@
         let telefono = item.telefono || 'Sin Teléfono';
         let otNum = item.numeroOT || 'Sin OT';
         
+        let telLlamar = (telefono && telefono !== 'Sin Teléfono') ? 
+          `<a href="tel:${telefono}" class="btn btn-sm btn-outline-warning fw-bold flex-fill"><i class="bi bi-telephone-fill me-1"></i>Llamar</a>` : '';
+
+        let urlWs = (telefono && telefono !== 'Sin Teléfono') ? generarUrlWhatsApp(telefono, codigo, usuario, item.tecnicoAsignado) : '#';
+        let btnWs = (telefono && telefono !== 'Sin Teléfono') ? 
+          `<a href="${urlWs}" target="_blank" class="btn btn-sm btn-success fw-bold flex-fill"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>` : '';
+
         contenedor.innerHTML += `
           <div class="order-card mb-3 fade-in-view">
             <div>
@@ -1030,7 +1084,13 @@
               </div>
             </div>
 
+            <div class="d-flex gap-2 mt-2">
+              ${telLlamar}
+              ${btnWs}
+            </div>
+
             <div class="d-flex gap-2 mt-2 border-top border-secondary border-opacity-25 pt-2">
+              <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
               <button class="btn btn-sm btn-primary flex-fill fw-bold py-2" onclick="abrirModal(${item.fila}, '${otNum}', '${codigo}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
             </div>
           </div>`;
@@ -1075,10 +1135,233 @@
             </div>
 
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary border-opacity-25">
+              <button class="btn btn-xs btn-outline-info p-1 px-3 small fw-bold" onclick="verDetallesOrdenTecnico(${index}, 'HISTORICO')"><i class="bi bi-eye me-1"></i>Detalles</button>
               ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-3 small fw-bold" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')"><i class="bi bi-image me-1"></i>Ver Evidencia</button>` : '<span class="text-secondary small">Sin Foto</span>'}
             </div>
           </div>`;
       });
+    }
+
+    async function cargarDirectorioTecnicosAdmin() {
+      try {
+        const lista = await apiCall("obtenerTecnicosConPerfil");
+        directorioTecnicos = Array.isArray(lista) ? lista : [];
+        renderizarDirectorioTecnicosAdminUI();
+      } catch(e) {}
+    }
+
+    function renderizarDirectorioTecnicosAdminUI() {
+      const cont = document.getElementById('lista-directorio-tecnicos');
+      if (!cont) return;
+      cont.innerHTML = '';
+
+      if (directorioTecnicos.length === 0) {
+        cont.innerHTML = '<div class="text-secondary text-center small py-3 col-12">Cargando directorio de técnicos...</div>';
+        return;
+      }
+
+      directorioTecnicos.forEach((t, idx) => {
+        let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:40px; height:40px; font-size:1.1rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
+        if (t.fotoPerfil && t.fotoPerfil.length > 50) {
+          let src = t.fotoPerfil.startsWith("data:image") ? t.fotoPerfil : "data:image/jpeg;base64," + t.fotoPerfil;
+          avatarHtml = `<img src="${src}" class="rounded-circle border border-info" style="width:40px; height:40px; object-fit:cover;">`;
+        }
+
+        cont.innerHTML += `
+          <div class="bi-card-dark p-2 d-flex justify-content-between align-items-center mb-2" onclick="verFichaTecnicoSupervisor(${idx})" style="cursor:pointer;">
+            <div class="d-flex align-items-center gap-2">
+              ${avatarHtml}
+              <div>
+                <h6 class="m-0 text-white fw-bold" style="font-size:0.85rem;">${t.nombre}</h6>
+                <small class="text-secondary" style="font-size:0.7rem;">${t.departamento} • ${t.ciudad}</small>
+              </div>
+            </div>
+            <span class="badge bg-outline-info text-info border border-info border-opacity-25 p-1 px-2" style="font-size:0.68rem;">Ficha <i class="bi bi-chevron-right"></i></span>
+          </div>`;
+      });
+    }
+
+    function verFichaTecnicoSupervisor(idx) {
+      let t = directorioTecnicos[idx];
+      if (!t) return;
+
+      let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-2" style="width:70px; height:70px; font-size:2rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
+      if (t.fotoPerfil && t.fotoPerfil.length > 50) {
+        let src = t.fotoPerfil.startsWith("data:image") ? t.fotoPerfil : "data:image/jpeg;base64," + t.fotoPerfil;
+        avatarHtml = `<img src="${src}" class="rounded-circle border border-info mx-auto mb-2" style="width:70px; height:70px; object-fit:cover;">`;
+      }
+
+      document.getElementById('ftec-avatar-box').innerHTML = avatarHtml;
+      document.getElementById('ftec-nombre').innerText = t.nombre;
+      document.getElementById('ftec-region').innerText = `${t.departamento} • ${t.ciudad}`;
+      document.getElementById('ftec-telefono').innerText = t.telefono || 'Sin registrar';
+      document.getElementById('ftec-ci').innerText = t.ci || 'Sin registrar';
+      document.getElementById('ftec-placa').innerText = t.placa || 'Sin registrar';
+
+      let num = t.telefono ? t.telefono.toString().replace(/[^0-9]/g, '') : '';
+      document.getElementById('btn-ftec-llamar').href = num ? `tel:${num}` : '#';
+      document.getElementById('btn-ftec-ws').href = num ? `https://wa.me/591${num}` : '#';
+
+      abrirModalBS('modalFichaTecnico');
+    }
+
+    async function cargarDashboard() {
+      const per = document.getElementById('select-periodo').value;
+      const filtroDeptEl = document.getElementById('select-filtro-dept');
+      const filtroCiuEl = document.getElementById('select-filtro-ciudad');
+
+      const deptVal = filtroDeptEl ? filtroDeptEl.value : (usuarioActual.departamento || "TODOS");
+      const ciuVal = filtroCiuEl ? filtroCiuEl.value : (usuarioActual.ciudad || "TODAS");
+
+      try {
+        const res = await apiCall("obtenerDatosDashboard", {
+          usuario: usuarioActual.usuario,
+          rol: usuarioActual.rol,
+          departamento: deptVal,
+          ciudad: ciuVal,
+          periodo: per
+        });
+
+        procesarYRenderizarDashboard(res);
+      } catch(e) {}
+    }
+
+    function procesarYRenderizarDashboard(res) {
+      const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos;
+      document.getElementById('kpi-total').innerText = tot;
+      document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
+      document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
+      
+      const pctCobertura = tot > 0 ? Math.round((res.kpis.gestionados / tot) * 100) : 0;
+      document.getElementById('kpi-pct-prom').innerText = pctCobertura + "%";
+
+      const promotores = res.kpis.promotores || 0;
+      const pasivos = res.kpis.pasivos || 0;
+      const detractores = res.kpis.detractores || 0;
+      const totalEncuestas = promotores + pasivos + detractores;
+
+      document.getElementById('kpi-nps-promotores').innerText = promotores;
+      document.getElementById('kpi-nps-pasivos').innerText = pasivos;
+      document.getElementById('kpi-nps-detractores').innerText = detractores;
+
+      const scoreNpsNeto = totalEncuestas > 0 ? Math.round(((promotores - detractores) / totalEncuestas) * 100) : 0;
+      document.getElementById('kpi-nps-neto').innerText = (scoreNpsNeto > 0 ? '+' : '') + scoreNpsNeto + "%";
+      document.getElementById('gauge-score-val').innerText = (scoreNpsNeto > 0 ? '+' : '') + scoreNpsNeto + "%";
+
+      renderizarGraficoGauge(scoreNpsNeto);
+      renderizarGraficoBarras(res.tecnicos);
+
+      todosLosRegistros = res.registros;
+      aplicarFiltrosDetalle();
+    }
+
+    function renderizarGraficoGauge(scoreVal) {
+      const ctx = document.getElementById('gaugeChart').getContext('2d');
+      if (chartGauge) chartGauge.destroy();
+
+      let displayValue = Math.max(0, Math.min(100, ((scoreVal + 100) / 2)));
+
+      chartGauge = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Score NPS', 'Resto'],
+          datasets: [{
+            data: [displayValue, 100 - displayValue],
+            backgroundColor: [scoreVal >= 0 ? '#10b981' : '#f87171', '#23335a'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          rotation: -90,
+          circumference: 180,
+          cutout: '75%',
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderizarGraficoBarras(tecnicos) {
+      const ctx = document.getElementById('barTecnicosChart').getContext('2d');
+      if (chartBar) chartBar.destroy();
+
+      const nombres = tecnicos.map(t => t.nombre);
+      const avances = tecnicos.map(t => t.pctAvance);
+
+      chartBar = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: nombres,
+          datasets: [{
+            label: '% Cumplimiento',
+            data: avances,
+            backgroundColor: '#38bdf8',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { 
+            x: { max: 100, ticks: { color: '#8e9bb4', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#f8fafc' }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function aplicarFiltrosDetalle() {
+      let resultado = todosLosRegistros;
+      renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
+    }
+
+    function renderizarTarjetasAdmin(lista, idContenedor) {
+      const contenedor = document.getElementById(idContenedor);
+      contenedor.innerHTML = '';
+      if (lista.length === 0) {
+        contenedor.innerHTML = '<div class="text-secondary text-center small py-4 col-12">No hay órdenes registradas.</div>';
+        return;
+      }
+
+      lista.forEach(r => {
+        const isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
+        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+        let otClave = obtenerClaveLimpiaOT(r.numeroOT, r.codigoCliente);
+        let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
+        let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
+
+        contenedor.innerHTML += `
+          <div class="order-card fade-in-view ${isConflict ? 'conflictive' : ''}">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
+                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT}</small>
+              </div>
+              <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombreUsuario}</div>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
+              <span class="text-secondary fw-bold" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
+              ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')">Ver Foto</button>` : ''}
+            </div>
+          </div>`;
+      });
+    }
+
+    function verDetallesOrdenTecnico(index, origen) {
+      let item = (origen === 'PENDIENTE') ? pendientesTecnicoActual[index] : historicoTecnicoActual[index];
+      if (!item) return;
+
+      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
+      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
+      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
+      document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || usuarioActual.nombre;
+      document.getElementById('det-fecha').innerText = formatearFechaCorta(item.fechaAsignacion);
+      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
+      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
+
+      abrirModalBS('modalDetalleOrden');
     }
 
     function abrirModal(fila, numeroOT, codigoCliente) {
@@ -1184,7 +1467,7 @@
       }
 
       if (archivoFotoSeleccionado && !base64Compresion) {
-        alert("⏳ La foto aún se está optimizando. Espere un segundo y vuelva a presionar Guardar.");
+        alert("⏳ La foto aún se está optimizando. Espere un segundo y presione Guardar.");
         return;
       }
 
