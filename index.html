@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DATARED OPERACIONES - GESTION NPS 2026</title>
+  <title>DATARED OPERACIONES - GESTION Y NPS 2026</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b1329">
@@ -15,7 +15,6 @@
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
     :root { 
@@ -28,31 +27,54 @@
       --accent-green: #10b981;
     }
 
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
     body { 
       background-color: var(--bg-dark); 
       color: #f8fafc; 
-      font-family: system-ui, -apple-system, sans-serif;
-      padding-bottom: 75px; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding-bottom: 80px; 
+      overflow-x: hidden;
     }
     
-    .container-custom { max-width: 650px; margin: auto; padding: 14px; transition: max-width 0.3s ease; }
+    .container-custom { max-width: 650px; margin: auto; padding: 14px; transition: all 0.2s ease-in-out; }
     @media (min-width: 992px) {
       .container-custom { max-width: 1250px; padding: 24px; }
       body { padding-bottom: 0px; }
     }
 
+    /* ANIMACIONES Y TRANSMISION INSTANTÁNEA */
+    .fade-in-view {
+      animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn, .order-card, .nav-item-btn {
+      transition: transform 0.1s ease, background-color 0.2s ease;
+    }
+    .btn:active, .order-card:active {
+      transform: scale(0.97);
+    }
+
     .bi-card-dark { 
       background: var(--card-bg); 
       border: 1px solid var(--card-border); 
-      border-radius: 16px; 
+      border-radius: 18px; 
       padding: 18px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     }
 
     /* LOGIN STYLES */
     .login-container { min-height: 90vh; display: flex; align-items: center; justify-content: center; }
     .login-card { 
       width: 100%; max-width: 400px; padding: 32px 24px; border-radius: 24px; 
-      background: rgba(21, 32, 62, 0.85); backdrop-filter: blur(12px);
+      background: rgba(21, 32, 62, 0.9); backdrop-filter: blur(16px);
       border: 1px solid var(--card-border); 
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     }
@@ -62,25 +84,27 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* BOTTOM NAV BAR */
+    /* BOTTOM NAV BAR FLUIDA */
     .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      height: 65px; background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid var(--card-border);
+      position: fixed; bottom: 12px; left: 14px; right: 14px;
+      height: 65px; background: rgba(21, 32, 62, 0.92);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
       display: flex; justify-content: space-around; align-items: center;
-      z-index: 1050; padding: 0 10px;
+      z-index: 1050; padding: 0 6px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
     }
     .nav-item-btn {
       background: transparent; border: none; color: var(--text-muted);
       display: flex; flex-direction: column; align-items: center;
-      font-size: 0.72rem; font-weight: 500; transition: all 0.2s ease;
-      position: relative; width: 22%; padding: 6px 0;
+      font-size: 0.7rem; font-weight: 600; transition: all 0.2s ease;
+      position: relative; width: 23%; padding: 8px 0; border-radius: 14px;
     }
-    .nav-item-btn i { font-size: 1.35rem; margin-bottom: 2px; }
-    .nav-item-btn.active { color: var(--accent-cyan); font-weight: 700; }
+    .nav-item-btn i { font-size: 1.4rem; margin-bottom: 2px; }
+    .nav-item-btn.active { color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); }
     .nav-item-btn .badge-count {
-      position: absolute; top: 2px; right: 20%;
+      position: absolute; top: 4px; right: 22%;
       background: #ef4444; color: white; border-radius: 10px;
       padding: 1px 6px; font-size: 0.65rem; font-weight: 800;
     }
@@ -93,12 +117,12 @@
     .kpi-strip {
       background: var(--bg-dark);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 12px;
       text-align: center;
     }
-    .kpi-strip .val { font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
-    .kpi-strip .lbl { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .kpi-strip .val { font-size: 1.5rem; font-weight: 800; line-height: 1.1; }
+    .kpi-strip .lbl { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
 
     .grid-dashboard { display: grid; grid-template-columns: 1fr; gap: 12px; }
     @media (min-width: 768px) { .grid-dashboard { grid-template-columns: repeat(2, 1fr); } }
@@ -108,11 +132,12 @@
       background: var(--card-bg); border: 1px solid var(--card-border); 
       border-radius: 18px; padding: 16px; position: relative; 
       display: flex; flex-direction: column; justify-content: space-between; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .order-card.conflictive { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, #15203e 0%, #2a1215 100%); }
 
     .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; margin-top: 10px; }
-    .meta-item { background: rgba(11, 19, 41, 0.6); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); }
+    .meta-item { background: rgba(11, 19, 41, 0.6); padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.03); }
 
     .badge-subtle { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
     .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
@@ -125,8 +150,12 @@
     .detail-val { font-size: 0.9rem; color: #f8fafc; font-weight: 600; }
 
     .input-group-text { background: #0b1329; border-color: var(--card-border); color: var(--text-muted); }
-    .form-control, .form-select { background-color: #0b1329 !important; border-color: var(--card-border) !important; color: #ffffff !important; }
+    .form-control, .form-select { background-color: #0b1329 !important; border-color: var(--card-border) !important; color: #ffffff !important; border-radius: 10px; }
     .form-control:focus, .form-select:focus { border-color: var(--accent-blue) !important; box-shadow: none !important; }
+
+    .segmented-control { display: flex; background: #0b1329; border: 1px solid var(--card-border); border-radius: 12px; padding: 4px; }
+    .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border: none; padding: 8px; font-weight: 600; font-size: 0.8rem; border-radius: 8px; }
+    .segmented-control .nav-link.active { background: var(--card-bg); color: #ffffff; }
 
     .hidden { display: none !important; }
   </style>
@@ -135,8 +164,8 @@
 
   <div class="container-custom">
 
-    <!-- LOGIN MEJORADO -->
-    <div id="view-login" class="login-container">
+    <!-- LOGIN -->
+    <div id="view-login" class="login-container fade-in-view">
       <div class="login-card">
         <div class="text-center mb-4">
           <div class="logo-glow">
@@ -192,7 +221,7 @@
       </div>
 
       <!-- SECCIÓN INICIO TECNICO -->
-      <div id="sec-tec-inicio">
+      <div id="sec-tec-inicio" class="fade-in-view">
         <div class="bi-card-dark mb-3">
           <h6 class="fw-bold text-white mb-2">Resumen Operativo</h6>
           <div class="row g-2 text-center">
@@ -225,21 +254,21 @@
         </div>
 
         <div class="bi-card-dark mb-3">
-          <h6 class="fw-bold text-secondary small mb-3">AJUSTES Y CUENTA</h6>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Opción en desarrollo')">
-            <span><i class="bi bi-person-gear me-2 text-info"></i>Información Personal</span>
+          <h6 class="fw-bold text-secondary small mb-3">AJUSTES Y NOTIFICACIONES</h6>
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="solicitarPermisoNotificaciones()">
+            <span><i class="bi bi-bell-fill me-2 text-warning"></i>Activar Notificaciones Nativas</span>
             <i class="bi bi-chevron-right text-secondary"></i>
           </div>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 1.2.0 - Activa')">
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 2.0.0 - Edición Pro Campo')">
             <span><i class="bi bi-info-circle me-2 text-warning"></i>Versión del Sistema</span>
-            <small class="text-secondary">v1.2.0</small>
+            <small class="text-secondary">v2.0.0 Pro</small>
           </div>
           <button class="btn btn-outline-danger w-100 fw-bold mt-3 py-2" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
         </div>
       </div>
     </div>
 
-    <!-- VISTA ADMIN / SUPERVISOR -->
+    <!-- VISTA ADMIN / SUPERVISOR COMPLETA -->
     <div id="view-admin" class="hidden">
       <div class="bi-card-dark mb-3">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -247,11 +276,11 @@
             <div class="bg-primary bg-opacity-25 text-primary p-2 rounded-3 border border-primary border-opacity-25"><i class="bi bi-speedometer2 fs-4"></i></div>
             <div>
               <h6 class="fw-bold m-0 text-white" id="admin-header-titulo">DATARED GLOBAL - PANEL EJECUTIVO</h6>
-              <small class="text-info fw-bold" style="font-size: 0.72rem;" id="admin-header-region">ZONA: NACIONAL</small>
+              <small class="text-info fw-bold" style="font-size: 0.72rem;" id="admin-header-region">ÁREA: CARGANDO... | DEP: TODO</small>
             </div>
           </div>
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <button class="btn btn-sm btn-outline-info fw-bold" onclick="abrirModalCargaExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Cargar Excel</button>
+            <button class="btn btn-sm btn-outline-info fw-bold" onclick="abrirModalCargaExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Cargar / Conciliar Excel</button>
             <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard()">
               <option value="dia">Hoy / 24h</option>
               <option value="semana">Últimos 7 días</option>
@@ -276,37 +305,50 @@
           </div>
         </div>
 
+        <!-- INDICADOR 1: VOLUMEN DE GESTIÓN OPERATIVA -->
+        <h6 class="fw-bold text-info border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
+          <i class="bi bi-card-checklist me-1"></i> 1. INDICADOR DE GESTIÓN OPERATIVA (VOLUMEN)
+        </h6>
+        <div class="row g-2 text-center mb-3">
+          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl">TOTAL ASIGNADOS</div><div class="val text-light" id="kpi-total">0</div></div></div>
+          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl text-success">GESTIONADOS</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
+          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
+          <div class="col-12 col-md-3"><div class="kpi-strip border-info"><div class="lbl text-info">% COBERTURA DE GESTIÓN</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
+        </div>
+
+        <!-- INDICADOR 2: PUNTUACIÓN Y SATISFACCIÓN NPS -->
+        <h6 class="fw-bold text-warning border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
+          <i class="bi bi-star-fill me-1"></i> 2. INDICADOR DE SATISFACCIÓN NPS (CALIFICACIÓN)
+        </h6>
         <div class="row g-2 text-center">
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl">TOTAL</div><div class="val text-light" id="kpi-total">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-success">GESTIONADOS</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-secondary">SIN GESTIÓN (144H)</div><div class="val text-secondary" id="kpi-sin-gestion">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip"><div class="lbl text-danger">CONFLICTIVOS</div><div class="val text-danger" id="kpi-conflictivos">0</div></div></div>
-          <div class="col-4 col-md-2"><div class="kpi-strip border-info"><div class="lbl text-info">% AVANCE</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
+          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl text-success">PROMOTORES (9-10)</div><div class="val text-success" id="kpi-nps-promotores">0</div></div></div>
+          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl text-warning">PASIVOS (7-8)</div><div class="val text-warning" id="kpi-nps-pasivos">0</div></div></div>
+          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl text-danger">DETRACTORES (0-6)</div><div class="val text-danger" id="kpi-nps-detractores">0</div></div></div>
+          <div class="col-12 col-md-3"><div class="kpi-strip border-warning"><div class="lbl text-warning">NET PROMOTER SCORE (NPS)</div><div class="val text-warning" id="kpi-nps-neto">0%</div></div></div>
         </div>
       </div>
 
       <div class="segmented-control mb-3">
-        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-pie-chart-fill me-1"></i> Resumen Visual</button>
+        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-pie-chart-fill me-1"></i> Resumen Visual Dual</button>
         <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-card-checklist me-1"></i> Detalle y Filtros</button>
       </div>
 
-      <div id="sec-tecnicos">
+      <div id="sec-tecnicos" class="fade-in-view">
         <div class="row g-3 mb-3">
           <div class="col-12 col-md-5">
             <div class="bi-card-dark text-center h-100 d-flex flex-column justify-content-between">
-              <h6 class="fw-bold text-secondary small">BALANCE GENERAL DE GESTIÓN</h6>
+              <h6 class="fw-bold text-secondary small">BALANCE GENERAL DE CALIDAD NPS</h6>
               <div style="position: relative; max-width: 240px; margin: auto;">
                 <canvas id="gaugeChart"></canvas>
                 <div style="position: absolute; bottom: 10px; left: 0; right: 0;">
                   <h2 class="fw-bold m-0 text-white" id="gauge-score-val">0%</h2>
-                  <span class="badge bg-success" id="gauge-score-lbl">Avance Global</span>
+                  <span class="badge bg-success" id="gauge-score-lbl">NPS Neto</span>
                 </div>
               </div>
               <div class="row g-1 pt-3 border-top border-secondary mt-2">
-                <div class="col-4"><small class="text-danger d-block fw-bold" id="pct-detractores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Conflictivos</span></div>
-                <div class="col-4"><small class="text-warning d-block fw-bold" id="pct-neutros">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Pendientes</span></div>
-                <div class="col-4"><small class="text-success d-block fw-bold" id="pct-promotores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Gestionados</span></div>
+                <div class="col-4"><small class="text-danger d-block fw-bold" id="pct-detractores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Detractores</span></div>
+                <div class="col-4"><small class="text-warning d-block fw-bold" id="pct-neutros">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Pasivos</span></div>
+                <div class="col-4"><small class="text-success d-block fw-bold" id="pct-promotores">0%</small><span class="text-secondary" style="font-size: 0.65rem;">Promotores</span></div>
               </div>
             </div>
           </div>
@@ -335,21 +377,18 @@
               </select>
             </div>
             <div class="col-12 col-md-4">
-              <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-tag-fill me-1"></i> Estado:</label>
+              <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-tag-fill me-1"></i> Estado / Puntuación:</label>
               <select id="select-filtro-estado" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="aplicarFiltrosDetalle()">
                 <option value="TODOS">-- Todos los Estados --</option>
-                <option value="Gestionado">Gestionado</option>
+                <option value="Gestionado">Gestionado (Promotor)</option>
                 <option value="Pendiente">Pendiente</option>
-                <option value="Sin Gestion">Sin Gestión (144h)</option>
-                <option value="UU conflictivo">UU conflictivo</option>
+                <option value="No le llego la encuesta">No le llegó la encuesta</option>
+                <option value="UU conflictivo">UU conflictivo (Detractor)</option>
               </select>
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-search me-1"></i> Búsqueda rápida:</label>
-              <div class="input-group input-group-sm">
-                <span class="input-group-text bg-dark text-secondary border-secondary"><i class="bi bi-search"></i></span>
-                <input type="text" id="input-buscar" class="form-control bg-dark text-white border-secondary" placeholder="Buscar OT, cliente, teléfono..." onkeyup="aplicarFiltrosDetalle()">
-              </div>
+              <input type="text" id="input-buscar" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Buscar OT, cliente..." onkeyup="aplicarFiltrosDetalle()">
             </div>
           </div>
         </div>
@@ -359,7 +398,7 @@
     </div>
   </div>
 
-  <!-- NAVEGACIÓN INFERIOR (BOTTOM NAV) PARA TÉCNICOS -->
+  <!-- NAVEGACIÓN INFERIOR FLUIDA -->
   <div class="bottom-nav hidden" id="app-bottom-nav">
     <button class="nav-item-btn active" id="bnav-inicio" onclick="navegarBottom('inicio')">
       <i class="bi bi-grid-1x2-fill"></i>
@@ -385,17 +424,17 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
         <div class="modal-header border-secondary">
-          <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Cargar Excel de Órdenes</h6>
+          <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Cargar Excel Nacional / Conciliar Encuestas</h6>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <p class="small text-secondary mb-3">Selecciona el archivo Excel (.xlsx o .csv) con las órdenes.</p>
+          <p class="small text-secondary mb-3">Sube el reporte nacional para cruzar la puntuación real de encuestas (0-10) con las gestiones realizadas.</p>
           <input type="file" id="input-file-excel" class="form-control bg-dark text-white border-secondary mb-3" accept=".xlsx, .xls, .csv">
           <div id="resultado-carga-excel" class="small hidden p-2 rounded"></div>
         </div>
         <div class="modal-footer border-secondary">
           <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" id="btn-procesar-excel" class="btn btn-sm btn-primary fw-bold" onclick="procesarArchivoExcel()"><i class="bi bi-cloud-upload me-1"></i> Subir a Base General</button>
+          <button type="button" id="btn-procesar-excel" class="btn btn-sm btn-primary fw-bold" onclick="procesarArchivoExcel()"><i class="bi bi-cloud-upload me-1"></i> Procesar y Conciliar</button>
         </div>
       </div>
     </div>
@@ -404,44 +443,71 @@
   <div class="modal fade" id="modalGestion" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Registrar Gestión</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title fw-bold"><i class="bi bi-shield-check text-primary me-2"></i>Registrar Gestión de Campo</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
         <div class="modal-body">
           <input type="hidden" id="modal-fila">
           <input type="hidden" id="modal-ot">
+          
           <div class="mb-3">
-            <label class="form-label small text-secondary">Estado de Gestión</label>
-            <select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="evaluarEstado()">
-              <option value="Gestionado">Gestionado</option>
-              <option value="UU conflictivo">UU conflictivo</option>
+            <label class="form-label small text-secondary fw-semibold">Estado de la Gestión *</label>
+            <select id="modal-estado" class="form-select bg-dark text-white border-secondary" onchange="actualizarScoreProyectado()">
+              <option value="Gestionado">Gestionado (Encuesta Enviada)</option>
+              <option value="No le llego la encuesta">No le llegó la encuesta</option>
+              <option value="Telefono no corresponde / Apagado">Teléfono no corresponde / Apagado</option>
+              <option value="UU conflictivo">UU conflictivo (Reclamo)</option>
             </select>
           </div>
+
           <div class="mb-3">
-            <label class="form-label small text-secondary">Resultado</label>
+            <label class="form-label small text-secondary fw-semibold">Calificación Estimada del Cliente (0-10)</label>
+            <select id="modal-score-estimado" class="form-select bg-dark text-white border-secondary">
+              <option value="10">10 - Promotor Puro (Excelente)</option>
+              <option value="9">9 - Promotor (Muy Bueno)</option>
+              <option value="8">8 - Pasivo (Satisfecho)</option>
+              <option value="7">7 - Pasivo (Regular)</option>
+              <option value="5">5 - Detractor (Insatisfecho)</option>
+              <option value="0">0 - Detractor Severo</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small text-secondary fw-semibold">Resultado de Contacto</label>
             <select id="modal-resultado" class="form-select bg-dark text-white border-secondary">
-              <option value="Exitoso">Exitoso</option>
-              <option value="Sin respuesta">Sin respuesta</option>
+              <option value="Exitoso">Exitoso (Contacto directo)</option>
+              <option value="Sin respuesta">Sin respuesta (Llamada no atendida)</option>
             </select>
           </div>
+
           <div class="mb-3">
-            <label class="form-label small text-secondary">Evidencia Fotográfica</label>
+            <label class="form-label small text-warning fw-bold"><i class="bi bi-pencil-square me-1"></i>Observación / Comentario de Campo</label>
+            <textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Escriba detalles relevantes..."></textarea>
+          </div>
+
+          <div class="mb-3 p-3 rounded border border-warning border-opacity-25 bg-dark bg-opacity-50">
+            <label class="form-label small text-warning fw-bold d-block text-center mb-2">
+              <i class="bi bi-camera-fill me-1"></i>Respaldo Fotográfico OBLIGATORIO *
+            </label>
             <div class="d-flex gap-2 mb-2">
               <label class="btn btn-outline-info btn-sm flex-fill fw-bold mb-0 py-2" style="font-size: 0.78rem; cursor: pointer;">
                 <i class="bi bi-camera-fill me-1"></i> Tomar Foto
                 <input type="file" id="modal-foto-camara" class="hidden" accept="image/*" capture="environment" onchange="procesarFotoSeleccionada(this)">
               </label>
               <label class="btn btn-outline-warning btn-sm flex-fill fw-bold mb-0 py-2" style="font-size: 0.78rem; cursor: pointer;">
-                <i class="bi bi-image-fill me-1"></i> Elegir Galería
+                <i class="bi bi-image-fill me-1"></i> Galería
                 <input type="file" id="modal-foto-galeria" class="hidden" accept="image/*" onchange="procesarFotoSeleccionada(this)">
               </label>
             </div>
-            <div id="label-archivo-elegido" class="text-success small fw-bold text-center"></div>
+            <div id="label-archivo-elegido" class="text-danger small fw-bold text-center">⚠ Falta adjuntar foto de respaldo</div>
           </div>
-          <div id="box-observacion" class="mb-3 hidden">
-            <label class="form-label small text-danger fw-bold">Informe / Motivo (Obligatorio para UU conflictivo) *</label>
-            <textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Detalla el motivo del informe..."></textarea>
-          </div>
+
         </div>
-        <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" id="btn-guardar" class="btn btn-sm btn-primary" onclick="guardarFormulario()">Guardar Gestión</button></div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="btn-guardar" class="btn btn-sm btn-primary fw-bold" onclick="guardarFormulario()">Guardar Gestión</button>
+        </div>
       </div>
     </div>
   </div>
@@ -449,7 +515,10 @@
   <div class="modal fade" id="modalDetalleOrden" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Ficha de Gestión NPS</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-person me-2 text-info"></i>Ficha de Gestión NPS</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
         <div class="modal-body">
           <div class="detail-row"><div class="detail-label">ID Gestión</div><div class="detail-val" id="det-id">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Código Cliente</div><div class="detail-val text-primary" id="det-codigo">N/A</div></div>
@@ -457,15 +526,15 @@
           <div class="detail-row"><div class="detail-label">Técnico Asignado</div><div class="detail-val fw-bold text-info" id="det-tecnico">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Fecha Asignación</div><div class="detail-val" id="det-fecha">N/A</div></div>
           <div class="detail-row"><div class="detail-label text-info">Fecha de Gestión</div><div class="detail-val text-info fw-bold" id="det-fecha-gestion">Pendiente</div></div>
-          <div class="detail-row"><div class="detail-label text-success">Tiempo de Respuesta</div><div class="detail-val text-success fw-bold" id="det-tiempo-respuesta">N/A</div></div>
+          <div class="detail-row"><div class="detail-label text-success">Puntuación Encuesta (0-10)</div><div class="detail-val text-success fw-bold" id="det-score-real">10 (Promotor Estimado)</div></div>
           <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-val" id="det-estado">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val" id="det-ot">N/A</div></div>
           <div class="detail-row"><div class="detail-label">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
           <div class="detail-row hidden" id="det-box-obs"><div class="detail-label text-danger">Informe Observación</div><div class="detail-val text-warning" id="det-observacion">N/A</div></div>
-          
-          <div class="mt-3 d-flex flex-column gap-2" id="box-btn-acciones"></div>
         </div>
-        <div class="modal-footer border-secondary"><button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button></div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar Ficha</button>
+        </div>
       </div>
     </div>
   </div>
@@ -490,6 +559,7 @@
     let usuarioActual = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [];
     let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
+    let conteoAnteriorPendientes = -1;
 
     function togglePasswordVisibility() {
       const inputPass = document.getElementById('input-pass');
@@ -513,27 +583,55 @@
       }
     }
 
+    function solicitarPermisoNotificaciones() {
+      if ("Notification" in window) {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") alert("Notificaciones activadas con éxito.");
+        });
+      }
+    }
+
+    function emitirNotificacionNativa(titulo, mensaje) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(titulo, { body: mensaje, icon: 'logo.png' });
+      }
+    }
+
+    function cambiarPestana(pestana) {
+      document.getElementById('tab-tecnicos-btn').classList.remove('active');
+      document.getElementById('tab-general-btn').classList.remove('active');
+
+      if (pestana === 'tecnicos') {
+        document.getElementById('tab-tecnicos-btn').classList.add('active');
+        document.getElementById('sec-tecnicos').classList.remove('hidden');
+        document.getElementById('sec-general').classList.add('hidden');
+      } else {
+        document.getElementById('tab-general-btn').classList.add('active');
+        document.getElementById('sec-tecnicos').classList.add('hidden');
+        document.getElementById('sec-general').classList.remove('hidden');
+      }
+    }
+
     function navegarBottom(seccion) {
       document.querySelectorAll('.nav-item-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById('bnav-' + seccion).classList.add('active');
 
-      document.getElementById('sec-tec-inicio').classList.add('hidden');
-      document.getElementById('sec-tec-pendientes').classList.add('hidden');
-      document.getElementById('sec-tec-historico').classList.add('hidden');
-      document.getElementById('sec-tec-perfil').classList.add('hidden');
+      const ids = ['sec-tec-inicio', 'sec-tec-pendientes', 'sec-tec-historico', 'sec-tec-perfil'];
+      ids.forEach(id => document.getElementById(id).classList.add('hidden'));
 
-      if (seccion === 'inicio') {
-        document.getElementById('sec-tec-inicio').classList.remove('hidden');
-        cargarPendientesTecnico();
-        cargarHistoricoTecnico();
-      } else if (seccion === 'pendientes') {
-        document.getElementById('sec-tec-pendientes').classList.remove('hidden');
-        cargarPendientesTecnico();
+      const secEl = document.getElementById('sec-tec-' + seccion);
+      if (secEl) {
+        secEl.classList.remove('hidden');
+        secEl.classList.add('fade-in-view');
+      }
+
+      // NAVEGACIÓN INSTANTÁNEA: renderiza inmediatamente desde memoria cache
+      if (seccion === 'inicio' || seccion === 'pendientes') {
+        renderizarPendientesTecnicoUI();
+        cargarPendientesTecnico(); // Revalida en segundo plano
       } else if (seccion === 'historico') {
-        document.getElementById('sec-tec-historico').classList.remove('hidden');
-        cargarHistoricoTecnico();
-      } else if (seccion === 'perfil') {
-        document.getElementById('sec-tec-perfil').classList.remove('hidden');
+        renderizarHistoricoTecnicoUI();
+        cargarHistoricoTecnico(); // Revalida en segundo plano
       }
     }
 
@@ -555,6 +653,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      solicitarPermisoNotificaciones();
       const perfilGuardado = localStorage.getItem("nps_user_profile");
       if (perfilGuardado) {
         try {
@@ -579,14 +678,36 @@
         document.getElementById('perfil-correo').innerText = res.usuario || '';
         document.getElementById('perfil-avatar').innerText = (res.nombre || 'T').charAt(0).toUpperCase();
 
+        // CARGA INSTANTÁNEA DESDE CACHE DE PENDIENTES E HISTÓRICO
+        const cachePendientes = localStorage.getItem(`cache_pendientes_${res.usuario}`);
+        if (cachePendientes) {
+          pendientesTecnicoActual = JSON.parse(cachePendientes);
+          renderizarPendientesTecnicoUI();
+          document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
+          document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
+        }
+
+        const cacheHistorico = localStorage.getItem(`cache_historico_${res.usuario}`);
+        if (cacheHistorico) {
+          historicoTecnicoActual = JSON.parse(cacheHistorico);
+          document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
+        }
+
         navegarBottom('inicio');
+        setInterval(cargarPendientesTecnico, 45000);
       } else {
         document.getElementById('view-admin').classList.remove('hidden');
         document.getElementById('view-tecnico').classList.add('hidden');
         document.getElementById('app-bottom-nav').classList.add('hidden');
 
         document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
-        document.getElementById('admin-header-region').innerText = `ÁREA: ${res.area || 'REGIONAL'} | DEP: ${res.departamento}`;
+        document.getElementById('admin-header-region').innerText = `ÁREA: ${res.area || 'Encargado Nacional'} | DEP: ${res.departamento || 'TODOS'}`;
+        
+        // Carga rápida del Dashboard desde cache
+        const cacheDash = localStorage.getItem(`cache_dashboard_${res.usuario}`);
+        if (cacheDash) {
+          procesarYRenderizarDashboard(JSON.parse(cacheDash));
+        }
         cargarDashboard();
       }
     }
@@ -600,9 +721,7 @@
             body: JSON.stringify({ accion: accion, ...dataPayload }),
             redirect: "follow"
           });
-          if (response.ok) {
-            return JSON.parse(await response.text());
-          }
+          if (response.ok) return JSON.parse(await response.text());
         } catch (e) {
           if (i === reintentos) throw e;
           await new Promise(r => setTimeout(r, 1000));
@@ -635,9 +754,7 @@
           if (alertBox) {
             alertBox.innerText = res.mensaje || "Credenciales no válidas";
             alertBox.classList.remove('hidden');
-          } else {
-            alert(res.mensaje || "Credenciales no válidas");
-          }
+          } else { alert(res.mensaje || "Credenciales no válidas"); }
         }
       } catch(e) {
         btnLogin.disabled = false;
@@ -646,14 +763,55 @@
       }
     }
 
+    function formatearFechaCorta(fechaStr) {
+      if (!fechaStr) return 'Hoy';
+      try {
+        const parts = fechaStr.toString().split('T')[0].split(' ')[0].split('/');
+        if (parts.length === 3) return `${parts[0].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[2]}`;
+        const d = new Date(fechaStr);
+        if (!isNaN(d.getTime())) {
+          return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+        return fechaStr;
+      } catch(e) { return fechaStr; }
+    }
+
+    function generarUrlWhatsApp(telefono, codigoCliente, nombreUsuario, nombreTecnico) {
+      let numLimpio = telefono.toString().replace(/[^0-9]/g, '');
+      let horaActual = new Date().getHours();
+      let saludoHora = "Estimado cliente, buenas tardes. 👋";
+
+      if (horaActual >= 0 && horaActual < 12) saludoHora = "Estimado cliente, buenos días. ☀️";
+      else if (horaActual >= 12 && horaActual < 19) saludoHora = "Estimado cliente, buenas tardes. 👋";
+      else saludoHora = "Estimado cliente, buenas noches. 🌙";
+
+      let tecNombre = nombreTecnico || (usuarioActual ? usuarioActual.nombre : 'Servicio Técnico');
+      let mensajeWs = `${saludoHora}\n\nLe escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codigoCliente || 'N/A'}* (${nombreUsuario || 'Estimado Cliente'}).\n\nMi nombre es *${tecNombre}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.\n\nEn caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo por favor un *10* 😁. Su calificación es muy importante para mí.\n\n¡Muchas gracias por su apoyo! 🙌`;
+
+      return `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
+    }
+
+    function actualizarScoreProyectado() {
+      const est = document.getElementById('modal-estado').value;
+      const scoreSelect = document.getElementById('modal-score-estimado');
+      if (est === 'Gestionado') scoreSelect.value = "10";
+      else if (est === 'No le llego la encuesta') scoreSelect.value = "8";
+      else if (est === 'UU conflictivo') scoreSelect.value = "5";
+      else scoreSelect.value = "7";
+    }
+
     async function cargarPendientesTecnico() {
-      const contenedor = document.getElementById('lista-pendientes');
-      contenedor.innerHTML = '<div class="text-info text-center small py-3 col-12"><div class="spinner-border spinner-border-sm me-2"></div>Cargando pendientes...</div>';
-      
       try {
         const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
         pendientesTecnicoActual = Array.isArray(lista) ? lista : [];
         
+        localStorage.setItem(`cache_pendientes_${usuarioActual.usuario}`, JSON.stringify(pendientesTecnicoActual));
+
+        if (conteoAnteriorPendientes !== -1 && pendientesTecnicoActual.length > conteoAnteriorPendientes) {
+          emitirNotificacionNativa("Nuevos Códigos Asignados", `Tiene ${pendientesTecnicoActual.length} órdenes pendientes por gestionar.`);
+        }
+        conteoAnteriorPendientes = pendientesTecnicoActual.length;
+
         document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
         document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
         
@@ -661,18 +819,15 @@
         if (pendientesTecnicoActual.length > 0) {
           badgeEl.innerText = pendientesTecnicoActual.length;
           badgeEl.classList.remove('hidden');
-        } else {
-          badgeEl.classList.add('hidden');
-        }
+        } else { badgeEl.classList.add('hidden'); }
 
         renderizarPendientesTecnicoUI();
-      } catch(e) {
-        contenedor.innerHTML = '<div class="alert alert-dark text-danger text-center small py-3 col-12">Error al cargar la lista.</div>';
-      }
+      } catch(e) {}
     }
 
     function renderizarPendientesTecnicoUI() {
       const contenedor = document.getElementById('lista-pendientes');
+      if (!contenedor) return;
       contenedor.innerHTML = '';
 
       if (!pendientesTecnicoActual || pendientesTecnicoActual.length === 0) {
@@ -689,11 +844,12 @@
         let telLlamar = (telefono && telefono !== 'Sin Teléfono') ? 
           `<a href="tel:${telefono}" class="btn btn-sm btn-outline-warning fw-bold flex-fill"><i class="bi bi-telephone-fill me-1"></i>Llamar</a>` : '';
 
+        let urlWs = (telefono && telefono !== 'Sin Teléfono') ? generarUrlWhatsApp(telefono, codigo, usuario, item.tecnicoAsignado) : '#';
         let btnWs = (telefono && telefono !== 'Sin Teléfono') ? 
-          `<a href="https://wa.me/591${telefono.toString().replace(/[^0-9]/g, '')}" target="_blank" class="btn btn-sm btn-success fw-bold flex-fill"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>` : '';
+          `<a href="${urlWs}" target="_blank" class="btn btn-sm btn-success fw-bold flex-fill"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>` : '';
 
         contenedor.innerHTML += `
-          <div class="order-card mb-3">
+          <div class="order-card mb-3 fade-in-view">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="badge-subtle badge-pending">Pendiente</span>
@@ -705,7 +861,7 @@
               <div class="meta-grid mb-2">
                 <div class="meta-item">
                   <span class="text-secondary d-block" style="font-size: 0.65rem;">ASIGNACIÓN</span>
-                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${item.fechaAsignacion || 'Hoy'}</span>
+                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${formatearFechaCorta(item.fechaAsignacion)}</span>
                 </div>
                 <div class="meta-item">
                   <span class="text-secondary d-block" style="font-size: 0.65rem;">TELÉFONO</span>
@@ -728,18 +884,20 @@
     }
 
     async function cargarHistoricoTecnico() {
-      const contenedor = document.getElementById('lista-historico-tecnico');
-      contenedor.innerHTML = '<div class="text-info text-center small py-3 col-12"><div class="spinner-border spinner-border-sm me-2"></div>Cargando histórico...</div>';
-
       try {
         const lista = await apiCall("obtenerHistoricoTecnico", { correoTecnico: usuarioActual.usuario });
         historicoTecnicoActual = Array.isArray(lista) ? lista : [];
+        localStorage.setItem(`cache_historico_${usuarioActual.usuario}`, JSON.stringify(historicoTecnicoActual));
         document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
-      } catch(e) { 
-        historicoTecnicoActual = []; 
-      }
-      
+        renderizarHistoricoTecnicoUI();
+      } catch(e) {}
+    }
+
+    function renderizarHistoricoTecnicoUI() {
+      const contenedor = document.getElementById('lista-historico-tecnico');
+      if (!contenedor) return;
       contenedor.innerHTML = '';
+
       if (!historicoTecnicoActual || historicoTecnicoActual.length === 0) {
         contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes gestiones en tu histórico.</div>';
         return;
@@ -754,7 +912,7 @@
         let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
 
         contenedor.innerHTML += `
-          <div class="order-card mb-3 ${isConflict ? 'conflictive' : ''}">
+          <div class="order-card mb-3 fade-in-view ${isConflict ? 'conflictive' : ''}">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
@@ -770,7 +928,7 @@
                 </div>
                 <div class="meta-item">
                   <span class="text-secondary d-block" style="font-size: 0.65rem;">FECHA GESTIÓN</span>
-                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${r.fechaGestion || 'N/A'}</span>
+                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${formatearFechaCorta(r.fechaGestion)}</span>
                 </div>
               </div>
             </div>
@@ -783,150 +941,6 @@
       });
     }
 
-    function construirBotoneraWhatsApp(item) {
-      if (!item.telefono || item.telefono === 'Sin Teléfono') return '';
-
-      let numLimpio = item.telefono.toString().replace(/[^0-9]/g, '');
-      let horaActual = new Date().getHours();
-      let saludoHora = "Estimado cliente, buenas tardes. 👋";
-
-      if (horaActual >= 0 && horaActual < 12) {
-        saludoHora = "Estimado cliente, buenos días. ☀️";
-      } else if (horaActual >= 12 && horaActual < 19) {
-        saludoHora = "Estimado cliente, buenas tardes. 👋";
-      } else {
-        saludoHora = "Estimado cliente, buenas noches. 🌙";
-      }
-
-      let nombreTecnicoActual = (usuarioActual && usuarioActual.nombre) ? usuarioActual.nombre : (item.tecnico || item.tecnicoAsignado || 'Servicio Técnico');
-      let codigoCli = item.codigoCliente || 'N/A';
-      let nombreCli = item.nombreUsuario || 'Estimado Cliente';
-
-      let mensajeWs = `${saludoHora}%0A%0A` +
-        `Le escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codigoCli}* (${nombreCli}).%0A%0A` +
-        `Mi nombre es *${nombreTecnicoActual}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.%0A%0A` +
-        `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo porfavor un *10* 😁. Su calificación y opinión son muy importantes para nosotros.%0A%0A` +
-        `Muchas gracias por su tiempo y colaboración. 🙌`;
-
-      let urlWs = `https://wa.me/591${numLimpio}?text=${mensajeWs}`;
-
-      return `
-        <a href="${urlWs}" target="_blank" class="btn btn-success fw-bold py-2"><i class="bi bi-whatsapp me-2"></i>Enviar WhatsApp NPS</a>
-        <a href="tel:${item.telefono}" class="btn btn-warning fw-bold py-2"><i class="bi bi-telephone-outbound-fill me-2"></i>Llamar (${item.telefono})</a>
-      `;
-    }
-
-    function verDetallesOrdenAdmin(index) {
-      let item = todosLosRegistros[index];
-      if (!item) return;
-
-      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
-      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
-      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
-      document.getElementById('det-tecnico').innerText = item.tecnico || 'Sin Asignar';
-      document.getElementById('det-fecha').innerText = item.fechaAsignacion || 'N/A';
-      
-      const fechaG = item.fechaGestion;
-      document.getElementById('det-fecha-gestion').innerText = fechaG ? fechaG : 'Pendiente de Gestión';
-
-      let tiempoTexto = "En proceso / Pendiente";
-      if (item.fechaAsignacion && fechaG) {
-        tiempoTexto = calcularTiempoDiferencia(item.fechaAsignacion, fechaG);
-      }
-      document.getElementById('det-tiempo-respuesta').innerText = tiempoTexto;
-
-      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
-      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
-
-      let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
-      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : (item.estado === 'Sin Gestion' ? 'badge-expired' : 'badge-pending'));
-      document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
-
-      const boxObs = document.getElementById('det-box-obs');
-      if (item.observacion) {
-        document.getElementById('det-observacion').innerText = item.observacion;
-        boxObs.classList.remove('hidden');
-      } else {
-        boxObs.classList.add('hidden');
-      }
-
-      document.getElementById('box-btn-acciones').innerHTML = construirBotoneraWhatsApp(item);
-      abrirModalBS('modalDetalleOrden');
-    }
-
-    function verDetallesOrdenTecnico(index, origen) {
-      let item = (origen === 'PENDIENTE') ? pendientesTecnicoActual[index] : historicoTecnicoActual[index];
-      if (!item) return;
-
-      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
-      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
-      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
-      document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || usuarioActual.nombre;
-      document.getElementById('det-fecha').innerText = item.fechaAsignacion || 'N/A';
-      
-      const fechaG = item.fechaGestion;
-      document.getElementById('det-fecha-gestion').innerText = fechaG ? fechaG : 'Pendiente de Gestión';
-
-      let tiempoTexto = "En proceso / Pendiente";
-      if (item.fechaAsignacion && fechaG) {
-        tiempoTexto = calcularTiempoDiferencia(item.fechaAsignacion, fechaG);
-      }
-      document.getElementById('det-tiempo-respuesta').innerText = tiempoTexto;
-
-      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
-      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
-
-      let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
-      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
-      document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
-
-      const boxObs = document.getElementById('det-box-obs');
-      if (item.observacion) {
-        document.getElementById('det-observacion').innerText = item.observacion;
-        boxObs.classList.remove('hidden');
-      } else {
-        boxObs.classList.add('hidden');
-      }
-
-      document.getElementById('box-btn-acciones').innerHTML = construirBotoneraWhatsApp(item);
-      abrirModalBS('modalDetalleOrden');
-    }
-
-    function calcularTiempoDiferencia(fechaInicioStr, fechaFinStr) {
-      try {
-        const f1 = parseFechaLocal(fechaInicioStr);
-        const f2 = parseFechaLocal(fechaFinStr);
-        if (!f1 || !f2) return "Registrado";
-        
-        const diffMs = Math.abs(f2 - f1);
-        const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-        if (diffHoras > 24) {
-          const dias = Math.floor(diffHoras / 24);
-          return `${dias} día(s) y ${diffHoras % 24} hr(s)`;
-        }
-        return `${diffHoras} hr(s) y ${diffMinutos} min`;
-      } catch(e) {
-        return "Registrado";
-      }
-    }
-
-    function parseFechaLocal(fStr) {
-      if (!fStr) return null;
-      const parts = fStr.split(" ");
-      if (parts.length < 1) return null;
-      const dateParts = parts[0].split("/");
-      if (dateParts.length < 3) return null;
-      let hh = 0, mm = 0;
-      if (parts.length > 1) {
-        const timeParts = parts[1].split(":");
-        hh = parseInt(timeParts[0]) || 0;
-        mm = parseInt(timeParts[1]) || 0;
-      }
-      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], hh, mm);
-    }
-
     async function cargarDashboard() {
       const per = document.getElementById('select-periodo').value;
       const filtroDeptEl = document.getElementById('select-filtro-dept');
@@ -935,18 +949,14 @@
       const esNacional = usuarioActual.area && usuarioActual.area.toUpperCase().includes('NACIONAL');
       const esDepartamental = usuarioActual.area && usuarioActual.area.toUpperCase().includes('DEPARTAMENTAL');
 
-      if (!esNacional) {
-        if (filtroDeptEl) {
-          filtroDeptEl.innerHTML = `<option value="${usuarioActual.departamento}">${usuarioActual.departamento}</option>`;
-          filtroDeptEl.disabled = true;
-        }
+      if (!esNacional && filtroDeptEl) {
+        filtroDeptEl.innerHTML = `<option value="${usuarioActual.departamento}">${usuarioActual.departamento}</option>`;
+        filtroDeptEl.disabled = true;
       }
 
-      if (!esNacional && !esDepartamental) {
-        if (filtroCiuEl) {
-          filtroCiuEl.innerHTML = `<option value="${usuarioActual.ciudad}">${usuarioActual.ciudad}</option>`;
-          filtroCiuEl.disabled = true;
-        }
+      if (!esNacional && !esDepartamental && filtroCiuEl) {
+        filtroCiuEl.innerHTML = `<option value="${usuarioActual.ciudad}">${usuarioActual.ciudad}</option>`;
+        filtroCiuEl.disabled = true;
       }
 
       const deptVal = filtroDeptEl ? filtroDeptEl.value : usuarioActual.departamento;
@@ -961,63 +971,84 @@
           periodo: per
         });
 
-        if (esNacional && filtroDeptEl && res.departamentos) {
-          let currDept = filtroDeptEl.value;
-          filtroDeptEl.innerHTML = '<option value="TODOS">-- Todos los Departamentos --</option>';
-          res.departamentos.forEach(d => {
-            filtroDeptEl.innerHTML += `<option value="${d}" ${d === currDept ? 'selected' : ''}>${d}</option>`;
-          });
-        }
-
-        if ((esNacional || esDepartamental) && filtroCiuEl && res.ciudades) {
-          let currCiu = filtroCiuEl.value;
-          filtroCiuEl.innerHTML = '<option value="TODAS">-- Todas las Ciudades --</option>';
-          res.ciudades.forEach(c => {
-            filtroCiuEl.innerHTML += `<option value="${c}" ${c === currCiu ? 'selected' : ''}>${c}</option>`;
-          });
-        }
-
-        const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos + (res.kpis.sinGestion || 0);
-        
-        document.getElementById('kpi-total').innerText = tot;
-        document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
-        document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
-        document.getElementById('kpi-sin-gestion').innerText = res.kpis.sinGestion || 0;
-        document.getElementById('kpi-conflictivos').innerText = res.kpis.conflictivos;
-
-        const pct = tot > 0 ? Math.round((res.kpis.gestionados / tot) * 100) : 0;
-        document.getElementById('kpi-pct-prom').innerText = pct + "%";
-        document.getElementById('gauge-score-val').innerText = pct + "%";
-
-        document.getElementById('pct-promotores').innerText = pct + "%";
-        document.getElementById('pct-neutros').innerText = (tot > 0 ? Math.round((res.kpis.pendientes / tot) * 100) : 0) + "%";
-        document.getElementById('pct-detractores').innerText = (tot > 0 ? Math.round((res.kpis.conflictivos / tot) * 100) : 0) + "%";
-
-        const selectFiltroTec = document.getElementById('select-filtro-tecnico');
-        selectFiltroTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
-        res.tecnicos.forEach(t => {
-          selectFiltroTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
-        });
-
-        renderizarGraficoGauge(pct);
-        renderizarGraficoBarras(res.tecnicos);
-
-        todosLosRegistros = res.registros;
-        aplicarFiltrosDetalle();
+        localStorage.setItem(`cache_dashboard_${usuarioActual.usuario}`, JSON.stringify(res));
+        procesarYRenderizarDashboard(res);
       } catch(e) { console.log("Error dashboard", e); }
     }
 
-    function renderizarGraficoGauge(pctVal) {
+    function procesarYRenderizarDashboard(res) {
+      const filtroDeptEl = document.getElementById('select-filtro-dept');
+      const filtroCiuEl = document.getElementById('select-filtro-ciudad');
+      const esNacional = usuarioActual.area && usuarioActual.area.toUpperCase().includes('NACIONAL');
+      const esDepartamental = usuarioActual.area && usuarioActual.area.toUpperCase().includes('DEPARTAMENTAL');
+
+      if (esNacional && filtroDeptEl && res.departamentos) {
+        let currDept = filtroDeptEl.value;
+        filtroDeptEl.innerHTML = '<option value="TODOS">-- Todos los Departamentos --</option>';
+        res.departamentos.forEach(d => {
+          filtroDeptEl.innerHTML += `<option value="${d}" ${d === currDept ? 'selected' : ''}>${d}</option>`;
+        });
+      }
+
+      if ((esNacional || esDepartamental) && filtroCiuEl && res.ciudades) {
+        let currCiu = filtroCiuEl.value;
+        filtroCiuEl.innerHTML = '<option value="TODAS">-- Todas las Ciudades --</option>';
+        res.ciudades.forEach(c => {
+          filtroCiuEl.innerHTML += `<option value="${c}" ${c === currCiu ? 'selected' : ''}>${c}</option>`;
+        });
+      }
+
+      const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos + (res.kpis.sinGestion || 0);
+      document.getElementById('kpi-total').innerText = tot;
+      document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
+      document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
+      
+      const pctCobertura = tot > 0 ? Math.round((res.kpis.gestionados / tot) * 100) : 0;
+      document.getElementById('kpi-pct-prom').innerText = pctCobertura + "%";
+
+      const promotores = res.kpis.promotores || res.kpis.gestionados || 0;
+      const pasivos = res.kpis.pasivos || res.kpis.pendientes || 0;
+      const detractores = res.kpis.detractores || res.kpis.conflictivos || 0;
+      const totalEncuestas = promotores + pasivos + detractores;
+
+      document.getElementById('kpi-nps-promotores').innerText = promotores;
+      document.getElementById('kpi-nps-pasivos').innerText = pasivos;
+      document.getElementById('kpi-nps-detractores').innerText = detractores;
+
+      const scoreNpsNeto = totalEncuestas > 0 ? Math.round(((promotores - detractores) / totalEncuestas) * 100) : 0;
+      document.getElementById('kpi-nps-neto').innerText = (scoreNpsNeto > 0 ? '+' : '') + scoreNpsNeto + "%";
+      document.getElementById('gauge-score-val').innerText = (scoreNpsNeto > 0 ? '+' : '') + scoreNpsNeto + "%";
+
+      document.getElementById('pct-promotores').innerText = (totalEncuestas > 0 ? Math.round((promotores / totalEncuestas) * 100) : 0) + "%";
+      document.getElementById('pct-neutros').innerText = (totalEncuestas > 0 ? Math.round((pasivos / totalEncuestas) * 100) : 0) + "%";
+      document.getElementById('pct-detractores').innerText = (totalEncuestas > 0 ? Math.round((detractores / totalEncuestas) * 100) : 0) + "%";
+
+      const selectFiltroTec = document.getElementById('select-filtro-tecnico');
+      selectFiltroTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
+      res.tecnicos.forEach(t => {
+        selectFiltroTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
+      });
+
+      renderizarGraficoGauge(scoreNpsNeto);
+      renderizarGraficoBarras(res.tecnicos);
+
+      todosLosRegistros = res.registros;
+      aplicarFiltrosDetalle();
+    }
+
+    function renderizarGraficoGauge(scoreVal) {
       const ctx = document.getElementById('gaugeChart').getContext('2d');
       if (chartGauge) chartGauge.destroy();
+
+      let displayValue = Math.max(0, Math.min(100, ((scoreVal + 100) / 2)));
 
       chartGauge = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: ['Completado', 'Pendiente'],
+          labels: ['Score NPS', 'Resto'],
           datasets: [{
-            data: [pctVal, 100 - pctVal],
-            backgroundColor: ['#10b981', '#23335a'],
+            data: [displayValue, 100 - displayValue],
+            backgroundColor: [scoreVal >= 0 ? '#10b981' : '#f87171', '#23335a'],
             borderWidth: 0
           }]
         },
@@ -1092,19 +1123,6 @@
       renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
     }
 
-    async function reasignarOrdenPendiente(fila) {
-      if (!confirm("¿Desea reasignar esta orden a estado Pendiente para que el técnico pueda registrarla?")) return;
-      try {
-        const res = await apiCall("reasignarPendienteAdmin", { fila: fila });
-        if (res && res.exito) {
-          alert("Orden reasignada a Pendiente.");
-          cargarDashboard();
-        } else {
-          alert("No se pudo reasignar la orden.");
-        }
-      } catch(e) { alert("Error de conexión al reasignar."); }
-    }
-
     function renderizarTarjetasAdmin(lista, idContenedor) {
       const contenedor = document.getElementById(idContenedor);
       contenedor.innerHTML = '';
@@ -1121,18 +1139,15 @@
         const indexOriginal = todosLosRegistros.indexOf(r);
 
         let subtextoFecha = r.fechaGestion ? 
-          `<span class="text-info" style="font-size: 0.68rem;">Gestión: ${r.fechaGestion}</span>` : 
+          `<span class="text-info" style="font-size: 0.68rem;">Gestión: ${formatearFechaCorta(r.fechaGestion)}</span>` : 
           '<span class="text-secondary" style="font-size: 0.68rem;">Sin fecha de gestión</span>';
-
-        let botonReasignar = (usuarioActual && (usuarioActual.rol === 'Administrador' || usuarioActual.rol === 'Supervisor') && isSinGestion) ?
-          `<button class="btn btn-xs btn-outline-warning p-1 px-2 small ms-1" style="font-size: 0.72rem;" onclick="reasignarOrdenPendiente(${r.fila})">Reasignar a Pendiente</button>` : '';
 
         let otClave = r.numeroOT || r.codigoCliente || '';
         let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
         let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
 
         contenedor.innerHTML += `
-          <div class="order-card ${isConflict ? 'conflictive' : ''}">
+          <div class="order-card fade-in-view ${isConflict ? 'conflictive' : ''}">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
@@ -1154,17 +1169,89 @@
               <div class="d-flex gap-1">
                 <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenAdmin(${indexOriginal})"><i class="bi bi-eye me-1"></i>Detalles</button>
                 ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')">Foto</button>` : ''}
-                ${botonReasignar}
               </div>
             </div>
           </div>`;
       });
     }
 
+    function verDetallesOrdenTecnico(index, origen) {
+      let item = (origen === 'PENDIENTE') ? pendientesTecnicoActual[index] : historicoTecnicoActual[index];
+      if (!item) return;
+
+      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
+      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
+      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
+      document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || usuarioActual.nombre;
+      document.getElementById('det-fecha').innerText = formatearFechaCorta(item.fechaAsignacion);
+      
+      const fechaG = item.fechaGestion;
+      document.getElementById('det-fecha-gestion').innerText = fechaG ? formatearFechaCorta(fechaG) : 'Pendiente de Gestión';
+      
+      let notaTexto = "10 (Promotor Estimado)";
+      if (item.scoreReal) notaTexto = `${item.scoreReal} (Real Nacional)`;
+      else if (item.estado === 'No le llego la encuesta') notaTexto = "8 (Pasivo Estimado)";
+      else if (item.estado === 'UU conflictivo') notaTexto = "5 (Detractor Estimado)";
+
+      document.getElementById('det-score-real').innerText = notaTexto;
+
+      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
+      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
+
+      let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
+      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+      document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
+
+      const boxObs = document.getElementById('det-box-obs');
+      if (item.observacion) {
+        document.getElementById('det-observacion').innerText = item.observacion;
+        boxObs.classList.remove('hidden');
+      } else { boxObs.classList.add('hidden'); }
+
+      abrirModalBS('modalDetalleOrden');
+    }
+
+    function verDetallesOrdenAdmin(index) {
+      let item = todosLosRegistros[index];
+      if (!item) return;
+
+      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
+      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
+      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
+      document.getElementById('det-tecnico').innerText = item.tecnico || 'Sin Asignar';
+      document.getElementById('det-fecha').innerText = formatearFechaCorta(item.fechaAsignacion);
+      
+      const fechaG = item.fechaGestion;
+      document.getElementById('det-fecha-gestion').innerText = fechaG ? formatearFechaCorta(fechaG) : 'Pendiente de Gestión';
+      
+      let notaTexto = "10 (Promotor Estimado)";
+      if (item.scoreReal) notaTexto = `${item.scoreReal} (Real Nacional)`;
+      else if (item.estado === 'No le llego la encuesta') notaTexto = "8 (Pasivo Estimado)";
+      else if (item.estado === 'UU conflictivo') notaTexto = "5 (Detractor Estimado)";
+
+      document.getElementById('det-score-real').innerText = notaTexto;
+
+      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
+      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
+
+      let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
+      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+      document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
+
+      const boxObs = document.getElementById('det-box-obs');
+      if (item.observacion) {
+        document.getElementById('det-observacion').innerText = item.observacion;
+        boxObs.classList.remove('hidden');
+      } else { boxObs.classList.add('hidden'); }
+
+      abrirModalBS('modalDetalleOrden');
+    }
+
     function abrirModal(fila, numeroOT) {
       document.getElementById('modal-fila').value = fila;
       document.getElementById('modal-ot').value = numeroOT || '';
       document.getElementById('modal-estado').value = 'Gestionado';
+      document.getElementById('modal-score-estimado').value = '10';
       document.getElementById('modal-observacion').value = '';
       archivoFotoSeleccionado = null;
       base64Compresion = null;
@@ -1173,10 +1260,12 @@
       btnG.disabled = false;
       btnG.innerText = "Guardar Gestión";
 
-      document.getElementById('label-archivo-elegido').innerText = '';
+      const lbl = document.getElementById('label-archivo-elegido');
+      lbl.className = "text-danger small fw-bold text-center";
+      lbl.innerText = "⚠ Falta adjuntar foto de respaldo";
+
       document.getElementById('modal-foto-camara').value = '';
       document.getElementById('modal-foto-galeria').value = '';
-      evaluarEstado();
       abrirModalBS('modalGestion');
     }
 
@@ -1191,7 +1280,7 @@
         btnG.disabled = true;
         btnG.innerText = "⏳ Procesando evidencia...";
         lbl.className = "text-warning small fw-bold text-center";
-        lbl.innerText = "⏳ Optimizando imagen...";
+        lbl.innerText = "⏳ Optimizando imagen de respaldo...";
 
         if (input.id === 'modal-foto-camara') document.getElementById('modal-foto-galeria').value = '';
         if (input.id === 'modal-foto-galeria') document.getElementById('modal-foto-camara').value = '';
@@ -1201,7 +1290,7 @@
           btnG.disabled = false;
           btnG.innerText = "Guardar Gestión";
           lbl.className = "text-success small fw-bold text-center";
-          lbl.innerText = "✓ Listo: Imagen lista para guardar";
+          lbl.innerText = "✓ Respaldo fotográfico adjuntado correctamente";
         }).catch(err => {
           btnG.disabled = false;
           btnG.innerText = "Guardar Gestión";
@@ -1249,50 +1338,38 @@
       });
     }
 
-    function evaluarEstado() {
-      const est = document.getElementById('modal-estado').value;
-      const boxObs = document.getElementById('box-observacion');
-      if (est === 'UU conflictivo' || est === 'Conflictivo') {
-        boxObs.classList.remove('hidden');
-      } else {
-        boxObs.classList.add('hidden');
-      }
-    }
-
     async function guardarFormulario() {
       const fila = document.getElementById('modal-fila').value;
       const numeroOT = document.getElementById('modal-ot').value;
       const estado = document.getElementById('modal-estado').value;
+      const scoreEstimado = document.getElementById('modal-score-estimado').value;
       const resultado = document.getElementById('modal-resultado').value;
       const obs = document.getElementById('modal-observacion').value;
 
-      if ((estado === 'UU conflictivo' || estado === 'Conflictivo') && !obs.trim()) {
-        return alert('Ingrese la observación / informe requerido para UU conflictivo.');
+      if (!base64Compresion && !archivoFotoSeleccionado) {
+        alert("⚠ DEBE ADJUNTAR UNA FOTO DE RESPALDO OBLIGATORIAMENTE. No se puede guardar la gestión sin evidencia fotográfica.");
+        return;
       }
 
       const btnGuardar = document.getElementById('btn-guardar');
       btnGuardar.disabled = true;
-      btnGuardar.innerText = "Enviando datos...";
+      btnGuardar.innerText = "Enviando respaldo...";
 
       let b64Foto = base64Compresion || "";
 
       if (archivoFotoSeleccionado && !b64Foto) {
-        btnGuardar.innerText = "Optimizando foto...";
-        try {
-          b64Foto = await convertirYComprimirFoto(archivoFotoSeleccionado);
-        } catch(e) {}
+        try { b64Foto = await convertirYComprimirFoto(archivoFotoSeleccionado); } catch(e) {}
       }
 
       if (b64Foto) {
-        try {
-          localStorage.setItem(`evidencia_ot_${numeroOT}`, b64Foto);
-        } catch(e) { console.log("Memory full", e); }
+        try { localStorage.setItem(`evidencia_ot_${numeroOT}`, b64Foto); } catch(e) {}
       }
 
       const payload = { 
         fila: fila, 
         numeroOT: numeroOT,
         estado: estado, 
+        scoreEstimado: scoreEstimado,
         resultado: resultado, 
         observacion: obs, 
         fotoBase64: b64Foto
@@ -1304,19 +1381,14 @@
         btnGuardar.innerText = "Guardar Gestión";
         
         if (res && res.exito) {
-          alert("¡Gestión y evidencia registradas con éxito!");
+          alert("¡Gestión y foto de respaldo guardadas con éxito!");
           ocultarModalBS('modalGestion');
           
           archivoFotoSeleccionado = null;
           base64Compresion = null;
 
-          const esRolTecnico = usuarioActual.esTecnico || (usuarioActual.rol && usuarioActual.rol.toLowerCase().includes('tec'));
-          if (esRolTecnico) {
-            cargarHistoricoTecnico();
-            cargarPendientesTecnico();
-          } else {
-            cargarDashboard();
-          }
+          cargarHistoricoTecnico();
+          cargarPendientesTecnico();
         } else {
           alert(res.mensaje || "Ocurrió un error al guardar.");
         }
@@ -1324,91 +1396,6 @@
         btnGuardar.disabled = false;
         btnGuardar.innerText = "Guardar Gestión";
         alert("Error de conexión al guardar.");
-      }
-    }
-
-    async function exportarExcelConImagenes(evt) {
-      if (!todosLosRegistros || todosLosRegistros.length === 0) {
-        return alert("No hay registros para exportar.");
-      }
-
-      const btnExport = evt ? evt.target : document.activeElement;
-      const textoOriginal = btnExport.innerHTML;
-      btnExport.disabled = true;
-      btnExport.innerHTML = "⏳ Generando Excel...";
-
-      try {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Reporte Gestiones NPS');
-
-        worksheet.columns = [
-          { header: 'ID Gestión', key: 'idGestion', width: 14 },
-          { header: 'Código Cliente', key: 'codigoCliente', width: 16 },
-          { header: 'Nombre Usuario', key: 'nombreUsuario', width: 28 },
-          { header: 'Técnico', key: 'tecnico', width: 22 },
-          { header: 'Fecha Asignación', key: 'fechaAsignacion', width: 18 },
-          { header: 'Fecha Gestión', key: 'fechaGestion', width: 18 },
-          { header: 'Estado', key: 'estado', width: 15 },
-          { header: 'Número OT', key: 'numeroOT', width: 20 },
-          { header: 'Teléfono', key: 'telefono', width: 16 },
-          { header: 'Informe Observación', key: 'observacion', width: 32 },
-          { header: 'Captura_Evidencia', key: 'evidencia', width: 22 }
-        ];
-
-        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
-        worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '0F172A' } };
-
-        for (let i = 0; i < todosLosRegistros.length; i++) {
-          const item = todosLosRegistros[i];
-          const numFila = i + 2;
-
-          worksheet.addRow({
-            idGestion: item.idGestion,
-            codigoCliente: item.codigoCliente,
-            nombreUsuario: item.nombreUsuario,
-            tecnico: item.tecnico,
-            fechaAsignacion: item.fechaAsignacion,
-            fechaGestion: item.fechaGestion || 'Sin Gestión',
-            estado: item.estado,
-            numeroOT: item.numeroOT,
-            telefono: item.telefono,
-            observacion: item.observacion,
-            evidencia: ''
-          });
-
-          let otClave = item.numeroOT || item.codigoCliente || '';
-          let b64Evidencia = (item.evidencia && item.evidencia.length > 50) ? item.evidencia : localStorage.getItem(`evidencia_ot_${otClave}`);
-
-          if (b64Evidencia && b64Evidencia.length > 50) {
-            worksheet.getRow(numFila).height = 65; 
-
-            let cleanB64 = b64Evidencia.includes(',') ? b64Evidencia.split(',')[1] : b64Evidencia;
-
-            const imageId = workbook.addImage({
-              base64: cleanB64,
-              extension: 'jpeg',
-            });
-
-            worksheet.addImage(imageId, {
-              tl: { col: 10, row: numFila - 1 },
-              ext: { width: 80, height: 75 }
-            });
-          }
-        }
-
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `Reporte_Gestiones_NPS_${Date.now()}.xlsx`;
-        link.click();
-
-        btnExport.disabled = false;
-        btnExport.innerHTML = textoOriginal;
-      } catch(e) {
-        btnExport.disabled = false;
-        btnExport.innerHTML = textoOriginal;
-        alert("Error al generar el archivo Excel: " + e.toString());
       }
     }
 
@@ -1432,6 +1419,10 @@
       
       imgElement.classList.remove('hidden');
       abrirModalBS('modalVisorFoto');
+    }
+
+    function abrirModalCargaExcel() {
+      abrirModalBS('modalCargaExcel');
     }
 
     function cerrarSesion() {
