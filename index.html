@@ -27,10 +27,7 @@
       --accent-green: #10b981;
     }
 
-    * {
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
+    * { -webkit-tap-highlight-color: transparent; user-select: none; }
 
     body { 
       background-color: var(--bg-dark); 
@@ -46,16 +43,12 @@
       body { padding-bottom: 0px; }
     }
 
-    /* ANIMACIONES FLUIDAS */
-    .fade-in-view {
-      animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
+    .fade-in-view { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* BANNER DE BIENVENIDA ANIMADO */
     .welcome-card {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       border: 1px solid rgba(56, 189, 248, 0.3);
@@ -93,24 +86,11 @@
       100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
-    /* AVATAR DE PERFIL CIRCULAR */
-    .avatar-container {
-      position: relative;
-      width: 85px; height: 85px;
-      margin: 0 auto 12px;
-    }
-    .avatar-img {
-      width: 85px; height: 85px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--accent-cyan);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    }
+    .avatar-container { position: relative; width: 85px; height: 85px; margin: 0 auto 12px; }
+    .avatar-img { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-cyan); box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
     .avatar-placeholder {
-      width: 85px; height: 85px;
-      border-radius: 50%;
-      background: var(--accent-blue);
-      color: white;
+      width: 85px; height: 85px; border-radius: 50%;
+      background: var(--accent-blue); color: white;
       font-size: 2.2rem; font-weight: 800;
       display: flex; align-items: center; justify-content: center;
       border: 3px solid var(--accent-cyan);
@@ -124,12 +104,8 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     }
 
-    .btn, .order-card, .nav-item-btn {
-      transition: transform 0.1s ease, background-color 0.2s ease;
-    }
-    .btn:active, .order-card:active {
-      transform: scale(0.97);
-    }
+    .btn, .order-card, .nav-item-btn { transition: transform 0.1s ease, background-color 0.2s ease; }
+    .btn:active, .order-card:active { transform: scale(0.97); }
 
     .bi-card-dark { 
       background: var(--card-bg); 
@@ -139,7 +115,6 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     }
 
-    /* LOGIN STYLES */
     .login-container { min-height: 90vh; display: flex; align-items: center; justify-content: center; }
     .login-card { 
       width: 100%; max-width: 400px; padding: 32px 24px; border-radius: 24px; 
@@ -153,7 +128,6 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* BOTTOM NAV BAR FLUIDA */
     .bottom-nav {
       position: fixed; bottom: 12px; left: 14px; right: 14px;
       height: 65px; background: rgba(21, 32, 62, 0.92);
@@ -178,18 +152,9 @@
       padding: 1px 6px; font-size: 0.65rem; font-weight: 800;
     }
 
-    @media (min-width: 992px) {
-      .bottom-nav { display: none !important; }
-    }
+    @media (min-width: 992px) { .bottom-nav { display: none !important; } }
 
-    /* DASHBOARD CARDS */
-    .kpi-strip {
-      background: var(--bg-dark);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 12px;
-      text-align: center;
-    }
+    .kpi-strip { background: var(--bg-dark); border: 1px solid var(--card-border); border-radius: 14px; padding: 12px; text-align: center; }
     .kpi-strip .val { font-size: 1.5rem; font-weight: 800; line-height: 1.1; }
     .kpi-strip .lbl { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
 
@@ -285,7 +250,6 @@
 
     <!-- VISTA TÉCNICO -->
     <div id="view-tecnico" class="hidden">
-      <!-- HEADER TECNICO -->
       <div class="bi-card-dark d-flex justify-content-between align-items-center mb-3">
         <div class="d-flex align-items-center gap-3">
           <div id="header-avatar-box">
@@ -299,7 +263,7 @@
         <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i></button>
       </div>
 
-      <!-- SECCIÓN INICIO TECNICO (CON TARJETA DE BIENVENIDA ANIMADA) -->
+      <!-- SECCIÓN INICIO TECNICO -->
       <div id="sec-tec-inicio" class="fade-in-view">
         <div class="welcome-card mb-3">
           <div class="d-flex justify-content-between align-items-center mb-2">
@@ -343,11 +307,9 @@
         <div id="lista-historico-tecnico" class="grid-dashboard"></div>
       </div>
 
-      <!-- SECCIÓN MI PERFIL TÉCNICO CON DATOS Y FOTO EDITABLES -->
+      <!-- SECCIÓN MI PERFIL TÉCNICO -->
       <div id="sec-tec-perfil" class="hidden">
         <div class="bi-card-dark mb-3 text-center">
-          
-          <!-- AVATAR INTERACTIVO -->
           <div class="avatar-container">
             <div id="perfil-avatar-box">
               <div class="avatar-placeholder mx-auto" id="perfil-avatar">T</div>
@@ -363,7 +325,6 @@
           <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3 py-1">Técnico Habilitado</span>
         </div>
 
-        <!-- FORMULARIO DE INFORMACIÓN TÉCNICA Y SINCRONIZACIÓN -->
         <div class="bi-card-dark mb-3">
           <h6 class="fw-bold text-info small mb-3"><i class="bi bi-person-badge me-2"></i>DATOS CORPORATIVOS DEL TÉCNICO</h6>
           
@@ -404,7 +365,7 @@
       </div>
     </div>
 
-    <!-- VISTA ADMIN / SUPERVISOR COMPLETA -->
+    <!-- VISTA ADMIN / SUPERVISOR -->
     <div id="view-admin" class="hidden">
       <div class="bi-card-dark mb-3">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -441,7 +402,7 @@
           </div>
         </div>
 
-        <!-- INDICADOR 1: VOLUMEN DE GESTIÓN OPERATIVA -->
+        <!-- INDICADORES -->
         <h6 class="fw-bold text-info border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
           <i class="bi bi-card-checklist me-1"></i> 1. INDICADOR DE GESTIÓN OPERATIVA (VOLUMEN)
         </h6>
@@ -452,7 +413,6 @@
           <div class="col-12 col-md-3"><div class="kpi-strip border-info"><div class="lbl text-info">% COBERTURA DE GESTIÓN</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
         </div>
 
-        <!-- INDICADOR 2: PUNTUACIÓN Y SATISFACCIÓN NPS -->
         <h6 class="fw-bold text-warning border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
           <i class="bi bi-star-fill me-1"></i> 2. INDICADOR DE SATISFACCIÓN NPS (CALIFICACIÓN)
         </h6>
@@ -493,7 +453,6 @@
             <div class="bi-card-dark h-100">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h6 class="fw-bold text-secondary small m-0">Rendimiento por Técnico</h6>
-                <button class="btn btn-xs btn-outline-success p-1 px-2" style="font-size: 0.75rem;" onclick="exportarExcelConImagenes(event)"><i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel</button>
               </div>
               <div style="position: relative; height: 220px;">
                 <canvas id="barTecnicosChart"></canvas>
@@ -502,7 +461,6 @@
           </div>
         </div>
 
-        <!-- LISTA DE FICHAS DE TÉCNICOS PARA ADMINISTRADORES -->
         <div class="bi-card-dark mb-3">
           <h6 class="fw-bold text-info small mb-3"><i class="bi bi-people-fill me-2"></i>DIRECTORIO OFICIAL DE TÉCNICOS EN CAMPO</h6>
           <div id="lista-directorio-tecnicos" class="grid-dashboard"></div>
@@ -540,7 +498,7 @@
     </div>
   </div>
 
-  <!-- NAVEGACIÓN INFERIOR FLUIDA -->
+  <!-- NAVEGACIÓN INFERIOR -->
   <div class="bottom-nav hidden" id="app-bottom-nav">
     <button class="nav-item-btn active" id="bnav-inicio" onclick="navegarBottom('inicio')">
       <i class="bi bi-grid-1x2-fill"></i>
@@ -561,7 +519,7 @@
     </button>
   </div>
 
-  <!-- MODAL DE FICHA TÉCNICA VERIFICADA PARA SUPERVISOR -->
+  <!-- MODAL FICHA TÉCNICA -->
   <div class="modal fade" id="modalFichaTecnico" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -589,7 +547,7 @@
     </div>
   </div>
 
-  <!-- MODAL PARA COMPARTIR GUÍA VISUAL -->
+  <!-- MODAL GUÍA SMS -->
   <div class="modal fade" id="modalGuiaSms" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -630,27 +588,7 @@
     </div>
   </div>
 
-  <!-- MODALES DE EXCEL Y GESTIÓN -->
-  <div class="modal fade" id="modalCargaExcel" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary">
-          <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Cargar Excel Nacional / Conciliar Encuestas</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <p class="small text-secondary mb-3">Sube el reporte nacional para cruzar la puntuación real de encuestas (0-10) con las gestiones realizadas.</p>
-          <input type="file" id="input-file-excel" class="form-control bg-dark text-white border-secondary mb-3" accept=".xlsx, .xls, .csv">
-          <div id="resultado-carga-excel" class="small hidden p-2 rounded"></div>
-        </div>
-        <div class="modal-footer border-secondary">
-          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" id="btn-procesar-excel" class="btn btn-sm btn-primary fw-bold" onclick="procesarArchivoExcel()"><i class="bi bi-cloud-upload me-1"></i> Procesar y Conciliar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <!-- MODAL GESTIÓN CON FOTO OBLIGATORIA -->
   <div class="modal fade" id="modalGestion" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -661,6 +599,7 @@
         <div class="modal-body">
           <input type="hidden" id="modal-fila">
           <input type="hidden" id="modal-ot">
+          <input type="hidden" id="modal-codigo">
           
           <div class="mb-3">
             <label class="form-label small text-secondary fw-semibold">Estado de la Gestión *</label>
@@ -723,6 +662,7 @@
     </div>
   </div>
 
+  <!-- MODAL DETALLES -->
   <div class="modal fade" id="modalDetalleOrden" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -750,6 +690,7 @@
     </div>
   </div>
 
+  <!-- VISOR DE FOTO -->
   <div class="modal fade" id="modalVisorFoto" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -770,7 +711,13 @@
     let usuarioActual = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
     let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
-    let conteoAnteriorPendientes = -1;
+
+    // EXTRAER CLAVE LIMPIA DE OT (EVITA ERRORES CON PREFIJOS BO_FS_)
+    function obtenerClaveLimpiaOT(otTexto, codCliente) {
+      if (!otTexto) return codCliente || '';
+      let partes = otTexto.toString().split('_');
+      return partes[partes.length - 1] || codCliente || '';
+    }
 
     function togglePasswordVisibility() {
       const inputPass = document.getElementById('input-pass');
@@ -790,7 +737,7 @@
         usuarioActual = JSON.parse(perfilGuardado);
         iniciarVistaSegunRol(usuarioActual);
       } else {
-        alert("Inicie sesión con usuario y contraseña primero para activar el acceso con huella.");
+        alert("Inicie sesión con usuario y contraseña primero.");
       }
     }
 
@@ -799,12 +746,6 @@
         Notification.requestPermission().then(permission => {
           if (permission === "granted") alert("Notificaciones activadas con éxito.");
         });
-      }
-    }
-
-    function emitirNotificacionNativa(titulo, mensaje) {
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(titulo, { body: mensaje, icon: 'logo.png' });
       }
     }
 
@@ -862,23 +803,17 @@
       }
     }
 
-    function abrirModalGuiaImagen() {
-      abrirModalBS('modalGuiaSms');
-    }
+    function abrirModalGuiaImagen() { abrirModalBS('modalGuiaSms'); }
 
     function compartirGuiaWhatsAppDirecto() {
       let txtGuia = "📱 *GUÍA RÁPIDA DE ENCUESTA TIGO*\n\n1. Ingrese a sus Mensajes de Texto (SMS).\n2. Busque el mensaje enviado por TIGO o el número 2820.\n3. Abra el enlace oficial y califique la atención del técnico con un 10. ¡Muchas gracias!";
       if (navigator.share) {
-        navigator.share({
-          title: 'Guía Encuesta Tigo',
-          text: txtGuia
-        }).catch(() => {});
+        navigator.share({ title: 'Guía Encuesta Tigo', text: txtGuia }).catch(() => {});
       } else {
         window.open(`https://wa.me/?text=${encodeURIComponent(txtGuia)}`, '_blank');
       }
     }
 
-    // GESTIÓN DE PERFIL DEL TÉCNICO
     function cargarAvatarYDatosTecnico() {
       if (!usuarioActual) return;
       
@@ -889,7 +824,7 @@
         document.getElementById('header-avatar-box').innerHTML = `<img src="${fotoGuardada}" class="rounded-circle border border-info" style="width:44px; height:44px; object-fit:cover;">`;
         document.getElementById('perfil-avatar-box').innerHTML = `<img src="${fotoGuardada}" class="avatar-img">`;
       } else {
-        document.getElementById('header-avatar-box').innerHTML = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.2rem;" id="avatar-tec">${primerLetra}</div>`;
+        document.getElementById('header-avatar-box').innerHTML = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.2rem;">${primerLetra}</div>`;
         document.getElementById('perfil-avatar-box').innerHTML = `<div class="avatar-placeholder mx-auto">${primerLetra}</div>`;
       }
 
@@ -903,7 +838,7 @@
         convertirYComprimirFoto(input.files[0]).then(b64 => {
           localStorage.setItem(`foto_avatar_${usuarioActual.usuario}`, b64);
           cargarAvatarYDatosTecnico();
-          alert("¡Foto de perfil cargada! Recuerde presionar 'Guardar y Sincronizar en la Nube' para enviar al supervisor.");
+          alert("¡Foto cargada! Presione 'Guardar y Sincronizar en la Nube'.");
         }).catch(() => alert("No se pudo procesar la foto."));
       }
     }
@@ -920,27 +855,17 @@
 
       const btnG = document.getElementById('btn-guardar-perfil');
       btnG.disabled = true;
-      btnG.innerText = "⏳ Sincronizando en la nube...";
+      btnG.innerText = "⏳ Sincronizando...";
 
       try {
         const res = await apiCall("guardarPerfilTecnicoServidor", {
-          payload: {
-            usuario: usuarioActual.usuario,
-            telefono: tel,
-            ci: ci,
-            placa: placa,
-            fotoBase64: b64Foto
-          }
+          payload: { usuario: usuarioActual.usuario, telefono: tel, ci: ci, placa: placa, fotoBase64: b64Foto }
         });
-
         btnG.disabled = false;
         btnG.innerText = "Guardar y Sincronizar en la Nube";
 
-        if (res && res.exito) {
-          alert("¡Información corporativa y foto guardadas en la nube con éxito! Ahora tus supervisores pueden identificarte.");
-        } else {
-          alert("Guardado localmente. " + (res.mensaje || ""));
-        }
+        if (res && res.exito) alert("¡Perfil sincronizado en la nube correctamente!");
+        else alert("Guardado localmente. " + (res.mensaje || ""));
       } catch(e) {
         btnG.disabled = false;
         btnG.innerText = "Guardar y Sincronizar en la Nube";
@@ -989,21 +914,6 @@
 
         cargarAvatarYDatosTecnico();
         actualizarSaludoHora();
-
-        const cachePendientes = localStorage.getItem(`cache_pendientes_${res.usuario}`);
-        if (cachePendientes) {
-          pendientesTecnicoActual = JSON.parse(cachePendientes);
-          renderizarPendientesTecnicoUI();
-          document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
-          document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
-        }
-
-        const cacheHistorico = localStorage.getItem(`cache_historico_${res.usuario}`);
-        if (cacheHistorico) {
-          historicoTecnicoActual = JSON.parse(cacheHistorico);
-          document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
-        }
-
         navegarBottom('inicio');
         setInterval(cargarPendientesTecnico, 45000);
       } else {
@@ -1012,78 +922,9 @@
         document.getElementById('app-bottom-nav').classList.add('hidden');
 
         document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
-        document.getElementById('admin-header-region').innerText = `ÁREA: ${res.area || 'Encargado Nacional'} | DEP: ${res.departamento || 'TODOS'}`;
-        
-        const cacheDash = localStorage.getItem(`cache_dashboard_${res.usuario}`);
-        if (cacheDash) {
-          procesarYRenderizarDashboard(JSON.parse(cacheDash));
-        }
         cargarDashboard();
         cargarDirectorioTecnicosAdmin();
       }
-    }
-
-    async function cargarDirectorioTecnicosAdmin() {
-      try {
-        const lista = await apiCall("obtenerTecnicosConPerfil");
-        directorioTecnicos = Array.isArray(lista) ? lista : [];
-        renderizarDirectorioTecnicosAdminUI();
-      } catch(e) {}
-    }
-
-    function renderizarDirectorioTecnicosAdminUI() {
-      const cont = document.getElementById('lista-directorio-tecnicos');
-      if (!cont) return;
-      cont.innerHTML = '';
-
-      if (directorioTecnicos.length === 0) {
-        cont.innerHTML = '<div class="text-secondary text-center small py-3 col-12">Cargando directorio de técnicos...</div>';
-        return;
-      }
-
-      directorioTecnicos.forEach((t, idx) => {
-        let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:40px; height:40px; font-size:1.1rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
-        if (t.fotoPerfil && t.fotoPerfil.length > 50) {
-          let src = t.fotoPerfil.startsWith("data:image") ? t.fotoPerfil : "data:image/jpeg;base64," + t.fotoPerfil;
-          avatarHtml = `<img src="${src}" class="rounded-circle border border-info" style="width:40px; height:40px; object-fit:cover;">`;
-        }
-
-        cont.innerHTML += `
-          <div class="bi-card-dark p-2 d-flex justify-content-between align-items-center mb-2" onclick="verFichaTecnicoSupervisor(${idx})" style="cursor:pointer;">
-            <div class="d-flex align-items-center gap-2">
-              ${avatarHtml}
-              <div>
-                <h6 class="m-0 text-white fw-bold" style="font-size:0.85rem;">${t.nombre}</h6>
-                <small class="text-secondary" style="font-size:0.7rem;">${t.departamento} • ${t.ciudad}</small>
-              </div>
-            </div>
-            <span class="badge bg-outline-info text-info border border-info border-opacity-25 p-1 px-2" style="font-size:0.68rem;">Ficha <i class="bi bi-chevron-right"></i></span>
-          </div>`;
-      });
-    }
-
-    function verFichaTecnicoSupervisor(idx) {
-      let t = directorioTecnicos[idx];
-      if (!t) return;
-
-      let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-2" style="width:70px; height:70px; font-size:2rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
-      if (t.fotoPerfil && t.fotoPerfil.length > 50) {
-        let src = t.fotoPerfil.startsWith("data:image") ? t.fotoPerfil : "data:image/jpeg;base64," + t.fotoPerfil;
-        avatarHtml = `<img src="${src}" class="rounded-circle border border-info mx-auto mb-2" style="width:70px; height:70px; object-fit:cover;">`;
-      }
-
-      document.getElementById('ftec-avatar-box').innerHTML = avatarHtml;
-      document.getElementById('ftec-nombre').innerText = t.nombre;
-      document.getElementById('ftec-region').innerText = `${t.departamento} • ${t.ciudad}`;
-      document.getElementById('ftec-telefono').innerText = t.telefono || 'Sin registrar';
-      document.getElementById('ftec-ci').innerText = t.ci || 'Sin registrar';
-      document.getElementById('ftec-placa').innerText = t.placa || 'Sin registrar';
-
-      let num = t.telefono ? t.telefono.toString().replace(/[^0-9]/g, '') : '';
-      document.getElementById('btn-ftec-llamar').href = num ? `tel:${num}` : '#';
-      document.getElementById('btn-ftec-ws').href = num ? `https://wa.me/591${num}` : '#';
-
-      abrirModalBS('modalFichaTecnico');
     }
 
     async function apiCall(accion, dataPayload = {}, reintentos = 2) {
@@ -1113,7 +954,6 @@
 
       btnLogin.disabled = true;
       btnLogin.innerText = "Verificando...";
-      if (alertBox) alertBox.classList.add('hidden');
 
       try {
         const res = await apiCall("loginUsuario", { usuario: u, password: p });
@@ -1128,12 +968,12 @@
           if (alertBox) {
             alertBox.innerText = res.mensaje || "Credenciales no válidas";
             alertBox.classList.remove('hidden');
-          } else { alert(res.mensaje || "Credenciales no válidas"); }
+          }
         }
       } catch(e) {
         btnLogin.disabled = false;
         btnLogin.innerText = "Iniciar Sesión";
-        alert("Servidor conectando... Presione 'Iniciar Sesión' nuevamente.");
+        alert("Error de conexión al servidor.");
       }
     }
 
@@ -1150,65 +990,10 @@
       } catch(e) { return fechaStr; }
     }
 
-    function generarUrlWhatsApp(telefono, codigoCliente, nombreUsuario, nombreTecnico) {
-      let numLimpio = telefono.toString().replace(/[^0-9]/g, '');
-      let horaActual = new Date().getHours();
-      let saludoHora = "Estimado cliente, buenas tardes. 👋";
-
-      if (horaActual >= 0 && horaActual < 12) saludoHora = "Estimado cliente, buenos días. ☀️";
-      else if (horaActual >= 12 && horaActual < 19) saludoHora = "Estimado cliente, buenas tardes. 👋";
-      else saludoHora = "Estimado cliente, buenas noches. 🌙";
-
-      let tecNombre = nombreTecnico || (usuarioActual ? usuarioActual.nombre : 'Servicio Técnico');
-      let clienteNombre = nombreUsuario || 'Estimado Cliente';
-      let codCliente = codigoCliente || 'N/A';
-
-      let mensajeWs = `${saludoHora}\n\n` +
-        `Le escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codCliente}* (${clienteNombre}).\n\n` +
-        `Mi nombre es *${tecNombre}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.\n\n` +
-        `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo por favor un *10* 😁. Su calificación es muy importante para mí.\n\n` +
-        `📲 *GUÍA PARA INGRESAR Y LLENAR LA ENCUESTA:*\n` +
-        `1. Ingrese a su pantalla de inicio y busque su aplicación de mensajería de texto (no WhatsApp).\n` +
-        `2. En su bandeja ubique la cuenta correspondiente: para líneas Tigo le llega desde la cuenta *TIGO* y para otras compañías le llega desde la cuenta *2820*.\n` +
-        `3. Ingrese al mensaje de texto donde le muestra un link.\n` +
-        `4. Ingrese al mensaje y le aparece mensaje automático de seguridad, ud le da en la casilla no soy un BOT.\n` +
-        `5. Califique al técnico con un 10 si su trabajo fue excelente (si tiene alguna observación la anota más abajo).\n` +
-        `6. Siga los pasos que le aparecen en pantalla para finalizar.\n\n` +
-        `MUCHAS GRACIAS POR SU TIEMPO! ESTAREMOS ATENTOS A CUALQUIER CONSULTA! 🙌`;
-
-      return `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
-    }
-
-    function actualizarScoreProyectado() {
-      const est = document.getElementById('modal-estado').value;
-      const scoreSelect = document.getElementById('modal-score-estimado');
-      if (est === 'Gestionado') scoreSelect.value = "10";
-      else if (est === 'No le llego la encuesta') scoreSelect.value = "8";
-      else if (est === 'UU conflictivo') scoreSelect.value = "5";
-      else scoreSelect.value = "7";
-    }
-
     async function cargarPendientesTecnico() {
       try {
         const lista = await apiCall("obtenerPendientesTecnico", { correoTecnico: usuarioActual.usuario });
         pendientesTecnicoActual = Array.isArray(lista) ? lista : [];
-        
-        localStorage.setItem(`cache_pendientes_${usuarioActual.usuario}`, JSON.stringify(pendientesTecnicoActual));
-
-        if (conteoAnteriorPendientes !== -1 && pendientesTecnicoActual.length > conteoAnteriorPendientes) {
-          emitirNotificacionNativa("Nuevos Códigos Asignados", `Tiene ${pendientesTecnicoActual.length} órdenes pendientes por gestionar.`);
-        }
-        conteoAnteriorPendientes = pendientesTecnicoActual.length;
-
-        document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
-        document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
-        
-        const badgeEl = document.getElementById('bnav-badge-count');
-        if (pendientesTecnicoActual.length > 0) {
-          badgeEl.innerText = pendientesTecnicoActual.length;
-          badgeEl.classList.remove('hidden');
-        } else { badgeEl.classList.add('hidden'); }
-
         renderizarPendientesTecnicoUI();
       } catch(e) {}
     }
@@ -1229,47 +1014,24 @@
         let telefono = item.telefono || 'Sin Teléfono';
         let otNum = item.numeroOT || 'Sin OT';
         
-        let telLlamar = (telefono && telefono !== 'Sin Teléfono') ? 
-          `<a href="tel:${telefono}" class="btn btn-sm btn-outline-warning fw-bold flex-fill"><i class="bi bi-telephone-fill me-1"></i>Llamar</a>` : '';
-
-        let urlWs = (telefono && telefono !== 'Sin Teléfono') ? generarUrlWhatsApp(telefono, codigo, usuario, item.tecnicoAsignado) : '#';
-        let btnWs = (telefono && telefono !== 'Sin Teléfono') ? 
-          `<a href="${urlWs}" target="_blank" class="btn btn-sm btn-success fw-bold flex-fill"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>` : '';
-
         contenedor.innerHTML += `
           <div class="order-card mb-3 fade-in-view">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="badge-subtle badge-pending">Pendiente</span>
-                <span class="text-info fw-semibold" style="font-size: 0.72rem;"><i class="bi bi-hdd-network me-1"></i>HFC • En SLA</span>
+                <span class="text-info fw-semibold" style="font-size: 0.72rem;"><i class="bi bi-hdd-network me-1"></i>HFC</span>
               </div>
               <h6 class="fw-bold text-white m-0">Cliente #${codigo}</h6>
               <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${usuario} • OT #${otNum}</small>
               
               <div class="meta-grid mb-2">
-                <div class="meta-item">
-                  <span class="text-secondary d-block" style="font-size: 0.65rem;">ASIGNACIÓN</span>
-                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${formatearFechaCorta(item.fechaAsignacion)}</span>
-                </div>
-                <div class="meta-item">
-                  <span class="text-secondary d-block" style="font-size: 0.65rem;">TELÉFONO</span>
-                  <span class="text-warning fw-semibold" style="font-size: 0.75rem;">${telefono}</span>
-                </div>
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.65rem;">ASIGNACIÓN</span><span class="text-light fw-semibold" style="font-size: 0.75rem;">${formatearFechaCorta(item.fechaAsignacion)}</span></div>
+                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.65rem;">TELÉFONO</span><span class="text-warning fw-semibold" style="font-size: 0.75rem;">${telefono}</span></div>
               </div>
             </div>
 
-            <div class="d-flex gap-2 mt-2">
-              ${telLlamar}
-              ${btnWs}
-            </div>
-
-            <div class="d-flex gap-2 mt-2">
-              <button class="btn btn-sm btn-outline-info w-100 fw-bold py-1" onclick="abrirModalGuiaImagen()"><i class="bi bi-phone-vibrate me-1"></i> Ver / Enviar Guía SMS</button>
-            </div>
-
             <div class="d-flex gap-2 mt-2 border-top border-secondary border-opacity-25 pt-2">
-              <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
-              <button class="btn btn-sm btn-primary flex-fill fw-bold py-2" onclick="abrirModal(${item.fila}, '${otNum}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
+              <button class="btn btn-sm btn-primary flex-fill fw-bold py-2" onclick="abrirModal(${item.fila}, '${otNum}', '${codigo}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
             </div>
           </div>`;
       });
@@ -1279,8 +1041,6 @@
       try {
         const lista = await apiCall("obtenerHistoricoTecnico", { correoTecnico: usuarioActual.usuario });
         historicoTecnicoActual = Array.isArray(lista) ? lista : [];
-        localStorage.setItem(`cache_historico_${usuarioActual.usuario}`, JSON.stringify(historicoTecnicoActual));
-        document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
         renderizarHistoricoTecnicoUI();
       } catch(e) {}
     }
@@ -1299,7 +1059,7 @@
         let isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
         let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
         
-        let otClave = r.numeroOT || r.codigoCliente || '';
+        let otClave = obtenerClaveLimpiaOT(r.numeroOT, r.codigoCliente);
         let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
         let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
 
@@ -1312,338 +1072,20 @@
               </div>
               <h6 class="fw-bold text-white m-0">Cliente #${r.codigoCliente || 'S/C'}</h6>
               <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${r.nombreUsuario || 'Cliente'}</small>
-
-              <div class="meta-grid mb-2">
-                <div class="meta-item">
-                  <span class="text-secondary d-block" style="font-size: 0.65rem;">TELÉFONO</span>
-                  <span class="text-warning fw-semibold" style="font-size: 0.75rem;">${r.telefono || 'Sin Tel.'}</span>
-                </div>
-                <div class="meta-item">
-                  <span class="text-secondary d-block" style="font-size: 0.65rem;">FECHA GESTIÓN</span>
-                  <span class="text-light fw-semibold" style="font-size: 0.75rem;">${formatearFechaCorta(r.fechaGestion)}</span>
-                </div>
-              </div>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary border-opacity-25">
-              <button class="btn btn-xs btn-outline-info p-1 px-3 small fw-bold" onclick="verDetallesOrdenTecnico(${index}, 'HISTORICO')"><i class="bi bi-eye me-1"></i>Detalles</button>
               ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-3 small fw-bold" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')"><i class="bi bi-image me-1"></i>Ver Evidencia</button>` : '<span class="text-secondary small">Sin Foto</span>'}
             </div>
           </div>`;
       });
     }
 
-    async function cargarDashboard() {
-      const per = document.getElementById('select-periodo').value;
-      const filtroDeptEl = document.getElementById('select-filtro-dept');
-      const filtroCiuEl = document.getElementById('select-filtro-ciudad');
-
-      const esNacional = usuarioActual.area && usuarioActual.area.toUpperCase().includes('NACIONAL');
-      const esDepartamental = usuarioActual.area && usuarioActual.area.toUpperCase().includes('DEPARTAMENTAL');
-
-      if (!esNacional && filtroDeptEl) {
-        filtroDeptEl.innerHTML = `<option value="${usuarioActual.departamento}">${usuarioActual.departamento}</option>`;
-        filtroDeptEl.disabled = true;
-      }
-
-      if (!esNacional && !esDepartamental && filtroCiuEl) {
-        filtroCiuEl.innerHTML = `<option value="${usuarioActual.ciudad}">${usuarioActual.ciudad}</option>`;
-        filtroCiuEl.disabled = true;
-      }
-
-      const deptVal = filtroDeptEl ? filtroDeptEl.value : usuarioActual.departamento;
-      const ciuVal = filtroCiuEl ? filtroCiuEl.value : usuarioActual.ciudad;
-
-      try {
-        const res = await apiCall("obtenerDatosDashboard", {
-          usuario: usuarioActual.usuario,
-          rol: usuarioActual.rol,
-          departamento: deptVal,
-          ciudad: ciuVal,
-          periodo: per
-        });
-
-        localStorage.setItem(`cache_dashboard_${usuarioActual.usuario}`, JSON.stringify(res));
-        procesarYRenderizarDashboard(res);
-      } catch(e) { console.log("Error dashboard", e); }
-    }
-
-    function procesarYRenderizarDashboard(res) {
-      const filtroDeptEl = document.getElementById('select-filtro-dept');
-      const filtroCiuEl = document.getElementById('select-filtro-ciudad');
-      const esNacional = usuarioActual.area && usuarioActual.area.toUpperCase().includes('NACIONAL');
-      const esDepartamental = usuarioActual.area && usuarioActual.area.toUpperCase().includes('DEPARTAMENTAL');
-
-      if (esNacional && filtroDeptEl && res.departamentos) {
-        let currDept = filtroDeptEl.value;
-        filtroDeptEl.innerHTML = '<option value="TODOS">-- Todos los Departamentos --</option>';
-        res.departamentos.forEach(d => {
-          filtroDeptEl.innerHTML += `<option value="${d}" ${d === currDept ? 'selected' : ''}>${d}</option>`;
-        });
-      }
-
-      if ((esNacional || esDepartamental) && filtroCiuEl && res.ciudades) {
-        let currCiu = filtroCiuEl.value;
-        filtroCiuEl.innerHTML = '<option value="TODAS">-- Todas las Ciudades --</option>';
-        res.ciudades.forEach(c => {
-          filtroCiuEl.innerHTML += `<option value="${c}" ${c === currCiu ? 'selected' : ''}>${c}</option>`;
-        });
-      }
-
-      const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos + (res.kpis.sinGestion || 0);
-      document.getElementById('kpi-total').innerText = tot;
-      document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
-      document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
-      
-      const pctCobertura = tot > 0 ? Math.round((res.kpis.gestionados / tot) * 100) : 0;
-      document.getElementById('kpi-pct-prom').innerText = pctCobertura + "%";
-
-      const promotores = res.kpis.promotores || res.kpis.gestionados || 0;
-      const pasivos = res.kpis.pasivos || res.kpis.pendientes || 0;
-      const detractores = res.kpis.detractores || res.kpis.conflictivos || 0;
-      const totalEncuestas = promotores + pasivos + detractores;
-
-      document.getElementById('kpi-nps-promotores').innerText = promotores;
-      document.getElementById('kpi-nps-pasivos').innerText = pasivos;
-      document.getElementById('kpi-nps-detractores').innerText = detractores;
-
-      const scoreNpsNeto = totalEncuestas > 0 ? Math.round(((promotores - detractores) / totalEncuestas) * 100) : 0;
-      document.getElementById('kpi-nps-neto').innerText = (scoreNpsNeto > 0 ? '+' : '') + scoreNpsNeto + "%";
-      document.getElementById('gauge-score-val').innerText = (scoreNpsNeto > 0 ? '+' : '') + scoreNpsNeto + "%";
-
-      document.getElementById('pct-promotores').innerText = (totalEncuestas > 0 ? Math.round((promotores / totalEncuestas) * 100) : 0) + "%";
-      document.getElementById('pct-neutros').innerText = (totalEncuestas > 0 ? Math.round((pasivos / totalEncuestas) * 100) : 0) + "%";
-      document.getElementById('pct-detractores').innerText = (totalEncuestas > 0 ? Math.round((detractores / totalEncuestas) * 100) : 0) + "%";
-
-      const selectFiltroTec = document.getElementById('select-filtro-tecnico');
-      selectFiltroTec.innerHTML = '<option value="TODOS">-- Todos los Técnicos --</option>';
-      res.tecnicos.forEach(t => {
-        selectFiltroTec.innerHTML += `<option value="${t.nombre}">${t.nombre} (${t.total})</option>`;
-      });
-
-      renderizarGraficoGauge(scoreNpsNeto);
-      renderizarGraficoBarras(res.tecnicos);
-
-      todosLosRegistros = res.registros;
-      aplicarFiltrosDetalle();
-    }
-
-    function renderizarGraficoGauge(scoreVal) {
-      const ctx = document.getElementById('gaugeChart').getContext('2d');
-      if (chartGauge) chartGauge.destroy();
-
-      let displayValue = Math.max(0, Math.min(100, ((scoreVal + 100) / 2)));
-
-      chartGauge = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Score NPS', 'Resto'],
-          datasets: [{
-            data: [displayValue, 100 - displayValue],
-            backgroundColor: [scoreVal >= 0 ? '#10b981' : '#f87171', '#23335a'],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          rotation: -90,
-          circumference: 180,
-          cutout: '75%',
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-
-    function renderizarGraficoBarras(tecnicos) {
-      const ctx = document.getElementById('barTecnicosChart').getContext('2d');
-      if (chartBar) chartBar.destroy();
-
-      const nombres = tecnicos.map(t => t.nombre);
-      const avances = tecnicos.map(t => t.pctAvance);
-
-      chartBar = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: nombres,
-          datasets: [{
-            label: '% Cumplimiento',
-            data: avances,
-            backgroundColor: '#38bdf8',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { 
-            x: { max: 100, ticks: { color: '#8e9bb4', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-            y: { ticks: { color: '#f8fafc' }, grid: { display: false } }
-          }
-        }
-      });
-    }
-
-    function aplicarFiltrosDetalle() {
-      const tecSel = document.getElementById('select-filtro-tecnico').value.toLowerCase();
-      const estSel = document.getElementById('select-filtro-estado').value;
-      const q = document.getElementById('input-buscar').value.toLowerCase();
-
-      let resultado = todosLosRegistros;
-
-      if (tecSel !== 'todos') {
-        resultado = resultado.filter(r => r.tecnico && r.tecnico.toLowerCase() === tecSel);
-      }
-
-      if (estSel !== 'TODOS') {
-        resultado = resultado.filter(r => {
-          if (estSel === 'Sin Gestion') return r.estado === 'Sin Gestion' || r.estado === 'Sin gestion';
-          return r.estado === estSel;
-        });
-      }
-
-      if (q.trim()) {
-        resultado = resultado.filter(r => 
-          (r.tecnico && r.tecnico.toLowerCase().includes(q)) || 
-          (r.nombreUsuario && r.nombreUsuario.toLowerCase().includes(q)) || 
-          (r.codigoCliente && r.codigoCliente.toString().toLowerCase().includes(q)) || 
-          (r.telefono && r.telefono.toString().toLowerCase().includes(q)) || 
-          (r.numeroOT && r.numeroOT.toString().toLowerCase().includes(q))
-        );
-      }
-
-      renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
-    }
-
-    function renderizarTarjetasAdmin(lista, idContenedor) {
-      const contenedor = document.getElementById(idContenedor);
-      contenedor.innerHTML = '';
-      if (lista.length === 0) {
-        contenedor.innerHTML = '<div class="text-secondary text-center small py-4 col-12">No hay órdenes que coincidan con los filtros.</div>';
-        return;
-      }
-
-      lista.forEach(r => {
-        const isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
-        const isSinGestion = r.estado === 'Sin Gestion' || r.estado === 'Sin gestion';
-        
-        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : (isSinGestion ? 'badge-expired' : 'badge-pending'));
-        const indexOriginal = todosLosRegistros.indexOf(r);
-
-        let subtextoFecha = r.fechaGestion ? 
-          `<span class="text-info" style="font-size: 0.68rem;">Gestión: ${formatearFechaCorta(r.fechaGestion)}</span>` : 
-          '<span class="text-secondary" style="font-size: 0.68rem;">Sin fecha de gestión</span>';
-
-        let otClave = r.numeroOT || r.codigoCliente || '';
-        let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
-        let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
-
-        contenedor.innerHTML += `
-          <div class="order-card fade-in-view ${isConflict ? 'conflictive' : ''}">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
-                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT}</small>
-              </div>
-              <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombreUsuario}</div>
-              <div class="meta-grid">
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">CLIENTE</span><strong class="text-light">${r.codigoCliente}</strong></div>
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.68rem;">TELÉFONO</span><span class="text-warning">${r.telefono}</span></div>
-              </div>
-              <div class="mt-2 p-1 px-2 bg-dark rounded border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-                ${subtextoFecha}
-              </div>
-              ${r.observacion ? `<div class="p-2 mt-2 bg-dark rounded border border-danger border-opacity-25 text-warning small" style="font-size: 0.78rem;"><strong>Informe:</strong> ${r.observacion}</div>` : ''}
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
-              <span class="text-secondary fw-bold" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
-              <div class="d-flex gap-1">
-                <button class="btn btn-xs btn-outline-info p-1 px-2 small" style="font-size: 0.72rem;" onclick="verDetallesOrdenAdmin(${indexOriginal})"><i class="bi bi-eye me-1"></i>Detalles</button>
-                ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')">Foto</button>` : ''}
-              </div>
-            </div>
-          </div>`;
-      });
-    }
-
-    function verDetallesOrdenTecnico(index, origen) {
-      let item = (origen === 'PENDIENTE') ? pendientesTecnicoActual[index] : historicoTecnicoActual[index];
-      if (!item) return;
-
-      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
-      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
-      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
-      document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || usuarioActual.nombre;
-      document.getElementById('det-fecha').innerText = formatearFechaCorta(item.fechaAsignacion);
-      
-      const fechaG = item.fechaGestion;
-      document.getElementById('det-fecha-gestion').innerText = fechaG ? formatearFechaCorta(fechaG) : 'Pendiente de Gestión';
-      
-      let notaTexto = "10 (Promotor Estimado)";
-      if (item.scoreReal) notaTexto = `${item.scoreReal} (Real Nacional)`;
-      else if (item.estado === 'No le llego la encuesta') notaTexto = "8 (Pasivo Estimado)";
-      else if (item.estado === 'UU conflictivo') notaTexto = "5 (Detractor Estimado)";
-
-      document.getElementById('det-score-real').innerText = notaTexto;
-
-      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
-      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
-
-      let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
-      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
-      document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
-
-      const boxObs = document.getElementById('det-box-obs');
-      if (item.observacion) {
-        document.getElementById('det-observacion').innerText = item.observacion;
-        boxObs.classList.remove('hidden');
-      } else { boxObs.classList.add('hidden'); }
-
-      abrirModalBS('modalDetalleOrden');
-    }
-
-    function verDetallesOrdenAdmin(index) {
-      let item = todosLosRegistros[index];
-      if (!item) return;
-
-      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
-      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
-      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
-      document.getElementById('det-tecnico').innerText = item.tecnico || 'Sin Asignar';
-      document.getElementById('det-fecha').innerText = formatearFechaCorta(item.fechaAsignacion);
-      
-      const fechaG = item.fechaGestion;
-      document.getElementById('det-fecha-gestion').innerText = fechaG ? formatearFechaCorta(fechaG) : 'Pendiente de Gestión';
-      
-      let notaTexto = "10 (Promotor Estimado)";
-      if (item.scoreReal) notaTexto = `${item.scoreReal} (Real Nacional)`;
-      else if (item.estado === 'No le llego la encuesta') notaTexto = "8 (Pasivo Estimado)";
-      else if (item.estado === 'UU conflictivo') notaTexto = "5 (Detractor Estimado)";
-
-      document.getElementById('det-score-real').innerText = notaTexto;
-
-      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
-      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
-
-      let isConflict = item.estado === 'UU conflictivo' || item.estado === 'Conflictivo';
-      let badgeStyle = item.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
-      document.getElementById('det-estado').innerHTML = `<span class="badge-subtle ${badgeStyle}">${item.estado}</span>`;
-
-      const boxObs = document.getElementById('det-box-obs');
-      if (item.observacion) {
-        document.getElementById('det-observacion').innerText = item.observacion;
-        boxObs.classList.remove('hidden');
-      } else { boxObs.classList.add('hidden'); }
-
-      abrirModalBS('modalDetalleOrden');
-    }
-
-    function abrirModal(fila, numeroOT) {
+    function abrirModal(fila, numeroOT, codigoCliente) {
       document.getElementById('modal-fila').value = fila;
       document.getElementById('modal-ot').value = numeroOT || '';
+      document.getElementById('modal-codigo').value = codigoCliente || '';
       document.getElementById('modal-estado').value = 'Gestionado';
-      document.getElementById('modal-score-estimado').value = '10';
       document.getElementById('modal-observacion').value = '';
       archivoFotoSeleccionado = null;
       base64Compresion = null;
@@ -1670,12 +1112,9 @@
         const btnG = document.getElementById('btn-guardar');
 
         btnG.disabled = true;
-        btnG.innerText = "⏳ Procesando evidencia...";
+        btnG.innerText = "⏳ Procesando foto...";
         lbl.className = "text-warning small fw-bold text-center";
         lbl.innerText = "⏳ Optimizando imagen de respaldo...";
-
-        if (input.id === 'modal-foto-camara') document.getElementById('modal-foto-galeria').value = '';
-        if (input.id === 'modal-foto-galeria') document.getElementById('modal-foto-camara').value = '';
 
         convertirYComprimirFoto(archivoFotoSeleccionado).then(b64 => {
           base64Compresion = b64;
@@ -1687,7 +1126,7 @@
           btnG.disabled = false;
           btnG.innerText = "Guardar Gestión";
           lbl.className = "text-danger small fw-bold text-center";
-          lbl.innerText = "Error al optimizar imagen.";
+          lbl.innerText = "Error al optimizar la imagen.";
         });
       }
     }
@@ -1733,13 +1172,19 @@
     async function guardarFormulario() {
       const fila = document.getElementById('modal-fila').value;
       const numeroOT = document.getElementById('modal-ot').value;
+      const codigoCliente = document.getElementById('modal-codigo').value;
       const estado = document.getElementById('modal-estado').value;
       const scoreEstimado = document.getElementById('modal-score-estimado').value;
       const resultado = document.getElementById('modal-resultado').value;
       const obs = document.getElementById('modal-observacion').value;
 
       if (!base64Compresion && !archivoFotoSeleccionado) {
-        alert("⚠ DEBE ADJUNTAR UNA FOTO DE RESPALDO OBLIGATORIAMENTE. No se puede guardar la gestión sin evidencia fotográfica.");
+        alert("⚠ DEBE ADJUNTAR UNA FOTO DE RESPALDO OBLIGATORIAMENTE.");
+        return;
+      }
+
+      if (archivoFotoSeleccionado && !base64Compresion) {
+        alert("⏳ La foto aún se está optimizando. Espere un segundo y vuelva a presionar Guardar.");
         return;
       }
 
@@ -1748,13 +1193,10 @@
       btnGuardar.innerText = "Enviando respaldo...";
 
       let b64Foto = base64Compresion || "";
-
-      if (archivoFotoSeleccionado && !b64Foto) {
-        try { b64Foto = await convertirYComprimirFoto(archivoFotoSeleccionado); } catch(e) {}
-      }
+      let otClaveLimpia = obtenerClaveLimpiaOT(numeroOT, codigoCliente);
 
       if (b64Foto) {
-        try { localStorage.setItem(`evidencia_ot_${numeroOT}`, b64Foto); } catch(e) {}
+        try { localStorage.setItem(`evidencia_ot_${otClaveLimpia}`, b64Foto); } catch(e) {}
       }
 
       const payload = { 
@@ -1773,12 +1215,10 @@
         btnGuardar.innerText = "Guardar Gestión";
         
         if (res && res.exito) {
-          alert("¡Gestión y foto de respaldo guardadas con éxito!");
+          alert("¡Gestión y foto guardadas con éxito!");
           ocultarModalBS('modalGestion');
-          
           archivoFotoSeleccionado = null;
           base64Compresion = null;
-
           cargarHistoricoTecnico();
           cargarPendientesTecnico();
         } else {
@@ -1803,18 +1243,11 @@
       errorElement.classList.add('hidden');
       loadingElement.classList.add('hidden');
       
-      if (b64Data.startsWith("data:image")) {
-        imgElement.src = b64Data;
-      } else {
-        imgElement.src = "data:image/jpeg;base64," + b64Data;
-      }
+      if (b64Data.startsWith("data:image")) imgElement.src = b64Data;
+      else imgElement.src = "data:image/jpeg;base64," + b64Data;
       
       imgElement.classList.remove('hidden');
       abrirModalBS('modalVisorFoto');
-    }
-
-    function abrirModalCargaExcel() {
-      abrirModalBS('modalCargaExcel');
     }
 
     function cerrarSesion() {
