@@ -46,13 +46,82 @@
       body { padding-bottom: 0px; }
     }
 
-    /* ANIMACIONES Y TRANSMISION INSTANTÁNEA */
+    /* ANIMACIONES FLUIDAS */
     .fade-in-view {
-      animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* BANNER DE BIENVENIDA ANIMADO */
+    .welcome-card {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 20px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, rgba(255,255,255,0) 60%);
+      animation: pulseGlow 4s infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes pulseGlow {
+      0% { transform: scale(0.9); opacity: 0.5; }
+      100% { transform: scale(1.1); opacity: 1; }
+    }
+
+    .pulse-dot {
+      width: 10px; height: 10px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulseGreen 2s infinite;
+    }
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* AVATAR DE PERFIL CIRCULAR */
+    .avatar-container {
+      position: relative;
+      width: 85px; height: 85px;
+      margin: 0 auto 12px;
+    }
+    .avatar-img {
+      width: 85px; height: 85px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent-cyan);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    .avatar-placeholder {
+      width: 85px; height: 85px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      color: white;
+      font-size: 2.2rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      border: 3px solid var(--accent-cyan);
+    }
+    .avatar-edit-btn {
+      position: absolute; bottom: 0; right: 0;
+      background: var(--accent-cyan); color: #000;
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: bold; cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     }
 
     .btn, .order-card, .nav-item-btn {
@@ -157,6 +226,14 @@
     .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border: none; padding: 8px; font-weight: 600; font-size: 0.8rem; border-radius: 8px; }
     .segmented-control .nav-link.active { background: var(--card-bg); color: #ffffff; }
 
+    .guia-card-container {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border: 2px solid #38bdf8;
+      border-radius: 16px;
+      padding: 16px;
+      color: #ffffff;
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -211,7 +288,9 @@
       <!-- HEADER TECNICO -->
       <div class="bi-card-dark d-flex justify-content-between align-items-center mb-3">
         <div class="d-flex align-items-center gap-3">
-          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.2rem;" id="avatar-tec">T</div>
+          <div id="header-avatar-box">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.2rem;" id="avatar-tec">T</div>
+          </div>
           <div>
             <h6 class="m-0 text-white fw-bold" id="label-nombre-tec">Técnico</h6>
             <small class="text-info fw-semibold" style="font-size: 0.75rem;" id="label-sub-tec">Tigo Datared • Operaciones</small>
@@ -220,8 +299,28 @@
         <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i></button>
       </div>
 
-      <!-- SECCIÓN INICIO TECNICO -->
+      <!-- SECCIÓN INICIO TECNICO (CON TARJETA DE BIENVENIDA ANIMADA) -->
       <div id="sec-tec-inicio" class="fade-in-view">
+        <div class="welcome-card mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-2 py-1 small fw-bold">
+              <span class="pulse-dot me-1"></span> SISTEMA OPERATIVO
+            </span>
+            <small class="text-info fw-bold" id="label-reloj-hora">--:--</small>
+          </div>
+          <h4 class="fw-extrabold text-white mb-1" id="label-saludo-animado">¡Hola! 👋</h4>
+          <p class="text-secondary small mb-3" id="label-sub-saludo">Listo para gestionar tus encuestas NPS de hoy.</p>
+          
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-primary fw-bold flex-fill py-2" onclick="navegarBottom('pendientes')">
+              <i class="bi bi-clock-history me-1"></i> Ver Pendientes
+            </button>
+            <button class="btn btn-sm btn-outline-info fw-bold flex-fill py-2" onclick="abrirModalGuiaImagen()">
+              <i class="bi bi-image me-1"></i> Guía SMS
+            </button>
+          </div>
+        </div>
+
         <div class="bi-card-dark mb-3">
           <h6 class="fw-bold text-white mb-2">Resumen Operativo</h6>
           <div class="row g-2 text-center">
@@ -244,19 +343,56 @@
         <div id="lista-historico-tecnico" class="grid-dashboard"></div>
       </div>
 
-      <!-- SECCIÓN MI PERFIL TÉCNICO -->
+      <!-- SECCIÓN MI PERFIL TÉCNICO CON DATOS Y FOTO EDITABLES -->
       <div id="sec-tec-perfil" class="hidden">
         <div class="bi-card-dark mb-3 text-center">
-          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-2" style="width: 70px; height: 70px; font-size: 2rem;" id="perfil-avatar">T</div>
+          
+          <!-- AVATAR INTERACTIVO -->
+          <div class="avatar-container">
+            <div id="perfil-avatar-box">
+              <div class="avatar-placeholder mx-auto" id="perfil-avatar">T</div>
+            </div>
+            <label for="input-foto-perfil" class="avatar-edit-btn" title="Cambiar foto de perfil">
+              <i class="bi bi-camera-fill"></i>
+            </label>
+            <input type="file" id="input-foto-perfil" class="hidden" accept="image/*" onchange="actualizarFotoPerfil(this)">
+          </div>
+
           <h5 class="fw-bold text-white mb-0" id="perfil-nombre">Nombre Técnico</h5>
           <small class="text-secondary d-block mb-2" id="perfil-correo">correo@datared.com</small>
           <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3 py-1">Técnico Habilitado</span>
+        </div>
+
+        <!-- FORMULARIO DE INFORMACIÓN TÉCNICA Y SINCRONIZACIÓN -->
+        <div class="bi-card-dark mb-3">
+          <h6 class="fw-bold text-info small mb-3"><i class="bi bi-person-badge me-2"></i>DATOS CORPORATIVOS DEL TÉCNICO</h6>
+          
+          <div class="mb-2">
+            <label class="form-label small text-secondary m-0">Teléfono Corporativo / WhatsApp</label>
+            <input type="text" id="input-tec-telefono" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Ej: 71234567">
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label small text-secondary m-0">Cédula de Identidad (CI)</label>
+            <input type="text" id="input-tec-ci" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Ej: 8934123 Tja">
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label small text-secondary m-0">Placa Vehículo / Moto</label>
+            <input type="text" id="input-tec-placa" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Ej: 4521-ABC">
+          </div>
+
+          <button id="btn-guardar-perfil" class="btn btn-sm btn-outline-info w-100 fw-bold mt-3" onclick="guardarDatosTecnico()"><i class="bi bi-cloud-upload me-1"></i> Guardar y Sincronizar en la Nube</button>
         </div>
 
         <div class="bi-card-dark mb-3">
           <h6 class="fw-bold text-secondary small mb-3">AJUSTES Y NOTIFICACIONES</h6>
           <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="solicitarPermisoNotificaciones()">
             <span><i class="bi bi-bell-fill me-2 text-warning"></i>Activar Notificaciones Nativas</span>
+            <i class="bi bi-chevron-right text-secondary"></i>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="abrirModalGuiaImagen()">
+            <span><i class="bi bi-image-fill me-2 text-info"></i>Ver Guía SMS para Clientes</span>
             <i class="bi bi-chevron-right text-secondary"></i>
           </div>
           <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 2.0.0 - Edición Pro Campo')">
@@ -365,6 +501,12 @@
             </div>
           </div>
         </div>
+
+        <!-- LISTA DE FICHAS DE TÉCNICOS PARA ADMINISTRADORES -->
+        <div class="bi-card-dark mb-3">
+          <h6 class="fw-bold text-info small mb-3"><i class="bi bi-people-fill me-2"></i>DIRECTORIO OFICIAL DE TÉCNICOS EN CAMPO</h6>
+          <div id="lista-directorio-tecnicos" class="grid-dashboard"></div>
+        </div>
       </div>
 
       <div id="sec-general" class="hidden">
@@ -419,7 +561,76 @@
     </button>
   </div>
 
-  <!-- MODALES -->
+  <!-- MODAL DE FICHA TÉCNICA VERIFICADA PARA SUPERVISOR -->
+  <div class="modal fade" id="modalFichaTecnico" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white border-secondary">
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title fw-bold"><i class="bi bi-person-bounding-box text-info me-2"></i>Ficha Oficial del Técnico</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center p-3">
+          <div id="ftec-avatar-box" class="mb-2"></div>
+          <h5 class="fw-bold text-white mb-0" id="ftec-nombre">Técnico</h5>
+          <small class="text-info fw-semibold d-block mb-3" id="ftec-region">Datared • Bolivia</small>
+
+          <div class="p-3 bg-dark rounded border border-secondary text-start mb-3 space-y-2" style="font-size:0.85rem;">
+            <div><span class="text-secondary">Teléfono:</span> <strong class="text-warning" id="ftec-telefono">No registrado</strong></div>
+            <div><span class="text-secondary">Cédula Identidad (CI):</span> <strong class="text-light" id="ftec-ci">No registrado</strong></div>
+            <div><span class="text-secondary">Placa Vehículo/Moto:</span> <strong class="text-info" id="ftec-placa">No registrado</strong></div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <a id="btn-ftec-llamar" href="#" class="btn btn-sm btn-outline-warning fw-bold flex-fill py-2"><i class="bi bi-telephone-fill me-1"></i> Llamar</a>
+            <a id="btn-ftec-ws" href="#" target="_blank" class="btn btn-sm btn-success fw-bold flex-fill py-2"><i class="bi bi-whatsapp me-1"></i> WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARA COMPARTIR GUÍA VISUAL -->
+  <div class="modal fade" id="modalGuiaSms" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white border-secondary">
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title fw-bold"><i class="bi bi-phone-vibrate text-info me-2"></i>Guía SMS Gráfica para Cliente</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-3">
+          <div class="guia-card-container mb-3 p-3 rounded border border-info">
+            <div class="text-center mb-2 pb-2 border-bottom border-secondary">
+              <span class="badge bg-primary px-3 py-1">TIGO BOLIVIA</span>
+              <h6 class="fw-bold text-info m-0 mt-2" style="font-size: 0.9rem;">GUÍA PARA INGRESAR Y LLENAR LA ENCUESTA</h6>
+            </div>
+            <div class="p-2 bg-dark rounded border border-secondary text-start mb-3">
+              <small class="text-secondary d-block fw-bold mb-1" style="font-size: 0.65rem;">MENSAJE DE TEXTO (SMS) OFICIAL:</small>
+              <div class="text-light fw-bold" style="font-size: 0.8rem;">
+                "Para Tigo tu opinión es muy importante, ayúdanos contestando la siguiente encuesta: <span class="text-info text-decoration-underline">https://b.tigo.com/...</span>"
+              </div>
+              <small class="text-success fw-bold d-block mt-1" style="font-size: 0.7rem;">Remitente: TIGO (Líneas Tigo) o 2820 (Otras empresas)</small>
+            </div>
+            <div class="text-start small text-light space-y-1 mb-2" style="font-size: 0.78rem;">
+              <div class="mb-1"><b>1.</b> Ingrese a su pantalla de inicio y busque su app de <b>Mensajes de Texto (SMS)</b> (no WhatsApp).</div>
+              <div class="mb-1"><b>2.</b> En su bandeja ubique la cuenta correspondiente: para líneas Tigo le llega desde la cuenta <b>TIGO</b> y para otras compañías desde la cuenta <b>2820</b>.</div>
+              <div class="mb-1"><b>3.</b> Ingrese al mensaje de texto y toque el enlace.</div>
+              <div class="mb-1"><b>4.</b> En el mensaje de seguridad marque la casilla <b>"No soy un robot"</b>.</div>
+              <div class="mb-1"><b>5.</b> Califique al técnico con un <b>10</b> si su trabajo fue excelente (si tiene observaciones las anota abajo).</div>
+              <div class="mb-1"><b>6.</b> Siga los pasos que le aparecen en pantalla para finalizar.</div>
+            </div>
+            <div class="text-warning small fw-bold text-center border-top border-secondary pt-2 mt-2">
+              🙌 ¡MUCHAS GRACIAS POR SU TIEMPO! ESTAREMOS ATENTOS A CUALQUIER CONSULTA.
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm btn-success fw-bold w-100 py-2" onclick="compartirGuiaWhatsAppDirecto()">
+            <i class="bi bi-whatsapp me-1"></i> Compartir Guía por WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALES DE EXCEL Y GESTIÓN -->
   <div class="modal fade" id="modalCargaExcel" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-white border-secondary">
@@ -557,7 +768,7 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
 
     let usuarioActual = null;
-    let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [];
+    let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
     let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
     let conteoAnteriorPendientes = -1;
 
@@ -625,13 +836,12 @@
         secEl.classList.add('fade-in-view');
       }
 
-      // NAVEGACIÓN INSTANTÁNEA: renderiza inmediatamente desde memoria cache
       if (seccion === 'inicio' || seccion === 'pendientes') {
         renderizarPendientesTecnicoUI();
-        cargarPendientesTecnico(); // Revalida en segundo plano
+        cargarPendientesTecnico();
       } else if (seccion === 'historico') {
         renderizarHistoricoTecnicoUI();
-        cargarHistoricoTecnico(); // Revalida en segundo plano
+        cargarHistoricoTecnico();
       }
     }
 
@@ -652,6 +862,106 @@
       }
     }
 
+    function abrirModalGuiaImagen() {
+      abrirModalBS('modalGuiaSms');
+    }
+
+    function compartirGuiaWhatsAppDirecto() {
+      let txtGuia = "📱 *GUÍA RÁPIDA DE ENCUESTA TIGO*\n\n1. Ingrese a sus Mensajes de Texto (SMS).\n2. Busque el mensaje enviado por TIGO o el número 2820.\n3. Abra el enlace oficial y califique la atención del técnico con un 10. ¡Muchas gracias!";
+      if (navigator.share) {
+        navigator.share({
+          title: 'Guía Encuesta Tigo',
+          text: txtGuia
+        }).catch(() => {});
+      } else {
+        window.open(`https://wa.me/?text=${encodeURIComponent(txtGuia)}`, '_blank');
+      }
+    }
+
+    // GESTIÓN DE PERFIL DEL TÉCNICO
+    function cargarAvatarYDatosTecnico() {
+      if (!usuarioActual) return;
+      
+      const fotoGuardada = localStorage.getItem(`foto_avatar_${usuarioActual.usuario}`);
+      const primerLetra = (usuarioActual.nombre || 'T').charAt(0).toUpperCase();
+
+      if (fotoGuardada) {
+        document.getElementById('header-avatar-box').innerHTML = `<img src="${fotoGuardada}" class="rounded-circle border border-info" style="width:44px; height:44px; object-fit:cover;">`;
+        document.getElementById('perfil-avatar-box').innerHTML = `<img src="${fotoGuardada}" class="avatar-img">`;
+      } else {
+        document.getElementById('header-avatar-box').innerHTML = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.2rem;" id="avatar-tec">${primerLetra}</div>`;
+        document.getElementById('perfil-avatar-box').innerHTML = `<div class="avatar-placeholder mx-auto">${primerLetra}</div>`;
+      }
+
+      document.getElementById('input-tec-telefono').value = localStorage.getItem(`tec_tel_${usuarioActual.usuario}`) || '';
+      document.getElementById('input-tec-ci').value = localStorage.getItem(`tec_ci_${usuarioActual.usuario}`) || '';
+      document.getElementById('input-tec-placa').value = localStorage.getItem(`tec_placa_${usuarioActual.usuario}`) || '';
+    }
+
+    function actualizarFotoPerfil(input) {
+      if (input.files && input.files[0]) {
+        convertirYComprimirFoto(input.files[0]).then(b64 => {
+          localStorage.setItem(`foto_avatar_${usuarioActual.usuario}`, b64);
+          cargarAvatarYDatosTecnico();
+          alert("¡Foto de perfil cargada! Recuerde presionar 'Guardar y Sincronizar en la Nube' para enviar al supervisor.");
+        }).catch(() => alert("No se pudo procesar la foto."));
+      }
+    }
+
+    async function guardarDatosTecnico() {
+      const tel = document.getElementById('input-tec-telefono').value;
+      const ci = document.getElementById('input-tec-ci').value;
+      const placa = document.getElementById('input-tec-placa').value;
+      const b64Foto = localStorage.getItem(`foto_avatar_${usuarioActual.usuario}`) || "";
+
+      localStorage.setItem(`tec_tel_${usuarioActual.usuario}`, tel);
+      localStorage.setItem(`tec_ci_${usuarioActual.usuario}`, ci);
+      localStorage.setItem(`tec_placa_${usuarioActual.usuario}`, placa);
+
+      const btnG = document.getElementById('btn-guardar-perfil');
+      btnG.disabled = true;
+      btnG.innerText = "⏳ Sincronizando en la nube...";
+
+      try {
+        const res = await apiCall("guardarPerfilTecnicoServidor", {
+          payload: {
+            usuario: usuarioActual.usuario,
+            telefono: tel,
+            ci: ci,
+            placa: placa,
+            fotoBase64: b64Foto
+          }
+        });
+
+        btnG.disabled = false;
+        btnG.innerText = "Guardar y Sincronizar en la Nube";
+
+        if (res && res.exito) {
+          alert("¡Información corporativa y foto guardadas en la nube con éxito! Ahora tus supervisores pueden identificarte.");
+        } else {
+          alert("Guardado localmente. " + (res.mensaje || ""));
+        }
+      } catch(e) {
+        btnG.disabled = false;
+        btnG.innerText = "Guardar y Sincronizar en la Nube";
+        alert("Guardado localmente en el teléfono.");
+      }
+    }
+
+    function actualizarSaludoHora() {
+      const now = new Date();
+      const hora = now.getHours();
+      const mins = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('label-reloj-hora').innerText = `${hora}:${mins}`;
+
+      let saludo = "¡Buenas noches!";
+      if (hora >= 5 && hora < 12) saludo = "¡Buenos días!";
+      else if (hora >= 12 && hora < 19) saludo = "¡Buenas tardes!";
+
+      const nombreTec = usuarioActual ? usuarioActual.nombre.split(' ')[0] : '';
+      document.getElementById('label-saludo-animado').innerText = `${saludo} ${nombreTec} 👋`;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       solicitarPermisoNotificaciones();
       const perfilGuardado = localStorage.getItem("nps_user_profile");
@@ -661,6 +971,7 @@
           iniciarVistaSegunRol(usuarioActual);
         } catch(e) { cerrarSesion(); }
       }
+      setInterval(actualizarSaludoHora, 30000);
     });
 
     function iniciarVistaSegunRol(res) {
@@ -673,12 +984,12 @@
         document.getElementById('app-bottom-nav').classList.remove('hidden');
 
         document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
-        document.getElementById('avatar-tec').innerText = (res.nombre || 'T').charAt(0).toUpperCase();
         document.getElementById('perfil-nombre').innerText = res.nombre || 'Técnico';
         document.getElementById('perfil-correo').innerText = res.usuario || '';
-        document.getElementById('perfil-avatar').innerText = (res.nombre || 'T').charAt(0).toUpperCase();
 
-        // CARGA INSTANTÁNEA DESDE CACHE DE PENDIENTES E HISTÓRICO
+        cargarAvatarYDatosTecnico();
+        actualizarSaludoHora();
+
         const cachePendientes = localStorage.getItem(`cache_pendientes_${res.usuario}`);
         if (cachePendientes) {
           pendientesTecnicoActual = JSON.parse(cachePendientes);
@@ -703,13 +1014,76 @@
         document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
         document.getElementById('admin-header-region').innerText = `ÁREA: ${res.area || 'Encargado Nacional'} | DEP: ${res.departamento || 'TODOS'}`;
         
-        // Carga rápida del Dashboard desde cache
         const cacheDash = localStorage.getItem(`cache_dashboard_${res.usuario}`);
         if (cacheDash) {
           procesarYRenderizarDashboard(JSON.parse(cacheDash));
         }
         cargarDashboard();
+        cargarDirectorioTecnicosAdmin();
       }
+    }
+
+    async function cargarDirectorioTecnicosAdmin() {
+      try {
+        const lista = await apiCall("obtenerTecnicosConPerfil");
+        directorioTecnicos = Array.isArray(lista) ? lista : [];
+        renderizarDirectorioTecnicosAdminUI();
+      } catch(e) {}
+    }
+
+    function renderizarDirectorioTecnicosAdminUI() {
+      const cont = document.getElementById('lista-directorio-tecnicos');
+      if (!cont) return;
+      cont.innerHTML = '';
+
+      if (directorioTecnicos.length === 0) {
+        cont.innerHTML = '<div class="text-secondary text-center small py-3 col-12">Cargando directorio de técnicos...</div>';
+        return;
+      }
+
+      directorioTecnicos.forEach((t, idx) => {
+        let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:40px; height:40px; font-size:1.1rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
+        if (t.fotoPerfil && t.fotoPerfil.length > 50) {
+          let src = t.fotoPerfil.startsWith("data:image") ? t.fotoPerfil : "data:image/jpeg;base64," + t.fotoPerfil;
+          avatarHtml = `<img src="${src}" class="rounded-circle border border-info" style="width:40px; height:40px; object-fit:cover;">`;
+        }
+
+        cont.innerHTML += `
+          <div class="bi-card-dark p-2 d-flex justify-content-between align-items-center mb-2" onclick="verFichaTecnicoSupervisor(${idx})" style="cursor:pointer;">
+            <div class="d-flex align-items-center gap-2">
+              ${avatarHtml}
+              <div>
+                <h6 class="m-0 text-white fw-bold" style="font-size:0.85rem;">${t.nombre}</h6>
+                <small class="text-secondary" style="font-size:0.7rem;">${t.departamento} • ${t.ciudad}</small>
+              </div>
+            </div>
+            <span class="badge bg-outline-info text-info border border-info border-opacity-25 p-1 px-2" style="font-size:0.68rem;">Ficha <i class="bi bi-chevron-right"></i></span>
+          </div>`;
+      });
+    }
+
+    function verFichaTecnicoSupervisor(idx) {
+      let t = directorioTecnicos[idx];
+      if (!t) return;
+
+      let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-2" style="width:70px; height:70px; font-size:2rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
+      if (t.fotoPerfil && t.fotoPerfil.length > 50) {
+        let src = t.fotoPerfil.startsWith("data:image") ? t.fotoPerfil : "data:image/jpeg;base64," + t.fotoPerfil;
+        avatarHtml = `<img src="${src}" class="rounded-circle border border-info mx-auto mb-2" style="width:70px; height:70px; object-fit:cover;">`;
+      }
+
+      document.getElementById('ftec-avatar-box').innerHTML = avatarHtml;
+      document.getElementById('ftec-nombre').innerText = t.nombre;
+      document.getElementById('ftec-region').innerText = `${t.departamento} • ${t.ciudad}`;
+      document.getElementById('ftec-telefono').innerText = t.telefono || 'Sin registrar';
+      document.getElementById('ftec-ci').innerText = t.ci || 'Sin registrar';
+      document.getElementById('ftec-placa').innerText = t.placa || 'Sin registrar';
+
+      let num = t.telefono ? t.telefono.toString().replace(/[^0-9]/g, '') : '';
+      document.getElementById('btn-ftec-llamar').href = num ? `tel:${num}` : '#';
+      document.getElementById('btn-ftec-ws').href = num ? `https://wa.me/591${num}` : '#';
+
+      abrirModalBS('modalFichaTecnico');
     }
 
     async function apiCall(accion, dataPayload = {}, reintentos = 2) {
@@ -786,7 +1160,21 @@
       else saludoHora = "Estimado cliente, buenas noches. 🌙";
 
       let tecNombre = nombreTecnico || (usuarioActual ? usuarioActual.nombre : 'Servicio Técnico');
-      let mensajeWs = `${saludoHora}\n\nLe escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codigoCliente || 'N/A'}* (${nombreUsuario || 'Estimado Cliente'}).\n\nMi nombre es *${tecNombre}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.\n\nEn caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo por favor un *10* 😁. Su calificación es muy importante para mí.\n\n¡Muchas gracias por su apoyo! 🙌`;
+      let clienteNombre = nombreUsuario || 'Estimado Cliente';
+      let codCliente = codigoCliente || 'N/A';
+
+      let mensajeWs = `${saludoHora}\n\n` +
+        `Le escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codCliente}* (${clienteNombre}).\n\n` +
+        `Mi nombre es *${tecNombre}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.\n\n` +
+        `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo por favor un *10* 😁. Su calificación es muy importante para mí.\n\n` +
+        `📲 *GUÍA PARA INGRESAR Y LLENAR LA ENCUESTA:*\n` +
+        `1. Ingrese a su pantalla de inicio y busque su aplicación de mensajería de texto (no WhatsApp).\n` +
+        `2. En su bandeja ubique la cuenta correspondiente: para líneas Tigo le llega desde la cuenta *TIGO* y para otras compañías le llega desde la cuenta *2820*.\n` +
+        `3. Ingrese al mensaje de texto donde le muestra un link.\n` +
+        `4. Ingrese al mensaje y le aparece mensaje automático de seguridad, ud le da en la casilla no soy un BOT.\n` +
+        `5. Califique al técnico con un 10 si su trabajo fue excelente (si tiene alguna observación la anota más abajo).\n` +
+        `6. Siga los pasos que le aparecen en pantalla para finalizar.\n\n` +
+        `MUCHAS GRACIAS POR SU TIEMPO! ESTAREMOS ATENTOS A CUALQUIER CONSULTA! 🙌`;
 
       return `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
     }
@@ -873,6 +1261,10 @@
             <div class="d-flex gap-2 mt-2">
               ${telLlamar}
               ${btnWs}
+            </div>
+
+            <div class="d-flex gap-2 mt-2">
+              <button class="btn btn-sm btn-outline-info w-100 fw-bold py-1" onclick="abrirModalGuiaImagen()"><i class="bi bi-phone-vibrate me-1"></i> Ver / Enviar Guía SMS</button>
             </div>
 
             <div class="d-flex gap-2 mt-2 border-top border-secondary border-opacity-25 pt-2">
