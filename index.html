@@ -362,7 +362,7 @@
 
         <div class="bi-card-dark mb-3">
           <h6 class="fw-bold text-secondary small mb-3">AJUSTES Y NOTIFICACIONES</h6>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="solicitarPermisoNotificaciones()">
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="solicitarPermisoNotificacionesManual()">
             <span><i class="bi bi-bell-fill me-2 text-warning"></i>Activar Notificaciones Nativas</span>
             <i class="bi bi-chevron-right text-secondary"></i>
           </div>
@@ -370,9 +370,9 @@
             <span><i class="bi bi-image-fill me-2 text-info"></i>Ver Guía SMS para Clientes</span>
             <i class="bi bi-chevron-right text-secondary"></i>
           </div>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 2.0.0 Pro Ultra Fast')">
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 2.1.0 Pro Ultra Fast')">
             <span><i class="bi bi-info-circle me-2 text-warning"></i>Versión del Sistema</span>
-            <small class="text-secondary">v2.0.0 Ultra</small>
+            <small class="text-secondary">v2.1.0 Ultra</small>
           </div>
           <button class="btn btn-outline-danger w-100 fw-bold mt-3 py-2" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
         </div>
@@ -405,7 +405,7 @@
             </select>
 
             <!-- FILTRO CIUDAD -->
-            <select id="select-filtro-ciudad" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="aplicarFiltrosMultiples()">
+            <select id="select-filtro-ciudad" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
               <option value="TODAS">Ciudad: TODAS</option>
             </select>
 
@@ -646,30 +646,6 @@
     </div>
   </div>
 
-  <!-- MODAL DETALLES -->
-  <div class="modal fade" id="modalDetalleOrden" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary">
-          <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-person me-2 text-info"></i>Ficha de Gestión NPS</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <div class="detail-row"><div class="detail-label">ID Gestión</div><div class="detail-val" id="det-id">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Código Cliente</div><div class="detail-val text-primary" id="det-codigo">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Nombre Usuario</div><div class="detail-val fw-bold" id="det-nombre">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Técnico Asignado</div><div class="detail-val fw-bold text-info" id="det-tecnico">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Fecha Asignación</div><div class="detail-val" id="det-fecha">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Número OT</div><div class="detail-val" id="det-ot">N/A</div></div>
-          <div class="detail-row"><div class="detail-label">Teléfono Cliente</div><div class="detail-val text-warning fs-6" id="det-telefono">N/A</div></div>
-        </div>
-        <div class="modal-footer border-secondary">
-          <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar Ficha</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- VISOR DE FOTO -->
   <div class="modal fade" id="modalVisorFoto" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -684,6 +660,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // ==========================================
+    // CRÍTICO: REEMPLAZAR ABAJO POR TU ENLACE ACTUAL DE APPS SCRIPT
+    // ==========================================
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
 
     let usuarioActual = null;
@@ -716,24 +695,17 @@
       cargarDashboard(true);
     }
 
-    function poblarSelectorTecnicos(tecnicosLista) {
-      const selTec = document.getElementById('select-filtro-tecnico');
-      if (!selTec) return;
-      
-      let valorActual = selTec.value || "TODOS";
-      selTec.innerHTML = '<option value="TODOS">Técnico: TODOS</option>';
-
-      tecnicosLista.forEach(t => {
-        let nombreTec = typeof t === 'object' ? (t.nombre || t.email) : t;
-        if (nombreTec) {
-          let opt = document.createElement('option');
-          opt.value = nombreTec;
-          opt.innerText = nombreTec;
-          selTec.appendChild(opt);
+    // CORRECCIÓN NOTIFICACIONES
+    function solicitarPermisoNotificacionesManual() {
+      if ("Notification" in window) {
+        if (Notification.permission === "granted") {
+          alert("Las notificaciones ya se encuentran activadas correctamente.");
+          return;
         }
-      });
-
-      selTec.value = valorActual;
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") alert("Notificaciones activadas con éxito.");
+        });
+      }
     }
 
     function aplicarFiltrosMultiples() {
@@ -798,14 +770,6 @@
         iniciarVistaSegunRol(usuarioActual);
       } else {
         alert("Inicie sesión con usuario y contraseña primero.");
-      }
-    }
-
-    function solicitarPermisoNotificaciones() {
-      if ("Notification" in window) {
-        Notification.requestPermission().then(permission => {
-          if (permission === "granted") alert("Notificaciones activadas.");
-        });
       }
     }
 
@@ -943,11 +907,17 @@
       else if (hora >= 12 && hora < 19) saludo = "¡Buenas tardes!";
 
       const nombreTec = usuarioActual ? usuarioActual.nombre.split(' ')[0] : '';
-      document.getElementById('label-saludo-animado').innerText = `${saludo} ${nombreTec} 👋`;
+      if(document.getElementById('label-saludo-animado')) {
+        document.getElementById('label-saludo-animado').innerText = `${saludo} ${nombreTec} 👋`;
+      }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      solicitarPermisoNotificaciones();
+      // Evita la alerta al entrar, solo solicita si no se ha concedido nunca.
+      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+      }
+
       const perfilGuardado = localStorage.getItem("nps_user_profile");
       if (perfilGuardado) {
         try {
@@ -1017,8 +987,10 @@
           procesarYRenderizarDashboard(JSON.parse(cacheDash));
         }
 
-        cargarDashboard();
-        cargarDirectorioTecnicosAdmin();
+        // Primero se carga el directorio general
+        cargarDirectorioTecnicosAdmin().then(() => {
+          cargarDashboard();
+        });
       }
     }
 
@@ -1033,7 +1005,7 @@
           });
           if (response.ok) return JSON.parse(await response.text());
         } catch (e) {
-          if (i === reintentos) throw e;
+          if (i === reintentos) throw new Error("Falla de red o CORS. Verifique WEB_APP_URL.");
           await new Promise(r => setTimeout(r, 800));
         }
       }
@@ -1068,7 +1040,10 @@
       } catch(e) {
         btnLogin.disabled = false;
         btnLogin.innerText = "Iniciar Sesión";
-        alert("Error de conexión al servidor.");
+        if (alertBox) {
+          alertBox.innerText = "Error: Verifica que WEB_APP_URL sea correcta y los permisos sean 'Cualquiera'.";
+          alertBox.classList.remove('hidden');
+        }
       }
     }
 
@@ -1270,12 +1245,40 @@
       if (!cont) return;
       cont.innerHTML = '';
 
-      if (directorioTecnicos.length === 0) {
-        cont.innerHTML = '<div class="text-secondary text-center small py-3 col-12">Cargando directorio de técnicos...</div>';
+      const deptFiltro = (document.getElementById('select-filtro-dept') ? document.getElementById('select-filtro-dept').value : 'TODOS').toUpperCase();
+      const ciuFiltro = (document.getElementById('select-filtro-ciudad') ? document.getElementById('select-filtro-ciudad').value : 'TODAS').toUpperCase();
+
+      let filtrados = directorioTecnicos.filter(t => {
+        let d = (t.departamento || "").toUpperCase();
+        let c = (t.ciudad || "").toUpperCase();
+        let matchDept = (deptFiltro === "TODOS" || d === deptFiltro);
+        let matchCiu = (ciuFiltro === "TODAS" || c === ciuFiltro);
+        return matchDept && matchCiu;
+      });
+
+      // POBLAR EL SELECTOR DE TÉCNICOS ARRIBA CON ESTA LISTA FILTRADA
+      const selTec = document.getElementById('select-filtro-tecnico');
+      if (selTec) {
+        let valActual = selTec.value;
+        selTec.innerHTML = '<option value="TODOS">Técnico: TODOS</option>';
+        filtrados.forEach(t => {
+          let opt = document.createElement('option');
+          opt.value = t.nombre;
+          opt.innerText = t.nombre;
+          selTec.appendChild(opt);
+        });
+        if (Array.from(selTec.options).some(o => o.value === valActual)) {
+          selTec.value = valActual;
+        }
+      }
+
+      if (filtrados.length === 0) {
+        cont.innerHTML = '<div class="text-secondary text-center small py-3 col-12">No hay técnicos disponibles en esta ciudad.</div>';
         return;
       }
 
-      directorioTecnicos.forEach((t, idx) => {
+      filtrados.forEach((t, idx) => {
+        let originalIdx = directorioTecnicos.findIndex(dt => dt.usuario === t.usuario);
         let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:40px; height:40px; font-size:1.1rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
         if (t.fotoPerfil && t.fotoPerfil.length > 50) {
           let src = t.fotoPerfil.startsWith("data:image") ? t.fotoPerfil : "data:image/jpeg;base64," + t.fotoPerfil;
@@ -1283,7 +1286,7 @@
         }
 
         cont.innerHTML += `
-          <div class="bi-card-dark p-2 d-flex justify-content-between align-items-center mb-2" onclick="verFichaTecnicoSupervisor(${idx})" style="cursor:pointer;">
+          <div class="bi-card-dark p-2 d-flex justify-content-between align-items-center mb-2" onclick="verFichaTecnicoSupervisor(${originalIdx})" style="cursor:pointer;">
             <div class="d-flex align-items-center gap-2">
               ${avatarHtml}
               <div>
@@ -1369,7 +1372,8 @@
 
       todosLosRegistros = res.registros || [];
       
-      poblarSelectorTecnicos(res.tecnicos || []);
+      // Actualizamos los técnicos mostrados según la ciudad seleccionada
+      renderizarDirectorioTecnicosAdminUI();
       aplicarFiltrosMultiples();
     }
 
