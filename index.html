@@ -16,6 +16,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 
+  <!-- LIBRERÍA SUPABASE (Asegurando que el sistema la reconozca) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     :root { 
       --bg-dark: #0b1329; 
@@ -370,9 +373,9 @@
             <span><i class="bi bi-image-fill me-2 text-info"></i>Ver Guía SMS para Clientes</span>
             <i class="bi bi-chevron-right text-secondary"></i>
           </div>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 2.1.0 Pro Ultra Fast')">
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 2.2.0 Pro Ultra Fast')">
             <span><i class="bi bi-info-circle me-2 text-warning"></i>Versión del Sistema</span>
-            <small class="text-secondary">v2.1.0 Ultra</small>
+            <small class="text-secondary">v2.2.0 Ultra</small>
           </div>
           <button class="btn btn-outline-danger w-100 fw-bold mt-3 py-2" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
         </div>
@@ -414,13 +417,12 @@
               <option value="TODOS">Técnico: TODOS</option>
             </select>
 
-            <!-- FILTRO ESTADO -->
+            <!-- FILTRO ESTADO CORREGIDO -->
             <select id="select-filtro-estado" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="aplicarFiltrosMultiples()">
               <option value="TODOS">Estado: TODOS</option>
-              <option value="Gestionado">Gestionado</option>
-              <option value="Pendiente">Pendiente</option>
-              <option value="UU conflictivo">UU conflictivo</option>
-              <option value="No le llego la encuesta">No le llegó encuesta</option>
+              <option value="Gestionado">Gestionados</option>
+              <option value="Pendiente">Pendientes / Sin Gestión</option>
+              <option value="Descartado">Descartados / Conflictivos</option>
             </select>
 
             <!-- FILTRO PERIODO -->
@@ -435,15 +437,16 @@
           </div>
         </div>
 
-        <!-- INDICADORES -->
+        <!-- INDICADORES CORREGIDOS (4 KPIs) -->
         <h6 class="fw-bold text-info border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
           <i class="bi bi-card-checklist me-1"></i> 1. INDICADOR DE GESTIÓN OPERATIVA (VOLUMEN)
         </h6>
         <div class="row g-2 text-center mb-3">
-          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl">TOTAL ASIGNADOS</div><div class="val text-light" id="kpi-total">0</div></div></div>
-          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl text-success">GESTIONADOS</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
-          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
-          <div class="col-12 col-md-3"><div class="kpi-strip border-info"><div class="lbl text-info">% COBERTURA DE GESTIÓN</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
+          <div class="col-6 col-md-3"><div class="kpi-strip"><div class="lbl">ASIGNADOS</div><div class="val text-light" id="kpi-total">0</div></div></div>
+          <div class="col-6 col-md-3"><div class="kpi-strip"><div class="lbl text-success">GESTIONADOS</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
+          <div class="col-6 col-md-3"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
+          <div class="col-6 col-md-3"><div class="kpi-strip border-danger"><div class="lbl text-danger">DESCARTADOS</div><div class="val text-danger" id="kpi-descartados">0</div></div></div>
+          <div class="col-12"><div class="kpi-strip border-info"><div class="lbl text-info">% COBERTURA DE GESTIÓN</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
         </div>
 
         <h6 class="fw-bold text-warning border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
@@ -673,7 +676,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // ==========================================
-    // CRÍTICO: REEMPLAZAR ABAJO POR TU ENLACE ACTUAL DE APPS SCRIPT
+    // CRÍTICO: MANTENER TU ENLACE ACTUAL DE APPS SCRIPT / SUPABASE
     // ==========================================
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
 
@@ -707,7 +710,6 @@
       cargarDashboard(true);
     }
 
-    // CORRECCIÓN NOTIFICACIONES
     function solicitarPermisoNotificacionesManual() {
       if ("Notification" in window) {
         if (Notification.permission === "granted") {
@@ -720,6 +722,7 @@
       }
     }
 
+    // --- FUNCIÓN MEJORADA: FILTROS MÚLTIPLES ---
     function aplicarFiltrosMultiples() {
       let filtroBusqueda = (document.getElementById('input-buscar') ? document.getElementById('input-buscar').value : '').toLowerCase();
       let filtroTecnico = (document.getElementById('select-filtro-tecnico') ? document.getElementById('select-filtro-tecnico').value : 'TODOS');
@@ -734,20 +737,20 @@
 
         let coincideTecnico = true;
         if (filtroTecnico !== "TODOS") {
-          let tecSelected = filtroTecnico.toLowerCase();
-          coincideTecnico = (r.tecnico && r.tecnico.toLowerCase() === tecSelected) || (r.tecnicoEmail && r.tecnicoEmail.toLowerCase() === tecSelected);
+          let tecSelected = filtroTecnico.trim().toUpperCase();
+          let currentTec = (r.tecnico || '').trim().toUpperCase();
+          coincideTecnico = (currentTec === tecSelected);
         }
 
         let coincideEstado = true;
         if (filtroEstado !== "TODOS") {
+          let st = (r.estado || '').trim().toLowerCase();
           if (filtroEstado === "Gestionado") {
-            coincideEstado = (r.estado === "Gestionado");
+            coincideEstado = (st === "gestionado");
           } else if (filtroEstado === "Pendiente") {
-            coincideEstado = (r.estado === "Pendiente" || r.estado === "");
-          } else if (filtroEstado === "UU conflictivo") {
-            coincideEstado = (r.estado === "UU conflictivo" || r.estado === "Conflictivo");
-          } else {
-            coincideEstado = (r.estado === filtroEstado);
+            coincideEstado = (st === "pendiente" || st === "sin gestion" || st === "");
+          } else if (filtroEstado === "Descartado") {
+            coincideEstado = (st !== "gestionado" && st !== "pendiente" && st !== "sin gestion" && st !== "");
           }
         }
 
@@ -925,7 +928,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      // Evita la alerta al entrar, solo solicita si no se ha concedido nunca.
       if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
         Notification.requestPermission();
       }
@@ -999,7 +1001,6 @@
           procesarYRenderizarDashboard(JSON.parse(cacheDash));
         }
 
-        // Primero se carga el directorio general
         cargarDirectorioTecnicosAdmin().then(() => {
           cargarDashboard();
         });
@@ -1218,8 +1219,9 @@
       }
 
       historicoTecnicoActual.forEach((r, index) => {
-        let isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
-        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
+        let st = (r.estado || '').trim().toLowerCase();
+        let isConflict = st !== 'gestionado' && st !== 'pendiente' && st !== 'sin gestion' && st !== '';
+        let badgeStyle = st === 'gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
         
         let otClave = obtenerClaveLimpiaOT(r.numeroOT, r.codigoCliente);
         let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
@@ -1268,7 +1270,6 @@
         return matchDept && matchCiu;
       });
 
-      // POBLAR EL SELECTOR DE TÉCNICOS ARRIBA CON ESTA LISTA FILTRADA
       const selTec = document.getElementById('select-filtro-tecnico');
       if (selTec) {
         let valActual = selTec.value;
@@ -1355,20 +1356,51 @@
       } catch(e) {}
     }
 
+    // --- FUNCIÓN MEJORADA: PROCESAR DASHBOARD ROBUSTO ---
     function procesarYRenderizarDashboard(res) {
-      if (!res || !res.kpis) return;
+      if (!res) return;
+      todosLosRegistros = res.registros || [];
 
-      const tot = res.kpis.gestionados + res.kpis.pendientes + res.kpis.conflictivos;
-      document.getElementById('kpi-total').innerText = tot;
-      document.getElementById('kpi-gestionados').innerText = res.kpis.gestionados;
-      document.getElementById('kpi-pendientes').innerText = res.kpis.pendientes;
+      // 1. CÁLCULO ROBUSTO: Limpiamos espacios y agrupamos los 6 estados
+      let cTotal = todosLosRegistros.length;
+      let cGestionados = 0;
+      let cPendientes = 0;
+      let cDescartados = 0;
+      let mapTecnicos = {};
+
+      todosLosRegistros.forEach(r => {
+        // Limpiamos la basura del Excel (espacios extra, minúsculas/mayúsculas)
+        let st = (r.estado || '').trim().toLowerCase();
+        
+        if (st === 'gestionado') {
+          cGestionados++;
+        } else if (st === 'pendiente' || st === 'sin gestion' || st === '') {
+          cPendientes++;
+        } else {
+          // Todo lo demás (conflictivo, numero equivocado, etc)
+          cDescartados++;
+        }
+
+        // 2. Gráfico de Técnicos infalible
+        let nombreTec = (r.tecnico || 'Sin Asignar').trim().toUpperCase();
+        if(!mapTecnicos[nombreTec]) mapTecnicos[nombreTec] = { total: 0, gestionados: 0 };
+        mapTecnicos[nombreTec].total++;
+        if (st === 'gestionado') mapTecnicos[nombreTec].gestionados++;
+      });
+
+      // Actualizar los números visuales
+      document.getElementById('kpi-total').innerText = cTotal;
+      document.getElementById('kpi-gestionados').innerText = cGestionados;
+      document.getElementById('kpi-pendientes').innerText = cPendientes;
+      document.getElementById('kpi-descartados').innerText = cDescartados;
       
-      const pctCobertura = tot > 0 ? Math.round((res.kpis.gestionados / tot) * 100) : 0;
+      const pctCobertura = cTotal > 0 ? Math.round((cGestionados / cTotal) * 100) : 0;
       document.getElementById('kpi-pct-prom').innerText = pctCobertura + "%";
 
-      const promotores = res.kpis.promotores || 0;
-      const pasivos = res.kpis.pasivos || 0;
-      const detractores = res.kpis.detractores || 0;
+      // NPS (Se mantienen los cálculos)
+      const promotores = (res.kpis && res.kpis.promotores) ? res.kpis.promotores : 0;
+      const pasivos = (res.kpis && res.kpis.pasivos) ? res.kpis.pasivos : 0;
+      const detractores = (res.kpis && res.kpis.detractores) ? res.kpis.detractores : 0;
       const totalEncuestas = promotores + pasivos + detractores;
 
       document.getElementById('kpi-nps-promotores').innerText = promotores;
@@ -1380,11 +1412,16 @@
       document.getElementById('gauge-score-val').innerText = (scoreNpsNeto > 0 ? '+' : '') + scoreNpsNeto + "%";
 
       renderizarGraficoGauge(scoreNpsNeto);
-      renderizarGraficoBarras(res.tecnicos || []);
 
-      todosLosRegistros = res.registros || [];
+      // 3. Imprimir el gráfico de barras corregido
+      let arrayTecnicos = Object.keys(mapTecnicos).map(nombre => {
+        return {
+          nombre: nombre,
+          pctAvance: mapTecnicos[nombre].total > 0 ? Math.round((mapTecnicos[nombre].gestionados / mapTecnicos[nombre].total) * 100) : 0
+        };
+      }).sort((a,b) => b.pctAvance - a.pctAvance);
       
-      // Actualizamos los técnicos mostrados según la ciudad seleccionada
+      renderizarGraficoBarras(arrayTecnicos);
       renderizarDirectorioTecnicosAdminUI();
       aplicarFiltrosMultiples();
     }
@@ -1454,8 +1491,9 @@
       }
 
       lista.forEach(r => {
-        const isConflict = r.estado === 'UU conflictivo' || r.estado === 'Conflictivo';
-        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+        let st = (r.estado || '').trim().toLowerCase();
+        const isConflict = st !== 'gestionado' && st !== 'pendiente' && st !== 'sin gestion' && st !== '';
+        let badgeStyle = st === 'gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
         let otClave = obtenerClaveLimpiaOT(r.numeroOT, r.codigoCliente);
         let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
         let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
@@ -1660,9 +1698,8 @@
       localStorage.removeItem("nps_user_profile");
       location.reload();
     }
-  </script>
-</body>
-  // --- FUNCIÓN DE CARGA MASIVA PARA ADMINISTRADORES/SUPERVISORES ---
+
+    // --- FUNCIÓN DE CARGA MASIVA PARA ADMINISTRADORES/SUPERVISORES ---
     async function subirAsignacionesCSV() {
       const fileInput = document.getElementById('input-csv-cargas');
       const statusLbl = document.getElementById('status-carga-csv');
@@ -1684,16 +1721,12 @@
         
         if (lineas.length < 2) throw new Error("El archivo está vacío o no tiene registros.");
 
-        // Detectar si el Excel separó por comas o por punto y coma
         const separador = lineas[0].includes(';') ? ';' : ',';
-        
-        // Limpiar los títulos (minúsculas y sin espacios extra)
         const headers = lineas[0].split(separador).map(h => h.trim().toLowerCase().replace(/["']/g, ''));
         
         const registrosInsertar = [];
         const hoy = new Date().toISOString().split('T')[0];
 
-        // Recorrer todas las filas de datos
         for (let i = 1; i < lineas.length; i++) {
           const valores = lineas[i].split(separador).map(v => v.trim().replace(/["']/g, ''));
           let obj = {};
@@ -1704,29 +1737,25 @@
             }
           });
 
-          // Validar que la fila tenga al menos al técnico y el código del cliente
           if (obj.codigo_cliente && obj.tecnico_asignado) {
-            obj.estado = obj.estado || 'Pendiente'; // Si no tiene estado, entra como Pendiente
+            obj.estado = obj.estado || 'Pendiente';
             obj.fecha_asignacion = obj.fecha_asignacion || hoy;
             registrosInsertar.push(obj);
           }
         }
 
         if (registrosInsertar.length === 0) {
-          throw new Error("No se encontraron registros válidos. Verifica que los títulos de tus columnas sean correctos.");
+          throw new Error("No se encontraron registros válidos. Verifica los títulos de columnas.");
         }
 
-        // Enviar a Supabase en bloque
         const { error } = await supabase.from('gestiones').insert(registrosInsertar);
 
         if (error) throw error;
 
-        // Éxito
         statusLbl.className = "text-success mt-2 d-block fw-bold small";
-        statusLbl.innerText = `¡Éxito! Se asignaron ${registrosInsertar.length} nuevas órdenes a los técnicos.`;
-        fileInput.value = ''; // Limpiar el seleccionador
+        statusLbl.innerText = `¡Éxito! Se asignaron ${registrosInsertar.length} nuevas órdenes.`;
+        fileInput.value = '';
         
-        // Refrescar los gráficos del administrador
         cargarDashboard(true);
 
       } catch (err) {
@@ -1735,8 +1764,9 @@
         statusLbl.innerText = "⚠ Error: " + err.message;
       }
 
-      // Restaurar el botón
       btn.disabled = false;
       btn.innerHTML = '<i class="bi bi-upload me-1"></i> Subir a Base de Datos';
     }
+  </script>
+</body>
 </html>
