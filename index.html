@@ -15,8 +15,7 @@
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
-
-  <!-- LIBRERÍA SUPABASE (Asegurando que el sistema la reconozca) -->
+  <!-- SDK DE SUPABASE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -182,10 +181,6 @@
     .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
     .badge-expired { background: rgba(100, 116, 139, 0.15); color: #cbd5e1; border: 1px solid rgba(100, 116, 139, 0.3); }
 
-    .detail-row { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0; }
-    .detail-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; }
-    .detail-val { font-size: 0.9rem; color: #f8fafc; font-weight: 600; }
-
     .input-group-text { background: #0b1329; border-color: var(--card-border); color: var(--text-muted); }
     .form-control, .form-select { background-color: #0b1329 !important; border-color: var(--card-border) !important; color: #ffffff !important; border-radius: 10px; }
     .form-control:focus, .form-select:focus { border-color: var(--accent-blue) !important; box-shadow: none !important; }
@@ -331,10 +326,6 @@
             <div id="perfil-avatar-box">
               <div class="avatar-placeholder mx-auto" id="perfil-avatar">T</div>
             </div>
-            <label for="input-foto-perfil" class="avatar-edit-btn" title="Cambiar foto de perfil">
-              <i class="bi bi-camera-fill"></i>
-            </label>
-            <input type="file" id="input-foto-perfil" class="hidden" accept="image/*" onchange="actualizarFotoPerfil(this)">
           </div>
 
           <h5 class="fw-bold text-white mb-0" id="perfil-nombre">Nombre Técnico</h5>
@@ -373,9 +364,9 @@
             <span><i class="bi bi-image-fill me-2 text-info"></i>Ver Guía SMS para Clientes</span>
             <i class="bi bi-chevron-right text-secondary"></i>
           </div>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 2.2.0 Pro Ultra Fast')">
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 3.0.0 Supabase Integrada')">
             <span><i class="bi bi-info-circle me-2 text-warning"></i>Versión del Sistema</span>
-            <small class="text-secondary">v2.2.0 Ultra</small>
+            <small class="text-secondary">v3.0.0</small>
           </div>
           <button class="btn btn-outline-danger w-100 fw-bold mt-3 py-2" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
         </div>
@@ -394,9 +385,7 @@
             </div>
           </div>
           
-          <!-- BARRA COMPLETA DE FILTROS EN HEADER ADMIN -->
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <!-- FILTRO DEPARTAMENTO -->
             <select id="select-filtro-dept" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="alCambiarDepartamentoFiltro()">
               <option value="TODOS">Dep: TODOS</option>
               <option value="TARIJA">Tarija</option>
@@ -406,38 +395,30 @@
               <option value="SUCRE">Sucre</option>
               <option value="LA PAZ">La Paz</option>
             </select>
-
-            <!-- FILTRO CIUDAD -->
             <select id="select-filtro-ciudad" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
               <option value="TODAS">Ciudad: TODAS</option>
             </select>
-
-            <!-- FILTRO TÉCNICO -->
             <select id="select-filtro-tecnico" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="aplicarFiltrosMultiples()">
               <option value="TODOS">Técnico: TODOS</option>
             </select>
-
-            <!-- FILTRO ESTADO CORREGIDO -->
+            <!-- FILTRO ESTADO CORREGIDO CON 4 OPCIONES -->
             <select id="select-filtro-estado" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="aplicarFiltrosMultiples()">
               <option value="TODOS">Estado: TODOS</option>
               <option value="Gestionado">Gestionados</option>
               <option value="Pendiente">Pendientes / Sin Gestión</option>
               <option value="Descartado">Descartados / Conflictivos</option>
             </select>
-
-            <!-- FILTRO PERIODO -->
             <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
               <option value="dia">Hoy / 24h</option>
               <option value="semana">Últimos 7 días</option>
               <option value="mes" selected>Últimos 30 días</option>
             </select>
-
             <button onclick="cargarDashboard(true)" class="btn btn-outline-info btn-sm" title="Refrescar datos de la nube"><i class="bi bi-arrow-clockwise"></i></button>
             <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
           </div>
         </div>
 
-        <!-- INDICADORES CORREGIDOS (4 KPIs) -->
+        <!-- INDICADORES CON 4 CUADROS (INCLUYE DESCARTADOS) -->
         <h6 class="fw-bold text-info border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
           <i class="bi bi-card-checklist me-1"></i> 1. INDICADOR DE GESTIÓN OPERATIVA (VOLUMEN)
         </h6>
@@ -447,16 +428,6 @@
           <div class="col-6 col-md-3"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
           <div class="col-6 col-md-3"><div class="kpi-strip border-danger"><div class="lbl text-danger">DESCARTADOS</div><div class="val text-danger" id="kpi-descartados">0</div></div></div>
           <div class="col-12"><div class="kpi-strip border-info"><div class="lbl text-info">% COBERTURA DE GESTIÓN</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
-        </div>
-
-        <h6 class="fw-bold text-warning border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
-          <i class="bi bi-star-fill me-1"></i> 2. INDICADOR DE SATISFACCIÓN NPS (CALIFICACIÓN)
-        </h6>
-        <div class="row g-2 text-center">
-          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl text-success">PROMOTORES (9-10)</div><div class="val text-success" id="kpi-nps-promotores">0</div></div></div>
-          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl text-warning">PASIVOS (7-8)</div><div class="val text-warning" id="kpi-nps-pasivos">0</div></div></div>
-          <div class="col-4 col-md-3"><div class="kpi-strip"><div class="lbl text-danger">DETRACTORES (0-6)</div><div class="val text-danger" id="kpi-nps-detractores">0</div></div></div>
-          <div class="col-12 col-md-3"><div class="kpi-strip border-warning"><div class="lbl text-warning">NET PROMOTER SCORE (NPS)</div><div class="val text-warning" id="kpi-nps-neto">0%</div></div></div>
         </div>
       </div>
 
@@ -479,7 +450,6 @@
               </div>
             </div>
           </div>
-
           <div class="col-12 col-md-7">
             <div class="bi-card-dark h-100">
               <div class="d-flex justify-content-between align-items-center mb-2">
@@ -491,7 +461,6 @@
             </div>
           </div>
         </div>
-
         <div class="bi-card-dark mb-3">
           <h6 class="fw-bold text-info small mb-3"><i class="bi bi-people-fill me-2"></i>DIRECTORIO OFICIAL DE TÉCNICOS EN CAMPO</h6>
           <div id="lista-directorio-tecnicos" class="grid-dashboard"></div>
@@ -499,7 +468,7 @@
       </div>
 
       <div id="sec-general" class="hidden">
-        <!-- MÓDULO DE CARGA MASIVA DE ASIGNACIONES -->
+        <!-- MÓDULO DE CARGA MASIVA DE ÓRDENES (CSV) -->
         <div class="bi-card-dark mb-3 p-3 border-info border-opacity-50">
           <h6 class="fw-bold text-info small mb-3"><i class="bi bi-cloud-arrow-up-fill me-2"></i>CARGA MASIVA DE ÓRDENES (CSV)</h6>
           <div class="d-flex gap-2 align-items-center flex-wrap">
@@ -510,7 +479,7 @@
           </div>
           <small class="text-secondary mt-2 d-block" id="status-carga-csv">Sube un archivo CSV con los encabezados en minúsculas (ej. codigo_cliente, tecnico_asignado, numero_ot, departamento, ciudad).</small>
         </div>
-        <!-- FIN MÓDULO DE CARGA -->
+        
         <div class="bi-card-dark mb-3 p-3">
           <div class="row g-2">
             <div class="col-12 col-md-6">
@@ -543,68 +512,6 @@
       <i class="bi bi-person-circle"></i>
       <span>Perfil</span>
     </button>
-  </div>
-
-  <!-- MODAL FICHA TÉCNICA -->
-  <div class="modal fade" id="modalFichaTecnico" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary">
-          <h6 class="modal-title fw-bold"><i class="bi bi-person-bounding-box text-info me-2"></i>Ficha Oficial del Técnico</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body text-center p-3">
-          <div id="ftec-avatar-box" class="mb-2"></div>
-          <h5 class="fw-bold text-white mb-0" id="ftec-nombre">Técnico</h5>
-          <small class="text-info fw-semibold d-block mb-3" id="ftec-region">Datared • Bolivia</small>
-
-          <div class="p-3 bg-dark rounded border border-secondary text-start mb-3 space-y-2" style="font-size:0.85rem;">
-            <div><span class="text-secondary">Teléfono:</span> <strong class="text-warning" id="ftec-telefono">No registrado</strong></div>
-            <div><span class="text-secondary">Cédula Identidad (CI):</span> <strong class="text-light" id="ftec-ci">No registrado</strong></div>
-            <div><span class="text-secondary">Placa Vehículo/Moto:</span> <strong class="text-info" id="ftec-placa">No registrado</strong></div>
-          </div>
-
-          <div class="d-flex gap-2">
-            <a id="btn-ftec-llamar" href="#" class="btn btn-sm btn-outline-warning fw-bold flex-fill py-2"><i class="bi bi-telephone-fill me-1"></i> Llamar</a>
-            <a id="btn-ftec-ws" href="#" target="_blank" class="btn btn-sm btn-success fw-bold flex-fill py-2"><i class="bi bi-whatsapp me-1"></i> WhatsApp</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL GUÍA SMS -->
-  <div class="modal fade" id="modalGuiaSms" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary">
-          <h6 class="modal-title fw-bold"><i class="bi bi-phone-vibrate text-info me-2"></i>Guía SMS Gráfica para Cliente</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-3">
-          <div class="guia-card-container mb-3 p-3 rounded border border-info">
-            <div class="text-center mb-2 pb-2 border-bottom border-secondary">
-              <span class="badge bg-primary px-3 py-1">TIGO BOLIVIA</span>
-              <h6 class="fw-bold text-info m-0 mt-2" style="font-size: 0.9rem;">GUÍA PARA INGRESAR Y LLENAR LA ENCUESTA</h6>
-            </div>
-            <div class="p-2 bg-dark rounded border border-secondary text-start mb-3">
-              <small class="text-secondary d-block fw-bold mb-1" style="font-size: 0.65rem;">MENSAJE DE TEXTO (SMS) OFICIAL:</small>
-              <div class="text-light fw-bold" style="font-size: 0.8rem;">
-                "Para Tigo tu opinión es muy importante, ayúdanos contestando la siguiente encuesta: <span class="text-info text-decoration-underline">https://b.tigo.com/...</span>"
-              </div>
-            </div>
-            <div class="text-start small text-light space-y-1 mb-2" style="font-size: 0.78rem;">
-              <div class="mb-1"><b>1.</b> Ingrese a sus <b>Mensajes de Texto (SMS)</b>.</div>
-              <div class="mb-1"><b>2.</b> Abra la conversación remitida por <b>TIGO</b> o <b>2820</b>.</div>
-              <div class="mb-1"><b>3.</b> Presione el enlace, marque "No soy un robot" y califique con un <b>10</b>.</div>
-            </div>
-          </div>
-          <button type="button" class="btn btn-sm btn-success fw-bold w-100 py-2" onclick="compartirGuiaWhatsAppDirecto()">
-            <i class="bi bi-whatsapp me-1"></i> Compartir Guía por WhatsApp
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- MODAL GESTIÓN CON FOTO -->
@@ -646,12 +553,11 @@
               </label>
               <label class="btn btn-outline-warning btn-sm flex-fill fw-bold mb-0 py-2" style="font-size: 0.78rem; cursor: pointer;">
                 <i class="bi bi-image-fill me-1"></i> Galería
-                <input type="file" id="modal-foto-galeria" class="hidden" accept="image/*" onchange="procesarFotoSeleccionada(this)">
+                <input type="file" id="modal-foto-galeria" class="hidden" accept="image/*" capture="environment" onchange="procesarFotoSeleccionada(this)">
               </label>
             </div>
             <div id="label-archivo-elegido" class="text-danger small fw-bold text-center">⚠ Falta adjuntar foto de respaldo</div>
           </div>
-
         </div>
         <div class="modal-footer border-secondary">
           <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -676,9 +582,11 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // ==========================================
-    // CRÍTICO: MANTENER TU ENLACE ACTUAL DE APPS SCRIPT / SUPABASE
+    // CREDENCIALES DE SUPABASE
     // ==========================================
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeTa4Ay6T330CKz0nFCj5IRHwz4iXnTRpOv7L4pPMf5_0DraAcpeZKRVQiJWZhb8X8bQ/exec"; 
+    const supabaseUrl = 'https://lrvitaprtpppqcwhbjba.supabase.co'; 
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxydml0YXBydHBwcHFjd2hiamJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4NTQ2MzQsImV4cCI6MjEwNTQzMDYzNH0.pkw8hR7BwkZa65h3phhVqDG_3-qTdPhZnn5PqPgJHEA'; 
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     let usuarioActual = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
@@ -710,19 +618,119 @@
       cargarDashboard(true);
     }
 
-    function solicitarPermisoNotificacionesManual() {
-      if ("Notification" in window) {
-        if (Notification.permission === "granted") {
-          alert("Las notificaciones ya se encuentran activadas correctamente.");
-          return;
+    // --- LOGIN CON SUPABASE ---
+    async function ejecutarLogin() {
+      const u = document.getElementById('input-user').value.trim().toLowerCase();
+      const p = document.getElementById('input-pass').value.trim();
+      const alertBox = document.getElementById('login-alert');
+      const btnLogin = document.getElementById('btn-login-submit');
+
+      if (!u || !p) return alert("Ingrese usuario y contraseña");
+
+      btnLogin.disabled = true;
+      btnLogin.innerText = "Verificando...";
+
+      try {
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('*')
+          .eq('usuario', u)
+          .eq('password', p)
+          .single();
+
+        btnLogin.disabled = false;
+        btnLogin.innerText = "Iniciar Sesión";
+
+        if (data && !error) {
+          data.esTecnico = data.rol && data.rol.toLowerCase().includes('tec');
+          usuarioActual = data;
+          localStorage.setItem("nps_user_profile", JSON.stringify(data));
+          iniciarVistaSegunRol(data);
+        } else {
+          if (alertBox) {
+            alertBox.innerText = "Credenciales incorrectas o usuario no encontrado";
+            alertBox.classList.remove('hidden');
+          }
         }
-        Notification.requestPermission().then(permission => {
-          if (permission === "granted") alert("Notificaciones activadas con éxito.");
-        });
+      } catch(e) {
+        btnLogin.disabled = false;
+        btnLogin.innerText = "Iniciar Sesión";
+        if (alertBox) {
+          alertBox.innerText = "Error de conexión con la base de datos.";
+          alertBox.classList.remove('hidden');
+        }
       }
     }
 
-    // --- FUNCIÓN MEJORADA: FILTROS MÚLTIPLES ---
+    // --- CARGAR DASHBOARD ADMIN ROBUSTO (CON 6 ESTADOS) ---
+    async function cargarDashboard(forzarNube = false) {
+      const dept = document.getElementById('select-filtro-dept') ? document.getElementById('select-filtro-dept').value : 'TODOS';
+      const ciu = document.getElementById('select-filtro-ciudad') ? document.getElementById('select-filtro-ciudad').value : 'TODAS';
+
+      try {
+        let query = supabase.from('gestiones').select('*');
+        
+        if (dept !== 'TODOS') {
+          query = query.eq('departamento', dept);
+        }
+        if (ciu !== 'TODAS') {
+          query = query.eq('ciudad', ciu);
+        }
+
+        const { data, error } = await query;
+        if (data && !error) {
+           todosLosRegistros = data;
+           procesarYRenderizarDashboard(data);
+        }
+      } catch(e) { console.error(e); }
+    }
+
+    function procesarYRenderizarDashboard(registrosDb) {
+      let cTotal = registrosDb.length;
+      let cGestionados = 0;
+      let cPendientes = 0;
+      let cDescartados = 0;
+      let mapTecnicos = {};
+
+      registrosDb.forEach(item => {
+        let st = (item.estado || '').trim().toLowerCase();
+        
+        if (st === 'gestionado') {
+          cGestionados++;
+        } else if (st === 'pendiente' || st === 'sin gestion' || st === '') {
+          cPendientes++;
+        } else {
+          cDescartados++;
+        }
+
+        let nombreTec = (item.tecnico_asignado || 'Sin Asignar').trim().toUpperCase();
+        if(!mapTecnicos[nombreTec]) mapTecnicos[nombreTec] = { total: 0, gestionados: 0 };
+        mapTecnicos[nombreTec].total++;
+        if (st === 'gestionado') mapTecnicos[nombreTec].gestionados++;
+      });
+
+      document.getElementById('kpi-total').innerText = cTotal;
+      document.getElementById('kpi-gestionados').innerText = cGestionados;
+      document.getElementById('kpi-pendientes').innerText = cPendientes;
+      document.getElementById('kpi-descartados').innerText = cDescartados;
+      
+      const pctCobertura = cTotal > 0 ? Math.round((cGestionados / cTotal) * 100) : 0;
+      document.getElementById('kpi-pct-prom').innerText = pctCobertura + "%";
+
+      // Gráfico de barras de técnicos
+      let arrayTecnicos = Object.keys(mapTecnicos).map(nombre => {
+        return {
+          nombre: nombre,
+          pctAvance: mapTecnicos[nombre].total > 0 ? Math.round((mapTecnicos[nombre].gestionados / mapTecnicos[nombre].total) * 100) : 0
+        };
+      }).sort((a,b) => b.pctAvance - a.pctAvance);
+      
+      renderizarGraficoBarras(arrayTecnicos);
+      renderizarDirectorioTecnicosAdminUI();
+      aplicarFiltrosMultiples();
+    }
+
+    // --- FILTROS MÚLTIPLES ---
     function aplicarFiltrosMultiples() {
       let filtroBusqueda = (document.getElementById('input-buscar') ? document.getElementById('input-buscar').value : '').toLowerCase();
       let filtroTecnico = (document.getElementById('select-filtro-tecnico') ? document.getElementById('select-filtro-tecnico').value : 'TODOS');
@@ -731,14 +739,14 @@
       let resultado = todosLosRegistros.filter(r => {
         let coincideBusqueda = true;
         if (filtroBusqueda) {
-          let textoCompleto = (r.nombreUsuario + ' ' + r.numeroOT + ' ' + r.codigoCliente + ' ' + r.tecnico).toLowerCase();
+          let textoCompleto = ((r.nombre_usuario || '') + ' ' + (r.numero_ot || '') + ' ' + (r.codigo_cliente || '') + ' ' + (r.tecnico_asignado || '')).toLowerCase();
           coincideBusqueda = textoCompleto.indexOf(filtroBusqueda) !== -1;
         }
 
         let coincideTecnico = true;
         if (filtroTecnico !== "TODOS") {
           let tecSelected = filtroTecnico.trim().toUpperCase();
-          let currentTec = (r.tecnico || '').trim().toUpperCase();
+          let currentTec = (r.tecnico_asignado || '').trim().toUpperCase();
           coincideTecnico = (currentTec === tecSelected);
         }
 
@@ -760,497 +768,98 @@
       renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
     }
 
-    function obtenerClaveLimpiaOT(otTexto, codCliente) {
-      if (!otTexto) return codCliente || '';
-      let partes = otTexto.toString().split('_');
-      return partes[partes.length - 1] || codCliente || '';
-    }
-
-    function togglePasswordVisibility() {
-      const inputPass = document.getElementById('input-pass');
-      const eyeIcon = document.getElementById('eye-icon');
-      if (inputPass.type === 'password') {
-        inputPass.type = 'text';
-        eyeIcon.className = 'bi bi-eye-slash';
-      } else {
-        inputPass.type = 'password';
-        eyeIcon.className = 'bi bi-eye';
-      }
-    }
-
-    async function autenticarConHuella() {
-      const perfilGuardado = localStorage.getItem("nps_user_profile");
-      if (perfilGuardado) {
-        usuarioActual = JSON.parse(perfilGuardado);
-        iniciarVistaSegunRol(usuarioActual);
-      } else {
-        alert("Inicie sesión con usuario y contraseña primero.");
-      }
-    }
-
-    function cambiarPestana(pestana) {
-      document.getElementById('tab-tecnicos-btn').classList.remove('active');
-      document.getElementById('tab-general-btn').classList.remove('active');
-
-      if (pestana === 'tecnicos') {
-        document.getElementById('tab-tecnicos-btn').classList.add('active');
-        document.getElementById('sec-tecnicos').classList.remove('hidden');
-        document.getElementById('sec-general').classList.add('hidden');
-      } else {
-        document.getElementById('tab-general-btn').classList.add('active');
-        document.getElementById('sec-tecnicos').classList.add('hidden');
-        document.getElementById('sec-general').classList.remove('hidden');
-      }
-    }
-
-    function navegarBottom(seccion) {
-      document.querySelectorAll('.nav-item-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('bnav-' + seccion).classList.add('active');
-
-      const ids = ['sec-tec-inicio', 'sec-tec-pendientes', 'sec-tec-historico', 'sec-tec-perfil'];
-      ids.forEach(id => document.getElementById(id).classList.add('hidden'));
-
-      const secEl = document.getElementById('sec-tec-' + seccion);
-      if (secEl) {
-        secEl.classList.remove('hidden');
-        secEl.classList.add('fade-in-view');
+    function renderizarTarjetasAdmin(lista, idContenedor) {
+      const contenedor = document.getElementById(idContenedor);
+      contenedor.innerHTML = '';
+      if (lista.length === 0) {
+        contenedor.innerHTML = '<div class="text-secondary text-center small py-4 col-12">No hay órdenes registradas.</div>';
+        return;
       }
 
-      if (seccion === 'inicio' || seccion === 'pendientes') {
-        renderizarPendientesTecnicoUI();
-        cargarPendientesTecnico();
-      } else if (seccion === 'historico') {
-        renderizarHistoricoTecnicoUI();
-        cargarHistoricoTecnico();
-      }
+      lista.forEach(r => {
+        let st = (r.estado || '').trim().toLowerCase();
+        const isConflict = st !== 'gestionado' && st !== 'pendiente' && st !== 'sin gestion' && st !== '';
+        let badgeStyle = st === 'gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+        let tieneEvidencia = r.evidencia_url && r.evidencia_url.length > 10;
+
+        contenedor.innerHTML += `
+          <div class="order-card fade-in-view ${isConflict ? 'conflictive' : ''}">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge-subtle ${badgeStyle}">${r.estado || 'Pendiente'}</span>
+                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numero_ot || 'S/N'}</small>
+              </div>
+              <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombre_usuario || 'Cliente'}</div>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
+              <span class="text-secondary fw-bold" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico_asignado || 'Sin Asignar'}</span>
+              ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia_url}')">Ver Foto</button>` : ''}
+            </div>
+          </div>`;
+      });
     }
 
-    function abrirModalBS(elementId) {
-      const modalEl = document.getElementById(elementId);
-      if (modalEl) {
-        let instance = bootstrap.Modal.getInstance(modalEl);
-        if (!instance) instance = new bootstrap.Modal(modalEl);
-        instance.show();
-      }
-    }
-
-    function ocultarModalBS(elementId) {
-      const modalEl = document.getElementById(elementId);
-      if (modalEl) {
-        let instance = bootstrap.Modal.getInstance(modalEl);
-        if (instance) instance.hide();
-      }
-    }
-
-    function abrirModalGuiaImagen() { abrirModalBS('modalGuiaSms'); }
-
-    function compartirGuiaWhatsAppDirecto() {
-      let txtGuia = "📱 *GUÍA RÁPIDA DE ENCUESTA TIGO*\n\n1. Ingrese a sus Mensajes de Texto (SMS).\n2. Busque el mensaje enviado por TIGO o el número 2820.\n3. Abra el enlace oficial y califique la atención del técnico con un 10. ¡Muchas gracias!";
-      if (navigator.share) {
-        navigator.share({ title: 'Guía Encuesta Tigo', text: txtGuia }).catch(() => {});
-      } else {
-        window.open(`https://wa.me/?text=${encodeURIComponent(txtGuia)}`, '_blank');
-      }
-    }
-
-    function cargarAvatarYDatosTecnico() {
-      if (!usuarioActual) return;
-      const fotoGuardada = localStorage.getItem(`foto_avatar_${usuarioActual.usuario}`);
-      const primerLetra = (usuarioActual.nombre || 'T').charAt(0).toUpperCase();
-
-      if (fotoGuardada) {
-        document.getElementById('header-avatar-box').innerHTML = `<img src="${fotoGuardada}" class="rounded-circle border border-info" style="width:44px; height:44px; object-fit:cover;">`;
-        document.getElementById('perfil-avatar-box').innerHTML = `<img src="${fotoGuardada}" class="avatar-img">`;
-      } else {
-        document.getElementById('header-avatar-box').innerHTML = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.2rem;">${primerLetra}</div>`;
-        document.getElementById('perfil-avatar-box').innerHTML = `<div class="avatar-placeholder mx-auto">${primerLetra}</div>`;
-      }
-
-      document.getElementById('input-tec-telefono').value = localStorage.getItem(`tec_tel_${usuarioActual.usuario}`) || '';
-      document.getElementById('input-tec-ci').value = localStorage.getItem(`tec_ci_${usuarioActual.usuario}`) || '';
-      document.getElementById('input-tec-placa').value = localStorage.getItem(`tec_placa_${usuarioActual.usuario}`) || '';
-    }
-
-    function actualizarFotoPerfil(input) {
-      if (input.files && input.files[0]) {
-        convertirYComprimirFoto(input.files[0]).then(b64 => {
-          localStorage.setItem(`foto_avatar_${usuarioActual.usuario}`, b64);
-          cargarAvatarYDatosTecnico();
-          alert("¡Foto cargada! Presione 'Guardar y Sincronizar en la Nube'.");
-        }).catch(() => alert("Error al procesar la foto."));
-      }
-    }
-
-    async function guardarDatosTecnico() {
-      const tel = document.getElementById('input-tec-telefono').value;
-      const ci = document.getElementById('input-tec-ci').value;
-      const placa = document.getElementById('input-tec-placa').value;
-      const b64Foto = localStorage.getItem(`foto_avatar_${usuarioActual.usuario}`) || "";
-
-      localStorage.setItem(`tec_tel_${usuarioActual.usuario}`, tel);
-      localStorage.setItem(`tec_ci_${usuarioActual.usuario}`, ci);
-      localStorage.setItem(`tec_placa_${usuarioActual.usuario}`, placa);
-
-      const btnG = document.getElementById('btn-guardar-perfil');
-      btnG.disabled = true;
-      btnG.innerText = "⏳ Sincronizando...";
-
-      try {
-        const res = await apiCall("guardarPerfilTecnicoServidor", {
-          payload: { usuario: usuarioActual.usuario, telefono: tel, ci: ci, placa: placa, fotoBase64: b64Foto }
-        });
-        btnG.disabled = false;
-        btnG.innerText = "Guardar y Sincronizar en la Nube";
-
-        if (res && res.exito) alert("¡Perfil sincronizado en la nube!");
-        else alert("Guardado localmente.");
-      } catch(e) {
-        btnG.disabled = false;
-        btnG.innerText = "Guardar y Sincronizar en la Nube";
-        alert("Guardado localmente en el dispositivo.");
-      }
-    }
-
-    function actualizarSaludoHora() {
-      const now = new Date();
-      const hora = now.getHours();
-      const mins = now.getMinutes().toString().padStart(2, '0');
-      document.getElementById('label-reloj-hora').innerText = `${hora}:${mins}`;
-
-      let saludo = "¡Buenas noches!";
-      if (hora >= 5 && hora < 12) saludo = "¡Buenos días!";
-      else if (hora >= 12 && hora < 19) saludo = "¡Buenas tardes!";
-
-      const nombreTec = usuarioActual ? usuarioActual.nombre.split(' ')[0] : '';
-      if(document.getElementById('label-saludo-animado')) {
-        document.getElementById('label-saludo-animado').innerText = `${saludo} ${nombreTec} 👋`;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-        Notification.requestPermission();
-      }
-
-      const perfilGuardado = localStorage.getItem("nps_user_profile");
-      if (perfilGuardado) {
-        try {
-          usuarioActual = JSON.parse(perfilGuardado);
-          iniciarVistaSegunRol(usuarioActual);
-        } catch(e) { cerrarSesion(); }
-      }
-      setInterval(actualizarSaludoHora, 30000);
-    });
-
-    function iniciarVistaSegunRol(res) {
-      document.getElementById('view-login').classList.add('hidden');
-      const esRolTecnico = res.esTecnico || (res.rol && res.rol.toLowerCase().includes('tec'));
-
-      if (esRolTecnico) {
-        document.getElementById('view-tecnico').classList.remove('hidden');
-        document.getElementById('view-admin').classList.add('hidden');
-        document.getElementById('app-bottom-nav').classList.remove('hidden');
-
-        document.getElementById('label-nombre-tec').innerText = res.nombre || 'Técnico';
-        document.getElementById('perfil-nombre').innerText = res.nombre || 'Técnico';
-        document.getElementById('perfil-correo').innerText = res.usuario || '';
-
-        cargarAvatarYDatosTecnico();
-        actualizarSaludoHora();
-
-        const cachePend = localStorage.getItem(`cache_pendientes_${res.usuario}`);
-        if (cachePend) {
-          pendientesTecnicoActual = JSON.parse(cachePend);
-          renderizarPendientesTecnicoUI();
-        }
-        const cacheHist = localStorage.getItem(`cache_historico_${res.usuario}`);
-        if (cacheHist) {
-          historicoTecnicoActual = JSON.parse(cacheHist);
-          renderizarHistoricoTecnicoUI();
-        }
-
-        navegarBottom('inicio');
-        
-        cargarPendientesTecnico();
-        cargarHistoricoTecnico();
-        setInterval(cargarPendientesTecnico, 30000);
-      } else {
-        document.getElementById('view-admin').classList.remove('hidden');
-        document.getElementById('view-tecnico').classList.add('hidden');
-        document.getElementById('app-bottom-nav').classList.add('hidden');
-
-        let areaTexto = res.area || "Encargado Nacional";
-        let depTexto = res.departamento || "TODOS";
-        let ciuTexto = res.ciudad || "TODAS";
-        
-        document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
-        document.getElementById('admin-header-region').innerText = `ÁREA: ${areaTexto.toUpperCase()} | DEP: ${depTexto.toUpperCase()}`;
-
-        const selDept = document.getElementById('select-filtro-dept');
-        if (selDept && depTexto !== "TODOS") {
-          selDept.value = depTexto.toUpperCase();
-          alCambiarDepartamentoFiltro();
-          const selCiu = document.getElementById('select-filtro-ciudad');
-          if (selCiu && ciuTexto !== "TODAS") {
-            selCiu.value = ciuTexto.toUpperCase();
-          }
-        }
-
-        const cacheDash = localStorage.getItem(`cache_admin_dashboard_${res.usuario}`);
-        if (cacheDash) {
-          procesarYRenderizarDashboard(JSON.parse(cacheDash));
-        }
-
-        cargarDirectorioTecnicosAdmin().then(() => {
-          cargarDashboard();
-        });
-      }
-    }
-
-    async function apiCall(accion, dataPayload = {}, reintentos = 2) {
-      for (let i = 0; i <= reintentos; i++) {
-        try {
-          const response = await fetch(WEB_APP_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ accion: accion, ...dataPayload }),
-            redirect: "follow"
-          });
-          if (response.ok) return JSON.parse(await response.text());
-        } catch (e) {
-          if (i === reintentos) throw new Error("Falla de red o CORS. Verifique WEB_APP_URL.");
-          await new Promise(r => setTimeout(r, 800));
-        }
-      }
-    }
-
-    async function ejecutarLogin() {
-      const u = document.getElementById('input-user').value;
-      const p = document.getElementById('input-pass').value;
-      const alertBox = document.getElementById('login-alert');
-      const btnLogin = document.getElementById('btn-login-submit');
-
-      if (!u || !p) return alert("Ingrese usuario y contraseña");
-
-      btnLogin.disabled = true;
-      btnLogin.innerText = "Verificando...";
-
-      try {
-        const res = await apiCall("loginUsuario", { usuario: u, password: p });
-        btnLogin.disabled = false;
-        btnLogin.innerText = "Iniciar Sesión";
-
-        if (res && res.exito) {
-          usuarioActual = res;
-          localStorage.setItem("nps_user_profile", JSON.stringify(res));
-          iniciarVistaSegunRol(res);
-        } else {
-          if (alertBox) {
-            alertBox.innerText = res.mensaje || "Credenciales no válidas";
-            alertBox.classList.remove('hidden');
-          }
-        }
-      } catch(e) {
-        btnLogin.disabled = false;
-        btnLogin.innerText = "Iniciar Sesión";
-        if (alertBox) {
-          alertBox.innerText = "Error: Verifica que WEB_APP_URL sea correcta y los permisos sean 'Cualquiera'.";
-          alertBox.classList.remove('hidden');
-        }
-      }
-    }
-
-    function formatearFechaCorta(fechaStr) {
-      if (!fechaStr) return 'Hoy';
-      try {
-        const parts = fechaStr.toString().split('T')[0].split(' ')[0].split('/');
-        if (parts.length === 3) return `${parts[0].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[2]}`;
-        const d = new Date(fechaStr);
-        if (!isNaN(d.getTime())) {
-          return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        }
-        return fechaStr;
-      } catch(e) { return fechaStr; }
-    }
-
-    function generarUrlWhatsApp(telefono, codigoCliente, nombreUsuario, nombreTecnico) {
-      let numLimpio = telefono.toString().replace(/[^0-9]/g, '');
-      let horaActual = new Date().getHours();
-      let saludoHora = "Estimado cliente, buenas tardes. 👋";
-
-      if (horaActual >= 0 && horaActual < 12) saludoHora = "Estimado cliente, buenos días. ☀️";
-      else if (horaActual >= 12 && horaActual < 19) saludoHora = "Estimado cliente, buenas tardes. 👋";
-      else saludoHora = "Estimado cliente, buenas noches. 🌙";
-
-      let tecNombre = (usuarioActual && usuarioActual.nombre) ? usuarioActual.nombre : (nombreTecnico || 'Servicio Técnico');
-      let clienteNombre = nombreUsuario || 'Estimado Cliente';
-      let codCliente = codigoCliente || 'N/A';
-
-      let mensajeWs = `${saludoHora}\n\n` +
-        `Le escribo de parte del Servicio Técnico Tigo. Recientemente realicé un trabajo correspondiente a su código *${codCliente}* (${clienteNombre}).\n\n` +
-        `Mi nombre es *${tecNombre}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.\n\n` +
-        `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo por favor un *10* 😁. Su calificación es muy importante para mí.\n\n` +
-        `📲 *GUÍA PARA INGRESAR Y LLENAR LA ENCUESTA:*\n` +
-        `1. Ingrese a sus Mensajes de Texto (SMS).\n` +
-        `2. Ubique la cuenta TIGO o el número 2820.\n` +
-        `3. Abra el link, marque "No soy un robot" y califique con 10.\n\n` +
-        `MUCHAS GRACIAS POR SU TIEMPO! 🙌`;
-
-      return `https://wa.me/591${numLimpio}?text=${encodeURIComponent(mensajeWs)}`;
-    }
-
-    function mostrarSyncStatus(sincronizando) {
-      const lbl = document.getElementById('label-sync-status');
-      const sp = document.getElementById('icon-sync-spinner');
-      if (!lbl || !sp) return;
-      if (sincronizando) {
-        lbl.innerText = "Sincronizando...";
-        sp.classList.remove('hidden');
-      } else {
-        lbl.innerText = "Sincronizado";
-        sp.classList.add('hidden');
-      }
-    }
-
+    // --- CARGAR PENDIENTES TÉCNICO ---
     async function cargarPendientesTecnico() {
       mostrarSyncStatus(true);
       try {
-        const lista = await apiCall("obtenerPendientesTecnico", { 
-          correoTecnico: usuarioActual.usuario,
-          nombreTecnico: usuarioActual.nombre
-        });
-        pendientesTecnicoActual = Array.isArray(lista) ? lista : [];
-        
-        localStorage.setItem(`cache_pendientes_${usuarioActual.usuario}`, JSON.stringify(pendientesTecnicoActual));
+        const { data, error } = await supabase
+          .from('gestiones')
+          .select('*')
+          .eq('tecnico_asignado', usuarioActual.nombre)
+          .in('estado', ['Pendiente', 'sin gestion', '']);
 
-        renderizarPendientesTecnicoUI();
+        if (data && !error) {
+          pendientesTecnicoActual = data.map(item => ({
+             fila: item.id,
+             idGestion: item.id_gestion,
+             codigoCliente: item.codigo_cliente,
+             nombreUsuario: item.nombre_usuario,
+             tecnicoAsignado: item.tecnico_asignado,
+             fechaAsignacion: item.fecha_asignacion,
+             estado: item.estado || 'Pendiente',
+             numeroOT: item.numero_ot,
+             telefono: item.telefono
+          }));
+          renderizarPendientesTecnicoUI();
+        }
       } catch(e) {}
       mostrarSyncStatus(false);
     }
 
-    function renderizarPendientesTecnicoUI() {
-      const contenedor = document.getElementById('lista-pendientes');
-      if (!contenedor) return;
-
-      document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
-      document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
-      
-      const badgeEl = document.getElementById('bnav-badge-count');
-      if (pendientesTecnicoActual.length > 0) {
-        badgeEl.innerText = pendientesTecnicoActual.length;
-        badgeEl.classList.remove('hidden');
-      } else {
-        badgeEl.classList.add('hidden');
-      }
-
-      contenedor.innerHTML = '';
-
-      if (!pendientesTecnicoActual || pendientesTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes.</div>';
-        return;
-      }
-
-      pendientesTecnicoActual.forEach((item, index) => {
-        let codigo = item.codigoCliente || item.idGestion || 'S/C';
-        let usuario = item.nombreUsuario || 'Cliente General';
-        let telefono = item.telefono || 'Sin Teléfono';
-        let otNum = item.numeroOT || 'Sin OT';
-        
-        let telLlamar = (telefono && telefono !== 'Sin Teléfono') ? 
-          `<a href="tel:${telefono}" class="btn btn-sm btn-outline-warning fw-bold flex-fill"><i class="bi bi-telephone-fill me-1"></i>Llamar</a>` : '';
-
-        let urlWs = (telefono && telefono !== 'Sin Teléfono') ? generarUrlWhatsApp(telefono, codigo, usuario, item.tecnicoAsignado) : '#';
-        let btnWs = (telefono && telefono !== 'Sin Teléfono') ? 
-          `<a href="${urlWs}" target="_blank" class="btn btn-sm btn-success fw-bold flex-fill"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>` : '';
-
-        contenedor.innerHTML += `
-          <div class="order-card mb-3 fade-in-view">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle badge-pending">Pendiente</span>
-                <span class="text-info fw-semibold" style="font-size: 0.72rem;"><i class="bi bi-hdd-network me-1"></i>HFC</span>
-              </div>
-              <h6 class="fw-bold text-white m-0">Cliente #${codigo}</h6>
-              <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${usuario} • OT #${otNum}</small>
-              
-              <div class="meta-grid mb-2">
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.65rem;">ASIGNACIÓN</span><span class="text-light fw-semibold" style="font-size: 0.75rem;">${formatearFechaCorta(item.fechaAsignacion)}</span></div>
-                <div class="meta-item"><span class="text-secondary d-block" style="font-size: 0.65rem;">TELÉFONO</span><span class="text-warning fw-semibold" style="font-size: 0.75rem;">${telefono}</span></div>
-              </div>
-            </div>
-
-            <div class="d-flex gap-2 mt-2">
-              ${telLlamar}
-              ${btnWs}
-            </div>
-
-            <div class="d-flex gap-2 mt-2 border-top border-secondary border-opacity-25 pt-2">
-              <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index}, 'PENDIENTE')"><i class="bi bi-eye me-1"></i> Detalles</button>
-              <button class="btn btn-sm btn-primary flex-fill fw-bold py-2" onclick="abrirModal(${item.fila}, '${otNum}', '${codigo}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
-            </div>
-          </div>`;
-      });
-    }
-
+    // --- CARGAR HISTÓRICO TÉCNICO ---
     async function cargarHistoricoTecnico() {
       try {
-        const lista = await apiCall("obtenerHistoricoTecnico", { 
-          correoTecnico: usuarioActual.usuario,
-          nombreTecnico: usuarioActual.nombre
-        });
-        historicoTecnicoActual = Array.isArray(lista) ? lista : [];
-        
-        localStorage.setItem(`cache_historico_${usuarioActual.usuario}`, JSON.stringify(historicoTecnicoActual));
+        const { data, error } = await supabase
+          .from('gestiones')
+          .select('*')
+          .eq('tecnico_asignado', usuarioActual.nombre)
+          .neq('estado', 'Pendiente');
 
-        renderizarHistoricoTecnicoUI();
+        if (data && !error) {
+          historicoTecnicoActual = data.map(item => ({
+             fila: item.id,
+             idGestion: item.id_gestion,
+             codigoCliente: item.codigo_cliente,
+             nombreUsuario: item.nombre_usuario,
+             numeroOT: item.numero_ot,
+             estado: item.estado,
+             evidencia: item.evidencia_url
+          }));
+          renderizarHistoricoTecnicoUI();
+        }
       } catch(e) {}
     }
 
-    function renderizarHistoricoTecnicoUI() {
-      const contenedor = document.getElementById('lista-historico-tecnico');
-      if (!contenedor) return;
-
-      document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
-      contenedor.innerHTML = '';
-
-      if (!historicoTecnicoActual || historicoTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes gestiones en tu histórico.</div>';
-        return;
-      }
-
-      historicoTecnicoActual.forEach((r, index) => {
-        let st = (r.estado || '').trim().toLowerCase();
-        let isConflict = st !== 'gestionado' && st !== 'pendiente' && st !== 'sin gestion' && st !== '';
-        let badgeStyle = st === 'gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
-        
-        let otClave = obtenerClaveLimpiaOT(r.numeroOT, r.codigoCliente);
-        let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
-        let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
-
-        contenedor.innerHTML += `
-          <div class="order-card mb-3 fade-in-view ${isConflict ? 'conflictive' : ''}">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
-                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT || 'S/N'}</small>
-              </div>
-              <h6 class="fw-bold text-white m-0">Cliente #${r.codigoCliente || 'S/C'}</h6>
-              <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${r.nombreUsuario || 'Cliente'}</small>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary border-opacity-25">
-              <button class="btn btn-xs btn-outline-info p-1 px-3 small fw-bold" onclick="verDetallesOrdenTecnico(${index}, 'HISTORICO')"><i class="bi bi-eye me-1"></i>Detalles</button>
-              ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-3 small fw-bold" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')"><i class="bi bi-image me-1"></i>Ver Evidencia</button>` : '<span class="text-secondary small">Sin Foto</span>'}
-            </div>
-          </div>`;
-      });
-    }
-
+    // --- CARGAR DIRECTORIO DE TÉCNICOS ---
     async function cargarDirectorioTecnicosAdmin() {
       try {
-        const lista = await apiCall("obtenerTecnicosConPerfil");
-        directorioTecnicos = Array.isArray(lista) ? lista : [];
-        renderizarDirectorioTecnicosAdminUI();
+        const { data, error } = await supabase.from('usuarios').select('*');
+        if (data && !error) {
+          directorioTecnicos = data;
+          renderizarDirectorioTecnicosAdminUI();
+        }
       } catch(e) {}
     }
 
@@ -1286,394 +895,83 @@
       }
 
       if (filtrados.length === 0) {
-        cont.innerHTML = '<div class="text-secondary text-center small py-3 col-12">No hay técnicos disponibles en esta ciudad.</div>';
+        cont.innerHTML = '<div class="text-secondary text-center small py-3 col-12">No hay técnicos disponibles.</div>';
         return;
       }
 
-      filtrados.forEach((t, idx) => {
-        let originalIdx = directorioTecnicos.findIndex(dt => dt.usuario === t.usuario);
+      filtrados.forEach((t) => {
         let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:40px; height:40px; font-size:1.1rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
-        if (t.fotoPerfil && t.fotoPerfil.length > 50) {
-          let src = t.fotoPerfil.startsWith("data:image") ? t.fotoPerfil : "data:image/jpeg;base64," + t.fotoPerfil;
-          avatarHtml = `<img src="${src}" class="rounded-circle border border-info" style="width:40px; height:40px; object-fit:cover;">`;
-        }
-
         cont.innerHTML += `
-          <div class="bi-card-dark p-2 d-flex justify-content-between align-items-center mb-2" onclick="verFichaTecnicoSupervisor(${originalIdx})" style="cursor:pointer;">
+          <div class="bi-card-dark p-2 d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center gap-2">
               ${avatarHtml}
               <div>
                 <h6 class="m-0 text-white fw-bold" style="font-size:0.85rem;">${t.nombre}</h6>
-                <small class="text-secondary" style="font-size:0.7rem;">${t.departamento} • ${t.ciudad}</small>
+                <small class="text-secondary" style="font-size:0.7rem;">${t.departamento || ''} • ${t.ciudad || ''}</small>
               </div>
-            </div>
-            <span class="badge bg-outline-info text-info border border-info border-opacity-25 p-1 px-2" style="font-size:0.68rem;">Ficha <i class="bi bi-chevron-right"></i></span>
-          </div>`;
-      });
-    }
-
-    function verFichaTecnicoSupervisor(idx) {
-      let t = directorioTecnicos[idx];
-      if (!t) return;
-
-      let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-2" style="width:70px; height:70px; font-size:2rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
-      if (t.fotoPerfil && t.fotoPerfil.length > 50) {
-        let src = t.fotoPerfil.startsWith("data:image") ? t.fotoPerfil : "data:image/jpeg;base64," + t.fotoPerfil;
-        avatarHtml = `<img src="${src}" class="rounded-circle border border-info mx-auto mb-2" style="width:70px; height:70px; object-fit:cover;">`;
-      }
-
-      document.getElementById('ftec-avatar-box').innerHTML = avatarHtml;
-      document.getElementById('ftec-nombre').innerText = t.nombre;
-      document.getElementById('ftec-region').innerText = `${t.departamento} • ${t.ciudad}`;
-      document.getElementById('ftec-telefono').innerText = t.telefono || 'Sin registrar';
-      document.getElementById('ftec-ci').innerText = t.ci || 'Sin registrar';
-      document.getElementById('ftec-placa').innerText = t.placa || 'Sin registrar';
-
-      let num = t.telefono ? t.telefono.toString().replace(/[^0-9]/g, '') : '';
-      document.getElementById('btn-ftec-llamar').href = num ? `tel:${num}` : '#';
-      document.getElementById('btn-ftec-ws').href = num ? `https://wa.me/591${num}` : '#';
-
-      abrirModalBS('modalFichaTecnico');
-    }
-
-    async function cargarDashboard(forzarNube = false) {
-      const per = document.getElementById('select-periodo').value;
-      const dept = document.getElementById('select-filtro-dept') ? document.getElementById('select-filtro-dept').value : 'TODOS';
-      const ciu = document.getElementById('select-filtro-ciudad') ? document.getElementById('select-filtro-ciudad').value : 'TODAS';
-
-      try {
-        const res = await apiCall("obtenerDatosDashboard", {
-          usuario: usuarioActual.usuario,
-          rol: usuarioActual.rol,
-          periodo: per,
-          departamento: dept,
-          ciudad: ciu
-        });
-
-        localStorage.setItem(`cache_admin_dashboard_${usuarioActual.usuario}`, JSON.stringify(res));
-
-        procesarYRenderizarDashboard(res);
-      } catch(e) {}
-    }
-
-    // --- FUNCIÓN MEJORADA: PROCESAR DASHBOARD ROBUSTO ---
-    function procesarYRenderizarDashboard(res) {
-      if (!res) return;
-      todosLosRegistros = res.registros || [];
-
-      // 1. CÁLCULO ROBUSTO: Limpiamos espacios y agrupamos los 6 estados
-      let cTotal = todosLosRegistros.length;
-      let cGestionados = 0;
-      let cPendientes = 0;
-      let cDescartados = 0;
-      let mapTecnicos = {};
-
-      todosLosRegistros.forEach(r => {
-        // Limpiamos la basura del Excel (espacios extra, minúsculas/mayúsculas)
-        let st = (r.estado || '').trim().toLowerCase();
-        
-        if (st === 'gestionado') {
-          cGestionados++;
-        } else if (st === 'pendiente' || st === 'sin gestion' || st === '') {
-          cPendientes++;
-        } else {
-          // Todo lo demás (conflictivo, numero equivocado, etc)
-          cDescartados++;
-        }
-
-        // 2. Gráfico de Técnicos infalible
-        let nombreTec = (r.tecnico || 'Sin Asignar').trim().toUpperCase();
-        if(!mapTecnicos[nombreTec]) mapTecnicos[nombreTec] = { total: 0, gestionados: 0 };
-        mapTecnicos[nombreTec].total++;
-        if (st === 'gestionado') mapTecnicos[nombreTec].gestionados++;
-      });
-
-      // Actualizar los números visuales
-      document.getElementById('kpi-total').innerText = cTotal;
-      document.getElementById('kpi-gestionados').innerText = cGestionados;
-      document.getElementById('kpi-pendientes').innerText = cPendientes;
-      document.getElementById('kpi-descartados').innerText = cDescartados;
-      
-      const pctCobertura = cTotal > 0 ? Math.round((cGestionados / cTotal) * 100) : 0;
-      document.getElementById('kpi-pct-prom').innerText = pctCobertura + "%";
-
-      // NPS (Se mantienen los cálculos)
-      const promotores = (res.kpis && res.kpis.promotores) ? res.kpis.promotores : 0;
-      const pasivos = (res.kpis && res.kpis.pasivos) ? res.kpis.pasivos : 0;
-      const detractores = (res.kpis && res.kpis.detractores) ? res.kpis.detractores : 0;
-      const totalEncuestas = promotores + pasivos + detractores;
-
-      document.getElementById('kpi-nps-promotores').innerText = promotores;
-      document.getElementById('kpi-nps-pasivos').innerText = pasivos;
-      document.getElementById('kpi-nps-detractores').innerText = detractores;
-
-      const scoreNpsNeto = totalEncuestas > 0 ? Math.round(((promotores - detractores) / totalEncuestas) * 100) : 0;
-      document.getElementById('kpi-nps-neto').innerText = (scoreNpsNeto > 0 ? '+' : '') + scoreNpsNeto + "%";
-      document.getElementById('gauge-score-val').innerText = (scoreNpsNeto > 0 ? '+' : '') + scoreNpsNeto + "%";
-
-      renderizarGraficoGauge(scoreNpsNeto);
-
-      // 3. Imprimir el gráfico de barras corregido
-      let arrayTecnicos = Object.keys(mapTecnicos).map(nombre => {
-        return {
-          nombre: nombre,
-          pctAvance: mapTecnicos[nombre].total > 0 ? Math.round((mapTecnicos[nombre].gestionados / mapTecnicos[nombre].total) * 100) : 0
-        };
-      }).sort((a,b) => b.pctAvance - a.pctAvance);
-      
-      renderizarGraficoBarras(arrayTecnicos);
-      renderizarDirectorioTecnicosAdminUI();
-      aplicarFiltrosMultiples();
-    }
-
-    function renderizarGraficoGauge(scoreVal) {
-      const ctx = document.getElementById('gaugeChart').getContext('2d');
-      if (chartGauge) chartGauge.destroy();
-
-      let displayValue = Math.max(0, Math.min(100, ((scoreVal + 100) / 2)));
-
-      chartGauge = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Score NPS', 'Resto'],
-          datasets: [{
-            data: [displayValue, 100 - displayValue],
-            backgroundColor: [scoreVal >= 0 ? '#10b981' : '#f87171', '#23335a'],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          rotation: -90,
-          circumference: 180,
-          cutout: '75%',
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-
-    function renderizarGraficoBarras(tecnicos) {
-      const ctx = document.getElementById('barTecnicosChart').getContext('2d');
-      if (chartBar) chartBar.destroy();
-
-      const nombres = tecnicos.map(t => t.nombre);
-      const avances = tecnicos.map(t => t.pctAvance);
-
-      chartBar = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: nombres,
-          datasets: [{
-            label: '% Cumplimiento',
-            data: avances,
-            backgroundColor: '#38bdf8',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { 
-            x: { max: 100, ticks: { color: '#8e9bb4', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-            y: { ticks: { color: '#f8fafc' }, grid: { display: false } }
-          }
-        }
-      });
-    }
-
-    function renderizarTarjetasAdmin(lista, idContenedor) {
-      const contenedor = document.getElementById(idContenedor);
-      contenedor.innerHTML = '';
-      if (lista.length === 0) {
-        contenedor.innerHTML = '<div class="text-secondary text-center small py-4 col-12">No hay órdenes registradas.</div>';
-        return;
-      }
-
-      lista.forEach(r => {
-        let st = (r.estado || '').trim().toLowerCase();
-        const isConflict = st !== 'gestionado' && st !== 'pendiente' && st !== 'sin gestion' && st !== '';
-        let badgeStyle = st === 'gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
-        let otClave = obtenerClaveLimpiaOT(r.numeroOT, r.codigoCliente);
-        let fotoLocal = localStorage.getItem(`evidencia_ot_${otClave}`);
-        let tieneEvidencia = (r.evidencia && r.evidencia.length > 50) || (fotoLocal && fotoLocal.length > 50);
-
-        contenedor.innerHTML += `
-          <div class="order-card fade-in-view ${isConflict ? 'conflictive' : ''}">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
-                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT}</small>
-              </div>
-              <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombreUsuario}</div>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
-              <span class="text-secondary fw-bold" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico}</span>
-              ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${otClave}', '${r.evidencia || ''}')">Ver Foto</button>` : ''}
             </div>
           </div>`;
       });
     }
 
-    function verDetallesOrdenTecnico(index, origen) {
-      let item = (origen === 'PENDIENTE') ? pendientesTecnicoActual[index] : historicoTecnicoActual[index];
-      if (!item) return;
-
-      document.getElementById('det-id').innerText = item.idGestion || 'N/A';
-      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
-      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
-      document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || usuarioActual.nombre;
-      document.getElementById('det-fecha').innerText = formatearFechaCorta(item.fechaAsignacion);
-      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
-      document.getElementById('det-telefono').innerText = item.telefono || 'Sin Teléfono';
-
-      abrirModalBS('modalDetalleOrden');
-    }
-
-    function abrirModal(fila, numeroOT, codigoCliente) {
-      document.getElementById('modal-fila').value = fila;
-      document.getElementById('modal-ot').value = numeroOT || '';
-      document.getElementById('modal-codigo').value = codigoCliente || '';
-      document.getElementById('modal-estado').value = 'Gestionado';
-      document.getElementById('modal-observacion').value = '';
-      archivoFotoSeleccionado = null;
-      base64Compresion = null;
-
-      const btnG = document.getElementById('btn-guardar');
-      btnG.disabled = false;
-      btnG.innerText = "Guardar Gestión";
-
-      const lbl = document.getElementById('label-archivo-elegido');
-      lbl.className = "text-danger small fw-bold text-center";
-      lbl.innerText = "⚠ Falta adjuntar foto de respaldo";
-
-      document.getElementById('modal-foto-camara').value = '';
-      document.getElementById('modal-foto-galeria').value = '';
-      abrirModalBS('modalGestion');
-    }
-
-    function procesarFotoSeleccionada(input) {
-      if (input.files && input.files[0]) {
-        archivoFotoSeleccionado = input.files[0];
-        base64Compresion = null;
-        
-        const lbl = document.getElementById('label-archivo-elegido');
-        const btnG = document.getElementById('btn-guardar');
-
-        btnG.disabled = true;
-        btnG.innerText = "⏳ Procesando foto...";
-        lbl.className = "text-warning small fw-bold text-center";
-        lbl.innerText = "⏳ Optimizando imagen de respaldo...";
-
-        convertirYComprimirFoto(archivoFotoSeleccionado).then(b64 => {
-          base64Compresion = b64;
-          btnG.disabled = false;
-          btnG.innerText = "Guardar Gestión";
-          lbl.className = "text-success small fw-bold text-center";
-          lbl.innerText = "✓ Respaldo fotográfico adjuntado correctamente";
-        }).catch(err => {
-          btnG.disabled = false;
-          btnG.innerText = "Guardar Gestión";
-          lbl.className = "text-danger small fw-bold text-center";
-          lbl.innerText = "Error al optimizar la imagen.";
-        });
-      }
-    }
-
-    function convertirYComprimirFoto(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement('canvas');
-            let maxDimension = 800;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-              if (width > maxDimension) {
-                height = Math.round((height * maxDimension) / width);
-                width = maxDimension;
-              }
-            } else {
-              if (height > maxDimension) {
-                width = Math.round((width * maxDimension) / height);
-                height = maxDimension;
-              }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-
-            resolve(canvas.toDataURL('image/jpeg', 0.50));
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
+    // --- GUARDAR GESTIÓN Y FOTO EN SUPABASE ---
     async function guardarFormulario() {
-      const fila = document.getElementById('modal-fila').value;
-      const numeroOT = document.getElementById('modal-ot').value;
-      const codigoCliente = document.getElementById('modal-codigo').value;
+      const filaId = document.getElementById('modal-fila').value;
+      const numeroOT = document.getElementById('modal-ot').value.trim();
+      const codigoCliente = document.getElementById('modal-codigo').value.trim();
       const estado = document.getElementById('modal-estado').value;
-      const obs = document.getElementById('modal-observacion').value;
+      const obs = document.getElementById('modal-observacion').value.trim();
 
       if (!base64Compresion && !archivoFotoSeleccionado) {
         alert("⚠ DEBE ADJUNTAR UNA FOTO DE RESPALDO OBLIGATORIAMENTE.");
         return;
       }
 
-      if (archivoFotoSeleccionado && !base64Compresion) {
-        alert("⏳ La foto aún se está optimizando. Espere un segundo y presione Guardar.");
-        return;
-      }
-
       const btnGuardar = document.getElementById('btn-guardar');
       btnGuardar.disabled = true;
-      btnGuardar.innerText = "Enviando respaldo...";
-
-      let b64Foto = base64Compresion || "";
-      let otClaveLimpia = obtenerClaveLimpiaOT(numeroOT, codigoCliente);
-
-      if (b64Foto) {
-        try { localStorage.setItem(`evidencia_ot_${otClaveLimpia}`, b64Foto); } catch(e) {}
-      }
-
-      const payload = { 
-        fila: fila, 
-        numeroOT: numeroOT,
-        estado: estado, 
-        observacion: obs, 
-        fotoBase64: b64Foto,
-        usuario: usuarioActual.usuario
-      };
-
-      pendientesTecnicoActual = pendientesTecnicoActual.filter(item => item.fila != fila);
-      renderizarPendientesTecnicoUI();
+      btnGuardar.innerText = "Subiendo archivo...";
 
       try {
-        const res = await apiCall("guardarGestionConFoto", { payload: payload });
+        let urlFoto = "";
+        if (base64Compresion) {
+           const resBlob = await fetch(base64Compresion);
+           const blob = await resBlob.blob();
+           const nombreArchivo = `${numeroOT || codigoCliente}_${Date.now()}.jpg`;
+
+           const { error: uploadErr } = await supabase.storage
+             .from('evidencias_nps')
+             .upload(`fotos/${nombreArchivo}`, blob, { contentType: 'image/jpeg' });
+
+           if (!uploadErr) {
+              const { data: publicUrlData } = supabase.storage.from('evidencias_nps').getPublicUrl(`fotos/${nombreArchivo}`);
+              urlFoto = publicUrlData.publicUrl;
+           }
+        }
+
+        const { error } = await supabase
+          .from('gestiones')
+          .update({
+             estado: estado,
+             observacion: obs,
+             evidencia_url: urlFoto
+          })
+          .eq('id', filaId);
+
+        if (error) throw error;
+
         btnGuardar.disabled = false;
         btnGuardar.innerText = "Guardar Gestión";
         
-        if (res && res.exito) {
-          alert("¡Gestión y foto guardadas con éxito!");
-          ocultarModalBS('modalGestion');
-          archivoFotoSeleccionado = null;
-          base64Compresion = null;
-          cargarHistoricoTecnico();
-          cargarPendientesTecnico();
-        } else {
-          alert(res.mensaje || "Ocurrió un error al guardar.");
-        }
+        pendientesTecnicoActual = pendientesTecnicoActual.filter(item => item.fila != filaId);
+        renderizarPendientesTecnicoUI();
+        
+        alert("¡Gestión y foto guardadas con éxito!");
+        ocultarModalBS('modalGestion');
+        
+        archivoFotoSeleccionado = null;
+        base64Compresion = null;
+        cargarHistoricoTecnico();
+
       } catch(e) {
         btnGuardar.disabled = false;
         btnGuardar.innerText = "Guardar Gestión";
@@ -1681,25 +979,7 @@
       }
     }
 
-    function verFotoModal(otClave, b64Servidor) {
-      let b64Data = (b64Servidor && b64Servidor.length > 50) ? b64Servidor : localStorage.getItem(`evidencia_ot_${otClave}`);
-
-      if (!b64Data) return alert("La evidencia fotográfica no se encuentra disponible.");
-      
-      const imgElement = document.getElementById('visor-img');
-      if (b64Data.startsWith("data:image")) imgElement.src = b64Data;
-      else imgElement.src = "data:image/jpeg;base64," + b64Data;
-      
-      imgElement.classList.remove('hidden');
-      abrirModalBS('modalVisorFoto');
-    }
-
-    function cerrarSesion() {
-      localStorage.removeItem("nps_user_profile");
-      location.reload();
-    }
-
-    // --- FUNCIÓN DE CARGA MASIVA PARA ADMINISTRADORES/SUPERVISORES ---
+    // --- CARGA MASIVA DE CSV (ADMIN) ---
     async function subirAsignacionesCSV() {
       const fileInput = document.getElementById('input-csv-cargas');
       const statusLbl = document.getElementById('status-carga-csv');
@@ -1745,11 +1025,10 @@
         }
 
         if (registrosInsertar.length === 0) {
-          throw new Error("No se encontraron registros válidos. Verifica los títulos de columnas.");
+          throw new Error("No se encontraron registros válidos.");
         }
 
         const { error } = await supabase.from('gestiones').insert(registrosInsertar);
-
         if (error) throw error;
 
         statusLbl.className = "text-success mt-2 d-block fw-bold small";
@@ -1759,13 +1038,235 @@
         cargarDashboard(true);
 
       } catch (err) {
-        console.error(err);
         statusLbl.className = "text-danger mt-2 d-block fw-bold small";
         statusLbl.innerText = "⚠ Error: " + err.message;
       }
 
       btn.disabled = false;
       btn.innerHTML = '<i class="bi bi-upload me-1"></i> Subir a Base de Datos';
+    }
+
+    // --- GRÁFICOS Y UTILIDADES ---
+    function renderizarGraficoBarras(tecnicos) {
+      const ctx = document.getElementById('barTecnicosChart').getContext('2d');
+      if (chartBar) chartBar.destroy();
+
+      const nombres = tecnicos.map(t => t.nombre);
+      const avances = tecnicos.map(t => t.pctAvance);
+
+      chartBar = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: nombres,
+          datasets: [{
+            label: '% Cumplimiento',
+            data: avances,
+            backgroundColor: '#38bdf8',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { 
+            x: { max: 100, ticks: { color: '#8e9bb4', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#f8fafc' }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderizarPendientesTecnicoUI() {
+      const contenedor = document.getElementById('lista-pendientes');
+      if (!contenedor) return;
+
+      document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
+      document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
+      
+      const badgeEl = document.getElementById('bnav-badge-count');
+      if (pendientesTecnicoActual.length > 0) {
+        badgeEl.innerText = pendientesTecnicoActual.length;
+        badgeEl.classList.remove('hidden');
+      } else { badgeEl.classList.add('hidden'); }
+
+      contenedor.innerHTML = '';
+      if (pendientesTecnicoActual.length === 0) {
+        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes.</div>';
+        return;
+      }
+
+      pendientesTecnicoActual.forEach((item) => {
+        contenedor.innerHTML += `
+          <div class="order-card mb-3 fade-in-view">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge-subtle badge-pending">Pendiente</span>
+                <span class="text-info fw-semibold" style="font-size: 0.72rem;">OT #${item.numeroOT || 'S/N'}</span>
+              </div>
+              <h6 class="fw-bold text-white m-0">Cliente #${item.codigoCliente}</h6>
+              <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${item.nombreUsuario}</small>
+            </div>
+            <div class="d-flex gap-2 mt-2 border-top border-secondary border-opacity-25 pt-2">
+              <button class="btn btn-sm btn-primary flex-fill fw-bold py-2" onclick="abrirModal('${item.fila}', '${item.numeroOT}', '${item.codigoCliente}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
+            </div>
+          </div>`;
+      });
+    }
+
+    function renderizarHistoricoTecnicoUI() {
+      const contenedor = document.getElementById('lista-historico-tecnico');
+      if (!contenedor) return;
+      document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
+      contenedor.innerHTML = '';
+
+      if (historicoTecnicoActual.length === 0) {
+        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes gestiones en tu histórico.</div>';
+        return;
+      }
+
+      historicoTecnicoActual.forEach((r) => {
+        let isConflict = r.estado !== 'Gestionado' && r.estado !== 'Pendiente';
+        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
+        let tieneEvidencia = r.evidencia && r.evidencia.length > 5;
+
+        contenedor.innerHTML += `
+          <div class="order-card mb-3 fade-in-view ${isConflict ? 'conflictive' : ''}">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
+                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT || 'S/N'}</small>
+              </div>
+              <h6 class="fw-bold text-white m-0">Cliente #${r.codigoCliente || 'S/C'}</h6>
+              <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${r.nombreUsuario || 'Cliente'}</small>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary border-opacity-25">
+              ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-3 small fw-bold" onclick="verFotoModal('${r.evidencia}')"><i class="bi bi-image me-1"></i>Ver Evidencia</button>` : '<span class="text-secondary small">Sin Foto</span>'}
+            </div>
+          </div>`;
+      });
+    }
+
+    function abrirModal(fila, numeroOT, codigoCliente) {
+      document.getElementById('modal-fila').value = fila;
+      document.getElementById('modal-ot').value = numeroOT || '';
+      document.getElementById('modal-codigo').value = codigoCliente || '';
+      document.getElementById('modal-estado').value = 'Gestionado';
+      document.getElementById('modal-observacion').value = '';
+      archivoFotoSeleccionado = null;
+      base64Compresion = null;
+      abrirModalBS('modalGestion');
+    }
+
+    function procesarFotoSeleccionada(input) {
+      if (input.files && input.files[0]) {
+        archivoFotoSeleccionado = input.files[0];
+        convertirYComprimirFoto(archivoFotoSeleccionado).then(b64 => {
+          base64Compresion = b64;
+          document.getElementById('label-archivo-elegido').className = "text-success small fw-bold text-center";
+          document.getElementById('label-archivo-elegido').innerText = "✓ Respaldo fotográfico adjuntado";
+        });
+      }
+    }
+
+    function convertirYComprimirFoto(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let maxDimension = 800;
+            let width = img.width, height = img.height;
+            if (width > height && width > maxDimension) { height = Math.round((height * maxDimension) / width); width = maxDimension; }
+            else if (height > maxDimension) { width = Math.round((width * maxDimension) / height); height = maxDimension; }
+            canvas.width = width; canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.5));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function verFotoModal(url) {
+      const img = document.getElementById('visor-img');
+      img.src = url;
+      img.classList.remove('hidden');
+      abrirModalBS('modalVisorFoto');
+    }
+
+    function togglePasswordVisibility() {
+      const inputPass = document.getElementById('input-pass');
+      inputPass.type = inputPass.type === 'password' ? 'text' : 'password';
+    }
+
+    function autenticarConHuella() {
+      const perfil = localStorage.getItem("nps_user_profile");
+      if (perfil) iniciarVistaSegunRol(JSON.parse(perfil));
+      else alert("Inicie sesión primero.");
+    }
+
+    function cambiarPestana(p) {
+      document.getElementById('tab-tecnicos-btn').classList.toggle('active', p === 'tecnicos');
+      document.getElementById('tab-general-btn').classList.toggle('active', p === 'general');
+      document.getElementById('sec-tecnicos').classList.toggle('hidden', p !== 'tecnicos');
+      document.getElementById('sec-general').classList.toggle('hidden', p !== 'general');
+    }
+
+    function navegarBottom(s) {
+      document.querySelectorAll('.nav-item-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('bnav-' + s).classList.add('active');
+      ['inicio', 'pendientes', 'historico', 'perfil'].forEach(id => {
+        document.getElementById('sec-tec-' + id).classList.add('hidden');
+      });
+      document.getElementById('sec-tec-' + s).classList.remove('hidden');
+      if (s === 'pendientes') cargarPendientesTecnico();
+      if (s === 'historico') cargarHistoricoTecnico();
+    }
+
+    function abrirModalBS(id) { new bootstrap.Modal(document.getElementById(id)).show(); }
+    function ocultarModalBS(id) { bootstrap.Modal.getInstance(document.getElementById(id)).hide(); }
+    function actualizarSaludoHora() {
+      const h = new Date().getHours();
+      document.getElementById('label-reloj-hora').innerText = `${h}:${new Date().getMinutes().toString().padStart(2,'0')}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const p = localStorage.getItem("nps_user_profile");
+      if (p) iniciarVistaSegunRol(JSON.parse(p));
+      setInterval(actualizarSaludoHora, 30000);
+    });
+
+    function iniciarVistaSegunRol(res) {
+      document.getElementById('view-login').classList.add('hidden');
+      if (res.esTecnico || (res.rol && res.rol.toLowerCase().includes('tec'))) {
+        document.getElementById('view-tecnico').classList.remove('hidden');
+        document.getElementById('app-bottom-nav').classList.remove('hidden');
+        document.getElementById('label-nombre-tec').innerText = res.nombre;
+        document.getElementById('perfil-nombre').innerText = res.nombre;
+        document.getElementById('perfil-correo').innerText = res.usuario;
+        cargarPendientesTecnico();
+        cargarHistoricoTecnico();
+      } else {
+        document.getElementById('view-admin').classList.remove('hidden');
+        document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
+        cargarDashboard();
+      }
+    }
+
+    function mostrarSyncStatus(s) {
+      const lbl = document.getElementById('label-sync-status');
+      const sp = document.getElementById('icon-sync-spinner');
+      if (lbl) lbl.innerText = s ? "Sincronizando..." : "Sincronizado";
+      if (sp) sp.classList.toggle('hidden', !s);
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem("nps_user_profile");
+      location.reload();
     }
   </script>
 </body>
