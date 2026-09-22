@@ -496,6 +496,18 @@
       </div>
 
       <div id="sec-general" class="hidden">
+        <!-- MÓDULO DE CARGA MASIVA DE ASIGNACIONES -->
+        <div class="bi-card-dark mb-3 p-3 border-info border-opacity-50">
+          <h6 class="fw-bold text-info small mb-3"><i class="bi bi-cloud-arrow-up-fill me-2"></i>CARGA MASIVA DE ÓRDENES (CSV)</h6>
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            <input class="form-control form-control-sm bg-dark text-white border-secondary flex-fill" type="file" id="input-csv-cargas" accept=".csv" style="max-width: 400px;">
+            <button class="btn btn-sm btn-primary fw-bold px-4" onclick="subirAsignacionesCSV()" id="btn-subir-csv">
+              <i class="bi bi-upload me-1"></i> Subir a Base de Datos
+            </button>
+          </div>
+          <small class="text-secondary mt-2 d-block" id="status-carga-csv">Sube un archivo CSV con los encabezados en minúsculas (ej. codigo_cliente, tecnico_asignado, numero_ot, departamento, ciudad).</small>
+        </div>
+        <!-- FIN MÓDULO DE CARGA -->
         <div class="bi-card-dark mb-3 p-3">
           <div class="row g-2">
             <div class="col-12 col-md-6">
@@ -1650,4 +1662,81 @@
     }
   </script>
 </body>
+  // --- FUNCIÓN DE CARGA MASIVA PARA ADMINISTRADORES/SUPERVISORES ---
+    async function subirAsignacionesCSV() {
+      const fileInput = document.getElementById('input-csv-cargas');
+      const statusLbl = document.getElementById('status-carga-csv');
+      const btn = document.getElementById('btn-subir-csv');
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        return alert("Por favor, selecciona un archivo CSV primero.");
+      }
+
+      const file = fileInput.files[0];
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+      statusLbl.className = "text-warning mt-2 d-block fw-bold small";
+      statusLbl.innerText = "⏳ Leyendo archivo y subiendo a la nube...";
+
+      try {
+        const text = await file.text();
+        const lineas = text.split('\n').filter(line => line.trim() !== '');
+        
+        if (lineas.length < 2) throw new Error("El archivo está vacío o no tiene registros.");
+
+        // Detectar si el Excel separó por comas o por punto y coma
+        const separador = lineas[0].includes(';') ? ';' : ',';
+        
+        // Limpiar los títulos (minúsculas y sin espacios extra)
+        const headers = lineas[0].split(separador).map(h => h.trim().toLowerCase().replace(/["']/g, ''));
+        
+        const registrosInsertar = [];
+        const hoy = new Date().toISOString().split('T')[0];
+
+        // Recorrer todas las filas de datos
+        for (let i = 1; i < lineas.length; i++) {
+          const valores = lineas[i].split(separador).map(v => v.trim().replace(/["']/g, ''));
+          let obj = {};
+          
+          headers.forEach((header, index) => {
+            if (header && valores[index]) {
+              obj[header] = valores[index];
+            }
+          });
+
+          // Validar que la fila tenga al menos al técnico y el código del cliente
+          if (obj.codigo_cliente && obj.tecnico_asignado) {
+            obj.estado = obj.estado || 'Pendiente'; // Si no tiene estado, entra como Pendiente
+            obj.fecha_asignacion = obj.fecha_asignacion || hoy;
+            registrosInsertar.push(obj);
+          }
+        }
+
+        if (registrosInsertar.length === 0) {
+          throw new Error("No se encontraron registros válidos. Verifica que los títulos de tus columnas sean correctos.");
+        }
+
+        // Enviar a Supabase en bloque
+        const { error } = await supabase.from('gestiones').insert(registrosInsertar);
+
+        if (error) throw error;
+
+        // Éxito
+        statusLbl.className = "text-success mt-2 d-block fw-bold small";
+        statusLbl.innerText = `¡Éxito! Se asignaron ${registrosInsertar.length} nuevas órdenes a los técnicos.`;
+        fileInput.value = ''; // Limpiar el seleccionador
+        
+        // Refrescar los gráficos del administrador
+        cargarDashboard(true);
+
+      } catch (err) {
+        console.error(err);
+        statusLbl.className = "text-danger mt-2 d-block fw-bold small";
+        statusLbl.innerText = "⚠ Error: " + err.message;
+      }
+
+      // Restaurar el botón
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-upload me-1"></i> Subir a Base de Datos';
+    }
 </html>
