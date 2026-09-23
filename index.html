@@ -1163,7 +1163,52 @@ supabase = window.supabaseApp;
         return;
       }
 
+      // Determinar saludo según la hora actual
+      const horaActual = new Date().getHours();
+      let saludoTiempo = "buenos días";
+      if (horaActual >= 12 && horaActual < 19) {
+        saludoTiempo = "buenas tardes";
+      } else if (horaActual >= 19 || horaActual < 5) {
+        saludoTiempo = "buenas noches";
+      }
+
       pendientesTecnicoActual.forEach((item, index) => {
+        let tel = item.telefono || '';
+        let telLimpio = tel.toString().replace(/\D/g, '');
+
+        let clienteNombre = item.nombreUsuario || 'Estimado cliente';
+        let codigoCliente = item.codigoCliente || 'S/C';
+        let tecNombre = usuarioActual ? (usuarioActual.nombre || usuarioActual.usuario) : 'el técnico asignado';
+
+        // MENSAJE DETALLADO CON GUÍA NPS Y SALUDO SEGÚN HORARIO
+        let textoMensaje = `Estimado cliente, ${saludoTiempo}.\n\n` +
+          `Le escribo de parte del Servicio Técnico TIGO. Recientemente realicé un trabajo correspondiente a su código *${codigoCliente} - ${clienteNombre}*\n\n` +
+          `Mi nombre es *${tecNombre}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.\n\n` +
+          `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo porfavor un *10* 😁. Su calificación y opinión son muy importantes para nosotros, ya que nos ayudan a evaluar y mejorar la calidad de nuestro servicio.\n\n` +
+          `Le comparto esta guía para llenar la encuesta:\n\n` +
+          `1. Ingrese a su pantalla inicio y busque su aplicación de mensajería de texto SMS (no whatsapp)\n` +
+          `2. En su bandeja ubica la cuenta TIGO o 2820\n` +
+          `3. Ingresa al mensaje y le muestra un link\n` +
+          `4. Ingresa al link y le aparece mensaje automático de seguridad, ud le da en la casilla no soy un BOOT\n` +
+          `5. Califica al técnico con un 10 si su trabajo fue excelente, si tiene alguna observación la anota más abajo.\n` +
+          `6. Siga los pasos que le aparece en pantalla.\n\n` +
+          `Me enviar una captura de pantalla al final de la encuesta porfavor.\n\n` +
+          `De antemano le quedo muy agradecido y quedo atento a su consulta acerca del servicio!\n\n` +
+          `Muchas gracias!`;
+
+        let mensajeWS = encodeURIComponent(textoMensaje);
+
+        let botonesContacto = telLimpio ? `
+          <div class="d-flex gap-2 mb-2">
+            <a href="https://wa.me/591${telLimpio}?text=${mensajeWS}" target="_blank" class="btn btn-sm btn-success flex-fill fw-bold py-1">
+              <i class="bi bi-whatsapp me-1"></i> WhatsApp
+            </a>
+            <a href="tel:${telLimpio}" class="btn btn-sm btn-outline-primary flex-fill fw-bold py-1">
+              <i class="bi bi-telephone me-1"></i> Llamar
+            </a>
+          </div>
+        ` : '<div class="text-secondary small mb-2"><i class="bi bi-exclamation-circle me-1"></i> Sin teléfono registrado</div>';
+
         contenedor.innerHTML += `
           <div class="order-card mb-3 fade-in-view">
             <div>
@@ -1174,7 +1219,10 @@ supabase = window.supabaseApp;
               <h6 class="fw-bold text-white m-0">Cliente #${item.codigoCliente || 'S/C'}</h6>
               <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${item.nombreUsuario || 'Titular'}</small>
             </div>
-            <div class="d-flex gap-2 mt-2 border-top border-secondary border-opacity-25 pt-2">
+            
+            ${botonesContacto}
+
+            <div class="d-flex gap-2 border-top border-secondary border-opacity-25 pt-2">
               <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index})"><i class="bi bi-eye me-1"></i> Detalles</button>
               <button class="btn btn-sm btn-primary flex-fill fw-bold py-2" onclick="abrirModal('${item.fila}', '${item.numeroOT}', '${item.codigoCliente}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
             </div>
