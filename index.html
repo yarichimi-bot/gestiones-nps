@@ -1050,7 +1050,12 @@ supabase = window.supabaseApp;
           throw new Error("No se encontraron registros válidos.");
         }
 
-        const { error } = await supabase.from('gestiones').insert(registrosInsertar);
+        const { error } = await supabase
+  .from('gestiones')
+  .upsert(registrosInsertar, { 
+    onConflict: 'codigo_cliente', 
+    ignoreDuplicates: false 
+  });
         if (error) throw error;
 
         statusLbl.className = "text-success mt-2 d-block fw-bold small";
