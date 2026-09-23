@@ -7,6 +7,9 @@
   
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b1329">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DataRed">
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
 
@@ -172,9 +175,6 @@
     }
     .order-card.conflictive { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, #15203e 0%, #2a1215 100%); }
 
-    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; margin-top: 10px; }
-    .meta-item { background: rgba(11, 19, 41, 0.6); padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.03); }
-
     .badge-subtle { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
     .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
     .badge-done { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
@@ -188,14 +188,6 @@
     .segmented-control { display: flex; background: #0b1329; border: 1px solid var(--card-border); border-radius: 12px; padding: 4px; }
     .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border: none; padding: 8px; font-weight: 600; font-size: 0.8rem; border-radius: 8px; }
     .segmented-control .nav-link.active { background: var(--card-bg); color: #ffffff; }
-
-    .guia-card-container {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      border: 2px solid #38bdf8;
-      border-radius: 16px;
-      padding: 16px;
-      color: #ffffff;
-    }
 
     .sync-spinner {
       display: inline-block;
@@ -291,9 +283,6 @@
             <button class="btn btn-sm btn-primary fw-bold flex-fill py-2" onclick="navegarBottom('pendientes')">
               <i class="bi bi-clock-history me-1"></i> Ver Pendientes
             </button>
-            <button class="btn btn-sm btn-outline-info fw-bold flex-fill py-2" onclick="abrirModalGuiaImagen()">
-              <i class="bi bi-image me-1"></i> Guía SMS
-            </button>
           </div>
         </div>
 
@@ -326,10 +315,6 @@
             <div id="perfil-avatar-box">
               <div class="avatar-placeholder mx-auto" id="perfil-avatar">T</div>
             </div>
-            <label for="input-foto-perfil" class="avatar-edit-btn" title="Cambiar foto de perfil">
-              <i class="bi bi-camera-fill"></i>
-            </label>
-            <input type="file" id="input-foto-perfil" class="hidden" accept="image/*" onchange="actualizarFotoPerfil(this)">
           </div>
 
           <h5 class="fw-bold text-white mb-0" id="perfil-nombre">Nombre Técnico</h5>
@@ -338,41 +323,8 @@
         </div>
 
         <div class="bi-card-dark mb-3">
-          <h6 class="fw-bold text-info small mb-3"><i class="bi bi-person-badge me-2"></i>DATOS CORPORATIVOS DEL TÉCNICO</h6>
-          
-          <div class="mb-2">
-            <label class="form-label small text-secondary m-0">Teléfono Corporativo / WhatsApp</label>
-            <input type="text" id="input-tec-telefono" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Ej: 71234567">
-          </div>
-
-          <div class="mb-2">
-            <label class="form-label small text-secondary m-0">Cédula de Identidad (CI)</label>
-            <input type="text" id="input-tec-ci" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Ej: 8934123 Tja">
-          </div>
-
-          <div class="mb-2">
-            <label class="form-label small text-secondary m-0">Placa Vehículo / Moto</label>
-            <input type="text" id="input-tec-placa" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Ej: 4521-ABC">
-          </div>
-
-          <button id="btn-guardar-perfil" class="btn btn-sm btn-outline-info w-100 fw-bold mt-3" onclick="guardarDatosTecnico()"><i class="bi bi-cloud-upload me-1"></i> Guardar y Sincronizar en la Nube</button>
-        </div>
-
-        <div class="bi-card-dark mb-3">
-          <h6 class="fw-bold text-secondary small mb-3">AJUSTES Y NOTIFICACIONES</h6>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="solicitarPermisoNotificacionesManual()">
-            <span><i class="bi bi-bell-fill me-2 text-warning"></i>Activar Notificaciones Nativas</span>
-            <i class="bi bi-chevron-right text-secondary"></i>
-          </div>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="abrirModalGuiaImagen()">
-            <span><i class="bi bi-image-fill me-2 text-info"></i>Ver Guía SMS para Clientes</span>
-            <i class="bi bi-chevron-right text-secondary"></i>
-          </div>
-          <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25" onclick="alert('Versión 3.1.0 Supabase Full Fixed')">
-            <span><i class="bi bi-info-circle me-2 text-warning"></i>Versión del Sistema</span>
-            <small class="text-secondary">v3.1.0 Supabase</small>
-          </div>
-          <button class="btn btn-outline-danger w-100 fw-bold mt-3 py-2" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
+          <h6 class="fw-bold text-secondary small mb-3">AJUSTES Y OPCIONES</h6>
+          <button class="btn btn-outline-danger w-100 fw-bold mt-2 py-2" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
         </div>
       </div>
     </div>
@@ -410,11 +362,6 @@
               <option value="Gestionado">Gestionados</option>
               <option value="Pendiente">Pendientes / Sin Gestión</option>
               <option value="Descartado">Descartados / Conflictivos</option>
-            </select>
-            <select id="select-periodo" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
-              <option value="dia">Hoy / 24h</option>
-              <option value="semana">Últimos 7 días</option>
-              <option value="mes" selected>Últimos 30 días</option>
             </select>
             <button onclick="cargarDashboard(true)" class="btn btn-outline-info btn-sm" title="Refrescar datos de la nube"><i class="bi bi-arrow-clockwise"></i></button>
             <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
@@ -579,12 +526,12 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-3">
-          <div class="detail-row"><span class="detail-label">Código Cliente:</span> <div class="detail-val text-warning" id="det-codigo">-</div></div>
-          <div class="detail-row"><span class="detail-label">Nombre Titular:</span> <div class="detail-val" id="det-nombre">-</div></div>
-          <div class="detail-row"><span class="detail-label">Número OT:</span> <div class="detail-val text-info" id="det-ot">-</div></div>
-          <div class="detail-row"><span class="detail-label">Teléfono:</span> <div class="detail-val text-success" id="det-telefono">-</div></div>
-          <div class="detail-row"><span class="detail-label">Técnico Asignado:</span> <div class="detail-val" id="det-tecnico">-</div></div>
-          <div class="detail-row"><span class="detail-label">Fecha Asignación:</span> <div class="detail-val text-muted" id="det-fecha">-</div></div>
+          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Código Cliente:</span> <div class="detail-val text-warning fw-bold" id="det-codigo">-</div></div>
+          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Nombre Titular:</span> <div class="detail-val fw-bold" id="det-nombre">-</div></div>
+          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Número OT:</span> <div class="detail-val text-info fw-bold" id="det-ot">-</div></div>
+          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Teléfono:</span> <div class="detail-val text-success fw-bold" id="det-telefono">-</div></div>
+          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Técnico Asignado:</span> <div class="detail-val fw-bold" id="det-tecnico">-</div></div>
+          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Fecha Asignación:</span> <div class="detail-val text-muted fw-bold" id="det-fecha">-</div></div>
         </div>
       </div>
     </div>
@@ -605,7 +552,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // ==========================================
-    // CREDENCIALES DE SUPABASE
+    // CREDENCIALES ÚNICAS DE SUPABASE
     // ==========================================
     const supabaseUrl = 'https://lrvitaprtpppqcwhbjba.supabase.co'; 
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxydml0YXBydHBwcHFjd2hiamJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4NTQ2MzQsImV4cCI6MjEwNTQzMDYzNH0.pkw8hR7BwkZa65h3phhVqDG_3-qTdPhZnn5PqPgJHEA'; 
@@ -624,6 +571,20 @@
       "SUCRE": ["TODAS", "Sucre"],
       "LA PAZ": ["TODAS", "La Paz", "El Alto"]
     };
+
+    function togglePasswordVisibility() {
+      const inputPass = document.getElementById('input-pass');
+      const eyeIcon = document.getElementById('eye-icon');
+      if (inputPass) {
+        if (inputPass.type === 'password') {
+          inputPass.type = 'text';
+          if (eyeIcon) eyeIcon.className = 'bi bi-eye-slash';
+        } else {
+          inputPass.type = 'password';
+          if (eyeIcon) eyeIcon.className = 'bi bi-eye';
+        }
+      }
+    }
 
     function alCambiarDepartamentoFiltro() {
       const depSel = document.getElementById('select-filtro-dept').value;
@@ -644,49 +605,64 @@
 
     // --- LOGIN CON SUPABASE ---
     async function ejecutarLogin() {
-      const u = document.getElementById('input-user').value.trim().toLowerCase();
-      const p = document.getElementById('input-pass').value.trim();
+      const uInput = document.getElementById('input-user');
+      const pInput = document.getElementById('input-pass');
       const alertBox = document.getElementById('login-alert');
       const btnLogin = document.getElementById('btn-login-submit');
 
-      if (!u || !p) return alert("Ingrese usuario y contraseña");
+      const u = uInput ? uInput.value.trim().toLowerCase() : '';
+      const p = pInput ? pInput.value.trim() : '';
+
+      if (alertBox) alertBox.classList.add('hidden');
+
+      if (!u || !p) {
+        if (alertBox) {
+          alertBox.innerText = "Por favor, ingresa tu usuario y contraseña.";
+          alertBox.classList.remove('hidden');
+        } else {
+          alert("Por favor, ingresa tu usuario y contraseña.");
+        }
+        return;
+      }
 
       btnLogin.disabled = true;
-      btnLogin.innerText = "Verificando...";
+      btnLogin.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verificando...';
 
       try {
         const { data, error } = await supabase
           .from('usuarios')
           .select('*')
           .eq('usuario', u)
-          .eq('password', p)
-          .single();
+          .eq('password', p);
 
         btnLogin.disabled = false;
-        btnLogin.innerText = "Iniciar Sesión";
+        btnLogin.innerHTML = 'Iniciar Sesión';
 
-        if (data && !error) {
-          data.esTecnico = data.rol && data.rol.toLowerCase().includes('tec');
-          usuarioActual = data;
-          localStorage.setItem("nps_user_profile", JSON.stringify(data));
-          iniciarVistaSegunRol(data);
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const user = data[0];
+          user.esTecnico = user.rol && user.rol.toLowerCase().includes('tec');
+          usuarioActual = user;
+          localStorage.setItem("nps_user_profile", JSON.stringify(user));
+          iniciarVistaSegunRol(user);
         } else {
           if (alertBox) {
-            alertBox.innerText = "Credenciales incorrectas o usuario no encontrado";
+            alertBox.innerText = "Usuario o contraseña incorrectos.";
             alertBox.classList.remove('hidden');
           }
         }
       } catch(e) {
         btnLogin.disabled = false;
-        btnLogin.innerText = "Iniciar Sesión";
+        btnLogin.innerHTML = 'Iniciar Sesión';
         if (alertBox) {
-          alertBox.innerText = "Error de conexión con la base de datos.";
+          alertBox.innerText = "Error de conexión: " + (e.message || "No se pudo acceder a la base de datos.");
           alertBox.classList.remove('hidden');
         }
       }
     }
 
-    // --- CARGAR DASHBOARD ADMIN ROBUSTO ---
+    // --- CARGAR DASHBOARD ADMIN ---
     async function cargarDashboard(forzarNube = false) {
       const dept = document.getElementById('select-filtro-dept') ? document.getElementById('select-filtro-dept').value : 'TODOS';
       const ciu = document.getElementById('select-filtro-ciudad') ? document.getElementById('select-filtro-ciudad').value : 'TODAS';
@@ -974,7 +950,7 @@
               const { data: publicUrlData } = supabase.storage.from('evidencias_nps').getPublicUrl(`fotos/${nombreArchivo}`);
               urlFoto = publicUrlData ? publicUrlData.publicUrl : "";
            } else {
-              urlFoto = base64Compresion; // Fallback
+              urlFoto = base64Compresion;
            }
         }
 
@@ -1181,7 +1157,7 @@
       document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
       document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
       document.getElementById('det-telefono').innerText = item.telefono || 'Sin registrar';
-      document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || usuarioActual.nombre;
+      document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || (usuarioActual ? usuarioActual.nombre : '');
       document.getElementById('det-fecha').innerText = item.fechaAsignacion || 'Hoy';
 
       abrirModalBS('modalDetalleOrden');
@@ -1268,11 +1244,6 @@
       img.src = url;
       img.classList.remove('hidden');
       abrirModalBS('modalVisorFoto');
-    }
-
-    function togglePasswordVisibility() {
-      const inputPass = document.getElementById('input-pass');
-      inputPass.type = inputPass.type === 'password' ? 'text' : 'password';
     }
 
     function autenticarConHuella() {
