@@ -17,8 +17,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
-  <!-- SDK OFICIAL DE SUPABASE (UNA SOLA CARGA) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -54,42 +52,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .welcome-card {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 20px;
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-    }
-
-    .pulse-dot {
-      width: 10px; height: 10px;
-      background-color: var(--accent-green);
-      border-radius: 50%;
-      display: inline-block;
-      box-shadow: 0 0 0 rgba(16, 185, 129, 0.7);
-      animation: pulseGreen 2s infinite;
-    }
-    @keyframes pulseGreen {
-      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-
-    .avatar-container { position: relative; width: 85px; height: 85px; margin: 0 auto 12px; }
-    .avatar-placeholder {
-      width: 85px; height: 85px; border-radius: 50%;
-      background: var(--accent-blue); color: white;
-      font-size: 2.2rem; font-weight: 800;
-      display: flex; align-items: center; justify-content: center;
-      border: 3px solid var(--accent-cyan);
-    }
-
-    .btn, .order-card, .nav-item-btn { transition: transform 0.1s ease, background-color 0.2s ease; }
-    .btn:active, .order-card:active { transform: scale(0.97); }
-
     .bi-card-dark { 
       background: var(--card-bg); 
       border: 1px solid var(--card-border); 
@@ -111,73 +73,19 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    .bottom-nav {
-      position: fixed; bottom: 12px; left: 14px; right: 14px;
-      height: 65px; background: rgba(21, 32, 62, 0.92);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      display: flex; justify-content: space-around; align-items: center;
-      z-index: 1050; padding: 0 6px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    }
-    .nav-item-btn {
-      background: transparent; border: none; color: var(--text-muted);
-      display: flex; flex-direction: column; align-items: center;
-      font-size: 0.7rem; font-weight: 600; transition: all 0.2s ease;
-      position: relative; width: 23%; padding: 8px 0; border-radius: 14px;
-    }
-    .nav-item-btn i { font-size: 1.4rem; margin-bottom: 2px; }
-    .nav-item-btn.active { color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); }
-    .nav-item-btn .badge-count {
-      position: absolute; top: 4px; right: 22%;
-      background: #ef4444; color: white; border-radius: 10px;
-      padding: 1px 6px; font-size: 0.65rem; font-weight: 800;
-    }
-
-    @media (min-width: 992px) { .bottom-nav { display: none !important; } }
-
-    .kpi-strip { background: var(--bg-dark); border: 1px solid var(--card-border); border-radius: 14px; padding: 12px; text-align: center; }
-    .kpi-strip .val { font-size: 1.5rem; font-weight: 800; line-height: 1.1; }
-    .kpi-strip .lbl { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
-
-    .grid-dashboard { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 768px) { .grid-dashboard { grid-template-columns: repeat(2, 1fr); } }
-    @media (min-width: 1200px) { .grid-dashboard { grid-template-columns: repeat(3, 1fr); } }
-
     .order-card { 
       background: var(--card-bg); border: 1px solid var(--card-border); 
       border-radius: 18px; padding: 16px; position: relative; 
       display: flex; flex-direction: column; justify-content: space-between; 
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
-    .order-card.conflictive { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, #15203e 0%, #2a1215 100%); }
 
     .badge-subtle { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
     .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
     .badge-done { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .badge-expired { background: rgba(100, 116, 139, 0.15); color: #cbd5e1; border: 1px solid rgba(100, 116, 139, 0.3); }
 
     .input-group-text { background: #0b1329; border-color: var(--card-border); color: var(--text-muted); }
     .form-control, .form-select { background-color: #0b1329 !important; border-color: var(--card-border) !important; color: #ffffff !important; border-radius: 10px; }
-    .form-control:focus, .form-select:focus { border-color: var(--accent-blue) !important; box-shadow: none !important; }
-
-    .segmented-control { display: flex; background: #0b1329; border: 1px solid var(--card-border); border-radius: 12px; padding: 4px; }
-    .segmented-control .nav-link { flex: 1; text-align: center; color: var(--text-muted); border: none; padding: 8px; font-weight: 600; font-size: 0.8rem; border-radius: 8px; }
-    .segmented-control .nav-link.active { background: var(--card-bg); color: #ffffff; }
-
-    .sync-spinner {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border: 2px solid rgba(56, 189, 248, 0.3);
-      border-radius: 50%;
-      border-top-color: #38bdf8;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
     .hidden { display: none !important; }
   </style>
 </head>
@@ -185,7 +93,7 @@
 
   <div class="container-custom">
 
-    <!-- LOGIN -->
+    <!-- FORMULARIO DE LOGIN -->
     <div id="view-login" class="login-container fade-in-view">
       <div class="login-card">
         <div class="text-center mb-4">
@@ -215,1102 +123,137 @@
           </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4 fs-7">
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="check-remember" checked>
-            <label class="form-check-label text-secondary small" for="check-remember">Recordarme</label>
-          </div>
-          <span class="text-info small fw-semibold" style="cursor: pointer;" onclick="autenticarConHuella()"><i class="bi bi-fingerprint me-1"></i>Huella digital</span>
-        </div>
-
         <button type="button" id="btn-login-submit" onclick="ejecutarLogin()" class="btn btn-primary w-100 fw-bold py-2 shadow-lg" style="border-radius: 12px;">Iniciar Sesión</button>
       </div>
     </div>
 
-    <!-- VISTA TÉCNICO -->
+    <!-- PANEL DEL TÉCNICO -->
     <div id="view-tecnico" class="hidden">
       <div class="bi-card-dark d-flex justify-content-between align-items-center mb-3">
-        <div class="d-flex align-items-center gap-3">
-          <div id="header-avatar-box">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.2rem;" id="avatar-tec">T</div>
-          </div>
-          <div>
-            <h6 class="m-0 text-white fw-bold" id="label-nombre-tec">Técnico</h6>
-            <small class="text-info fw-semibold d-flex align-items-center gap-1" style="font-size: 0.75rem;">
-              <span>Tigo Datared</span> • <span id="label-sync-status">Sincronizado</span>
-              <span id="icon-sync-spinner" class="sync-spinner hidden"></span>
-            </small>
-          </div>
+        <div>
+          <h6 class="m-0 text-white fw-bold" id="label-nombre-tec">Técnico</h6>
+          <small class="text-info fw-semibold" id="label-correo-tec">Tigo Datared</small>
         </div>
-        <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i></button>
+        <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
       </div>
 
-      <!-- SECCIÓN INICIO TECNICO -->
-      <div id="sec-tec-inicio" class="fade-in-view">
-        <div class="welcome-card mb-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-2 py-1 small fw-bold">
-              <span class="pulse-dot me-1"></span> SISTEMA OPERATIVO
-            </span>
-            <small class="text-info fw-bold" id="label-reloj-hora">--:--</small>
-          </div>
-          <h4 class="fw-extrabold text-white mb-1" id="label-saludo-animado">¡Hola! 👋</h4>
-          <p class="text-secondary small mb-3">Listo para gestionar tus encuestas NPS de hoy.</p>
-          
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-primary fw-bold flex-fill py-2" onclick="navegarBottom('pendientes')">
-              <i class="bi bi-clock-history me-1"></i> Ver Pendientes
-            </button>
-          </div>
-        </div>
-
-        <div class="bi-card-dark mb-3">
-          <h6 class="fw-bold text-white mb-2">Resumen Operativo</h6>
-          <div class="row g-2 text-center">
-            <div class="col-4"><div class="kpi-strip"><div class="lbl">ASIGNADAS</div><div class="val text-light" id="tec-kpi-total">0</div></div></div>
-            <div class="col-4"><div class="kpi-strip"><div class="lbl text-success">GESTIONADAS</div><div class="val text-success" id="tec-kpi-gestionadas">0</div></div></div>
-            <div class="col-4"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="tec-kpi-pendientes">0</div></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECCIÓN PENDIENTES TÉCNICO -->
-      <div id="sec-tec-pendientes" class="hidden">
-        <h6 class="fw-bold text-white mb-2"><i class="bi bi-clock-history me-2 text-warning"></i>Órdenes Pendientes</h6>
-        <div id="lista-pendientes" class="grid-dashboard"></div>
-      </div>
-
-      <!-- SECCIÓN HISTÓRICO TÉCNICO -->
-      <div id="sec-tec-historico" class="hidden">
-        <h6 class="fw-bold text-white mb-2"><i class="bi bi-check2-circle me-2 text-success"></i>Histórico Gestionado</h6>
-        <div id="lista-historico-tecnico" class="grid-dashboard"></div>
-      </div>
-
-      <!-- SECCIÓN MI PERFIL TÉCNICO -->
-      <div id="sec-tec-perfil" class="hidden">
-        <div class="bi-card-dark mb-3 text-center">
-          <div class="avatar-container">
-            <div id="perfil-avatar-box">
-              <div class="avatar-placeholder mx-auto" id="perfil-avatar">T</div>
-            </div>
-          </div>
-
-          <h5 class="fw-bold text-white mb-0" id="perfil-nombre">Nombre Técnico</h5>
-          <small class="text-secondary d-block mb-2" id="perfil-correo">correo@datared.com</small>
-          <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3 py-1">Técnico Habilitado</span>
-        </div>
-
-        <div class="bi-card-dark mb-3">
-          <h6 class="fw-bold text-secondary small mb-3">AJUSTES Y OPCIONES</h6>
-          <button class="btn btn-outline-danger w-100 fw-bold mt-2 py-2" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- VISTA ADMIN / SUPERVISOR -->
-    <div id="view-admin" class="hidden">
       <div class="bi-card-dark mb-3">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-          <div class="d-flex align-items-center gap-2">
-            <div class="bg-primary bg-opacity-25 text-primary p-2 rounded-3 border border-primary border-opacity-25"><i class="bi bi-speedometer2 fs-4"></i></div>
-            <div>
-              <h6 class="fw-bold m-0 text-white" id="admin-header-titulo">DATARED GLOBAL - PANEL EJECUTIVO</h6>
-              <small class="text-info fw-bold" style="font-size: 0.72rem;" id="admin-header-region">ÁREA: ENCARGADO NACIONAL | DEP: TODOS</small>
-            </div>
-          </div>
-          
-          <div class="d-flex align-items-center gap-2 flex-wrap">
-            <select id="select-filtro-dept" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="alCambiarDepartamentoFiltro()">
-              <option value="TODOS">Dep: TODOS</option>
-              <option value="TARIJA">Tarija</option>
-              <option value="POTOSI">Potosí</option>
-              <option value="SANTA CRUZ">Santa Cruz</option>
-              <option value="COCHABAMBA">Cochabamba</option>
-              <option value="SUCRE">Sucre</option>
-              <option value="LA PAZ">La Paz</option>
-            </select>
-            <select id="select-filtro-ciudad" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
-              <option value="TODAS">Ciudad: TODAS</option>
-            </select>
-            <select id="select-filtro-tecnico" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="aplicarFiltrosMultiples()">
-              <option value="TODOS">Técnico: TODOS</option>
-            </select>
-            <select id="select-filtro-estado" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="aplicarFiltrosMultiples()">
-              <option value="TODOS">Estado: TODOS</option>
-              <option value="Gestionado">Gestionados</option>
-              <option value="Pendiente">Pendientes / Sin Gestión</option>
-              <option value="Descartado">Descartados / Conflictivos</option>
-            </select>
-            <button onclick="cargarDashboard(true)" class="btn btn-outline-info btn-sm" title="Refrescar datos de la nube"><i class="bi bi-arrow-clockwise"></i></button>
-            <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
-          </div>
-        </div>
-
-        <!-- INDICADORES OPERATIVOS Y NPS -->
-        <h6 class="fw-bold text-info border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
-          <i class="bi bi-card-checklist me-1"></i> 1. INDICADOR DE GESTIÓN OPERATIVA (VOLUMEN)
-        </h6>
-        <div class="row g-2 text-center mb-3">
-          <div class="col-6 col-md-3"><div class="kpi-strip"><div class="lbl">ASIGNADOS</div><div class="val text-light" id="kpi-total">0</div></div></div>
-          <div class="col-6 col-md-3"><div class="kpi-strip"><div class="lbl text-success">GESTIONADOS</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
-          <div class="col-6 col-md-3"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
-          <div class="col-6 col-md-3"><div class="kpi-strip border-danger"><div class="lbl text-danger">DESCARTADOS</div><div class="val text-danger" id="kpi-descartados">0</div></div></div>
-          <div class="col-12"><div class="kpi-strip border-info"><div class="lbl text-info">% COBERTURA DE GESTIÓN</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
-        </div>
-      </div>
-
-      <div class="segmented-control mb-3">
-        <button class="nav-link active" id="tab-tecnicos-btn" onclick="cambiarPestana('tecnicos')"><i class="bi bi-pie-chart-fill me-1"></i> Resumen Visual Dual</button>
-        <button class="nav-link" id="tab-general-btn" onclick="cambiarPestana('general')"><i class="bi bi-card-checklist me-1"></i> Detalle y Filtros</button>
-      </div>
-
-      <div id="sec-tecnicos" class="fade-in-view">
-        <div class="row g-3 mb-3">
-          <div class="col-12 col-md-5">
-            <div class="bi-card-dark text-center h-100 d-flex flex-column justify-content-between">
-              <h6 class="fw-bold text-secondary small">BALANCE GENERAL DE CALIDAD NPS</h6>
-              <div style="position: relative; max-width: 240px; margin: auto;">
-                <canvas id="gaugeChart"></canvas>
-                <div style="position: absolute; bottom: 10px; left: 0; right: 0;">
-                  <h2 class="fw-bold m-0 text-white" id="gauge-score-val">0%</h2>
-                  <span class="badge bg-success" id="gauge-score-lbl">NPS Neto</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-7">
-            <div class="bi-card-dark h-100">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="fw-bold text-secondary small m-0">Rendimiento por Técnico</h6>
-              </div>
-              <div style="position: relative; height: 220px;">
-                <canvas id="barTecnicosChart"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="bi-card-dark mb-3">
-          <h6 class="fw-bold text-info small mb-3"><i class="bi bi-people-fill me-2"></i>DIRECTORIO OFICIAL DE TÉCNICOS EN CAMPO</h6>
-          <div id="lista-directorio-tecnicos" class="grid-dashboard"></div>
-        </div>
-      </div>
-
-      <div id="sec-general" class="hidden">
-        <!-- MÓDULO DE CARGA MASIVA DE ÓRDENES (CSV) -->
-        <div class="bi-card-dark mb-3 p-3 border-info border-opacity-50">
-          <h6 class="fw-bold text-info small mb-3"><i class="bi bi-cloud-arrow-up-fill me-2"></i>CARGA MASIVA DE ÓRDENES (CSV)</h6>
-          <div class="d-flex gap-2 align-items-center flex-wrap">
-            <input class="form-control form-control-sm bg-dark text-white border-secondary flex-fill" type="file" id="input-csv-cargas" accept=".csv" style="max-width: 400px;">
-            <button class="btn btn-sm btn-primary fw-bold px-4" onclick="subirAsignacionesCSV()" id="btn-subir-csv">
-              <i class="bi bi-upload me-1"></i> Subir a Base de Datos
-            </button>
-          </div>
-          <small class="text-secondary mt-2 d-block" id="status-carga-csv">Sube un archivo CSV con encabezados (ej. codigo_cliente, tecnico_asignado, numero_ot, departamento, ciudad).</small>
-        </div>
-        
-        <div class="bi-card-dark mb-3 p-3">
-          <div class="row g-2">
-            <div class="col-12 col-md-6">
-              <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-search me-1"></i> Búsqueda rápida:</label>
-              <input type="text" id="input-buscar" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Buscar OT, cliente..." onkeyup="aplicarFiltrosMultiples()">
-            </div>
-          </div>
-        </div>
-        <div id="contenedor-dashboard" class="grid-dashboard"></div>
+        <h6 class="fw-bold text-white mb-2">Órdenes Asignadas</h6>
+        <div id="lista-pendientes" class="row g-2"></div>
       </div>
     </div>
+
   </div>
 
-  <!-- NAVEGACIÓN INFERIOR -->
-  <div class="bottom-nav hidden" id="app-bottom-nav">
-    <button class="nav-item-btn active" id="bnav-inicio" onclick="navegarBottom('inicio')">
-      <i class="bi bi-grid-1x2-fill"></i>
-      <span>Inicio</span>
-    </button>
-    <button class="nav-item-btn" id="bnav-pendientes" onclick="navegarBottom('pendientes')">
-      <i class="bi bi-clock-history"></i>
-      <span>Pendientes</span>
-      <span class="badge-count hidden" id="bnav-badge-count">0</span>
-    </button>
-    <button class="nav-item-btn" id="bnav-historico" onclick="navegarBottom('historico')">
-      <i class="bi bi-check2-circle"></i>
-      <span>Gestionados</span>
-    </button>
-    <button class="nav-item-btn" id="bnav-perfil" onclick="navegarBottom('perfil')">
-      <i class="bi bi-person-circle"></i>
-      <span>Perfil</span>
-    </button>
-  </div>
-
-  <!-- MODAL GESTIÓN CON FOTO -->
-  <div class="modal fade" id="modalGestion" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary">
-          <h6 class="modal-title fw-bold"><i class="bi bi-shield-check text-primary me-2"></i>Registrar Gestión de Campo</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="modal-fila">
-          <input type="hidden" id="modal-ot">
-          <input type="hidden" id="modal-codigo">
-          
-          <div class="mb-3">
-            <label class="form-label small text-secondary fw-semibold">Estado de la Gestión *</label>
-            <select id="modal-estado" class="form-select bg-dark text-white border-secondary">
-              <option value="Gestionado">Gestionado (Encuesta Enviada)</option>
-              <option value="No le llego la encuesta">No le llegó la encuesta</option>
-              <option value="Telefono no corresponde / Apagado">Teléfono no corresponde / Apagado</option>
-              <option value="UU conflictivo">UU conflictivo (Reclamo)</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label small text-warning fw-bold"><i class="bi bi-pencil-square me-1"></i>Observación / Comentario de Campo</label>
-            <textarea id="modal-observacion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Escriba detalles relevantes..."></textarea>
-          </div>
-
-          <div class="mb-3 p-3 rounded border border-warning border-opacity-25 bg-dark bg-opacity-50">
-            <label class="form-label small text-warning fw-bold d-block text-center mb-2">
-              <i class="bi bi-camera-fill me-1"></i>Respaldo Fotográfico OBLIGATORIO *
-            </label>
-            <div class="d-flex gap-2 mb-2">
-              <label class="btn btn-outline-info btn-sm flex-fill fw-bold mb-0 py-2" style="font-size: 0.78rem; cursor: pointer;">
-                <i class="bi bi-camera-fill me-1"></i> Tomar Foto
-                <input type="file" id="modal-foto-camara" class="hidden" accept="image/*" capture="environment" onchange="procesarFotoSeleccionada(this)">
-              </label>
-              <label class="btn btn-outline-warning btn-sm flex-fill fw-bold mb-0 py-2" style="font-size: 0.78rem; cursor: pointer;">
-                <i class="bi bi-image-fill me-1"></i> Galería
-                <input type="file" id="modal-foto-galeria" class="hidden" accept="image/*" onchange="procesarFotoSeleccionada(this)">
-              </label>
-            </div>
-            <div id="label-archivo-elegido" class="text-danger small fw-bold text-center">⚠ Falta adjuntar foto de respaldo</div>
-          </div>
-        </div>
-        <div class="modal-footer border-secondary">
-          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" id="btn-guardar" class="btn btn-sm btn-primary fw-bold" onclick="guardarFormulario()">Guardar Gestión</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL DETALLE DE ÓRDEN TÉCNICO -->
-  <div class="modal fade" id="modalDetalleOrden" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary">
-          <h6 class="modal-title fw-bold"><i class="bi bi-card-heading text-info me-2"></i>Ficha de la Orden</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-3">
-          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Código Cliente:</span> <div class="detail-val text-warning fw-bold" id="det-codigo">-</div></div>
-          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Nombre Titular:</span> <div class="detail-val fw-bold" id="det-nombre">-</div></div>
-          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Número OT:</span> <div class="detail-val text-info fw-bold" id="det-ot">-</div></div>
-          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Teléfono:</span> <div class="detail-val text-success fw-bold" id="det-telefono">-</div></div>
-          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Técnico Asignado:</span> <div class="detail-val fw-bold" id="det-tecnico">-</div></div>
-          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Fecha Asignación:</span> <div class="detail-val text-muted fw-bold" id="det-fecha">-</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- VISOR DE FOTO -->
-  <div class="modal fade" id="modalVisorFoto" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary"><h6 class="modal-title fw-bold">Evidencia Fotográfica</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body text-center p-3">
-          <img id="visor-img" class="img-fluid rounded hidden">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // ==========================================
-    // INICIALIZACIÓN ÚNICA DE SUPABASE EN TODO EL PROYECTO
-    // ==========================================
+    // Inicialización única de Supabase
     const supabaseUrl = 'https://lrvitaprtpppqcwhbjba.supabase.co'; 
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxydml0YXBydHBwcHFjd2hiamJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4NTQ2MzQsImV4cCI6MjEwNTQzMDYzNH0.pkw8hR7BwkZa65h3phhVqDG_3-qTdPhZnn5PqPgJHEA'; 
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     let usuarioActual = null;
-    let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
-    let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
-
-    const MAPA_CIUDADES = {
-      "TODOS": ["TODAS"],
-      "TARIJA": ["TODAS", "Tarija", "Yacuiba", "Villamontes"],
-      "POTOSI": ["TODAS", "Potosí", "Villazón", "Tupiza"],
-      "SANTA CRUZ": ["TODAS", "Santa Cruz", "Montero", "Camiri"],
-      "COCHABAMBA": ["TODAS", "Cochabamba", "Quillacollo", "Sacaba"],
-      "SUCRE": ["TODAS", "Sucre"],
-      "LA PAZ": ["TODAS", "La Paz", "El Alto"]
-    };
 
     function togglePasswordVisibility() {
       const inputPass = document.getElementById('input-pass');
       const eyeIcon = document.getElementById('eye-icon');
-      if (inputPass) {
-        if (inputPass.type === 'password') {
-          inputPass.type = 'text';
-          if (eyeIcon) eyeIcon.className = 'bi bi-eye-slash';
-        } else {
-          inputPass.type = 'password';
-          if (eyeIcon) eyeIcon.className = 'bi bi-eye';
-        }
+      if (inputPass.type === 'password') {
+        inputPass.type = 'text';
+        eyeIcon.className = 'bi bi-eye-slash';
+      } else {
+        inputPass.type = 'password';
+        eyeIcon.className = 'bi bi-eye';
       }
     }
 
-    function alCambiarDepartamentoFiltro() {
-      const depSel = document.getElementById('select-filtro-dept').value;
-      const ciuSelect = document.getElementById('select-filtro-ciudad');
-      ciuSelect.innerHTML = '';
-
-      const ciudades = MAPA_CIUDADES[depSel] || ["TODAS"];
-      ciudades.forEach(c => {
-        let opt = document.createElement('option');
-        opt.value = c.toUpperCase();
-        opt.innerText = c === "TODAS" ? "Ciudad: TODAS" : c;
-        ciuSelect.appendChild(opt);
-      });
-
-      renderizarDirectorioTecnicosAdminUI();
-      cargarDashboard(true);
-    }
-
-    // --- LOGIN CON SUPABASE ---
     async function ejecutarLogin() {
-      const uInput = document.getElementById('input-user');
-      const pInput = document.getElementById('input-pass');
+      const u = document.getElementById('input-user').value.trim().toLowerCase();
+      const p = document.getElementById('input-pass').value.trim();
       const alertBox = document.getElementById('login-alert');
-      const btnLogin = document.getElementById('btn-login-submit');
+      const btn = document.getElementById('btn-login-submit');
 
-      const u = uInput ? uInput.value.trim().toLowerCase() : '';
-      const p = pInput ? pInput.value.trim() : '';
-
-      if (alertBox) alertBox.classList.add('hidden');
+      alertBox.classList.add('hidden');
 
       if (!u || !p) {
-        if (alertBox) {
-          alertBox.innerText = "Por favor, ingresa tu usuario y contraseña.";
-          alertBox.classList.remove('hidden');
-        } else {
-          alert("Por favor, ingresa tu usuario y contraseña.");
-        }
+        alertBox.innerText = "Ingresa tu usuario y contraseña.";
+        alertBox.classList.remove('hidden');
         return;
       }
 
-      btnLogin.disabled = true;
-      btnLogin.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verificando...';
+      btn.disabled = true;
+      btn.innerHTML = 'Verificando...';
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('usuarios')
           .select('*')
           .eq('usuario', u)
           .eq('password', p);
 
-        btnLogin.disabled = false;
-        btnLogin.innerHTML = 'Iniciar Sesión';
+        btn.disabled = false;
+        btn.innerHTML = 'Iniciar Sesión';
 
         if (error) throw error;
 
         if (data && data.length > 0) {
-          const user = data[0];
-          user.esTecnico = user.rol && user.rol.toLowerCase().includes('tec');
-          usuarioActual = user;
-          localStorage.setItem("nps_user_profile", JSON.stringify(user));
-          iniciarVistaSegunRol(user);
+          usuarioActual = data[0];
+          document.getElementById('view-login').classList.add('hidden');
+          document.getElementById('view-tecnico').classList.remove('hidden');
+          document.getElementById('label-nombre-tec').innerText = usuarioActual.nombre || usuarioActual.usuario;
+          document.getElementById('label-correo-tec').innerText = usuarioActual.usuario;
+          cargarOrdenesTecnico();
         } else {
-          if (alertBox) {
-            alertBox.innerText = "Usuario o contraseña incorrectos.";
-            alertBox.classList.remove('hidden');
-          }
-        }
-      } catch(e) {
-        btnLogin.disabled = false;
-        btnLogin.innerHTML = 'Iniciar Sesión';
-        if (alertBox) {
-          alertBox.innerText = "Error de conexión: " + (e.message || "No se pudo acceder a la base de datos.");
+          alertBox.innerText = "Usuario o contraseña incorrectos.";
           alertBox.classList.remove('hidden');
         }
-      }
-    }
-
-    // --- CARGAR DASHBOARD ADMIN ---
-    async function cargarDashboard(forzarNube = false) {
-      const dept = document.getElementById('select-filtro-dept') ? document.getElementById('select-filtro-dept').value : 'TODOS';
-      const ciu = document.getElementById('select-filtro-ciudad') ? document.getElementById('select-filtro-ciudad').value : 'TODAS';
-
-      try {
-        let query = supabase.from('gestiones').select('*').range(0, 9999);
-        
-        if (dept !== 'TODOS') {
-          query = query.ilike('departamento', dept);
-        }
-        if (ciu !== 'TODAS') {
-          query = query.ilike('ciudad', ciu);
-        }
-
-        const { data, error } = await query;
-        if (data && !error) {
-           todosLosRegistros = data;
-           procesarYRenderizarDashboard(data);
-        }
-      } catch(e) { console.error(e); }
-    }
-
-    function procesarYRenderizarDashboard(registrosDb) {
-      let cTotal = registrosDb.length;
-      let cGestionados = 0;
-      let cPendientes = 0;
-      let cDescartados = 0;
-      let mapTecnicos = {};
-
-      registrosDb.forEach(item => {
-        let st = (item.estado || '').trim().toLowerCase();
-        
-        if (st === 'gestionado') {
-          cGestionados++;
-        } else if (st === 'pendiente' || st === 'sin gestion' || st === '') {
-          cPendientes++;
-        } else {
-          cDescartados++;
-        }
-
-        let nombreTec = (item.tecnico_asignado || 'Sin Asignar').trim().toUpperCase();
-        if(!mapTecnicos[nombreTec]) mapTecnicos[nombreTec] = { total: 0, gestionados: 0 };
-        mapTecnicos[nombreTec].total++;
-        if (st === 'gestionado') mapTecnicos[nombreTec].gestionados++;
-      });
-
-      document.getElementById('kpi-total').innerText = cTotal;
-      document.getElementById('kpi-gestionados').innerText = cGestionados;
-      document.getElementById('kpi-pendientes').innerText = cPendientes;
-      document.getElementById('kpi-descartados').innerText = cDescartados;
-      
-      const pctCobertura = cTotal > 0 ? Math.round((cGestionados / cTotal) * 100) : 0;
-      document.getElementById('kpi-pct-prom').innerText = pctCobertura + "%";
-
-      let arrayTecnicos = Object.keys(mapTecnicos).map(nombre => {
-        return {
-          nombre: nombre,
-          pctAvance: mapTecnicos[nombre].total > 0 ? Math.round((mapTecnicos[nombre].gestionados / mapTecnicos[nombre].total) * 100) : 0
-        };
-      }).sort((a,b) => b.pctAvance - a.pctAvance);
-      
-      renderizarGraficoBarras(arrayTecnicos);
-      renderizarGraficoGauge(pctCobertura);
-      renderizarDirectorioTecnicosAdminUI();
-      aplicarFiltrosMultiples();
-    }
-
-    // --- FILTROS MÚLTIPLES ---
-    function aplicarFiltrosMultiples() {
-      let filtroBusqueda = (document.getElementById('input-buscar') ? document.getElementById('input-buscar').value : '').toLowerCase();
-      let filtroTecnico = (document.getElementById('select-filtro-tecnico') ? document.getElementById('select-filtro-tecnico').value : 'TODOS');
-      let filtroEstado = (document.getElementById('select-filtro-estado') ? document.getElementById('select-filtro-estado').value : 'TODOS');
-
-      let resultado = todosLosRegistros.filter(r => {
-        let coincideBusqueda = true;
-        if (filtroBusqueda) {
-          let textoCompleto = ((r.nombre_usuario || '') + ' ' + (r.numero_ot || '') + ' ' + (r.codigo_cliente || '') + ' ' + (r.tecnico_asignado || '')).toLowerCase();
-          coincideBusqueda = textoCompleto.indexOf(filtroBusqueda) !== -1;
-        }
-
-        let coincideTecnico = true;
-        if (filtroTecnico !== "TODOS") {
-          let tecSelected = filtroTecnico.trim().toUpperCase();
-          let currentTec = (r.tecnico_asignado || '').trim().toUpperCase();
-          coincideTecnico = (currentTec === tecSelected);
-        }
-
-        let coincideEstado = true;
-        if (filtroEstado !== "TODOS") {
-          let st = (r.estado || '').trim().toLowerCase();
-          if (filtroEstado === "Gestionado") {
-            coincideEstado = (st === "gestionado");
-          } else if (filtroEstado === "Pendiente") {
-            coincideEstado = (st === "pendiente" || st === "sin gestion" || st === "");
-          } else if (filtroEstado === "Descartado") {
-            coincideEstado = (st !== "gestionado" && st !== "pendiente" && st !== "sin gestion" && st !== "");
-          }
-        }
-
-        return coincideBusqueda && coincideTecnico && coincideEstado;
-      });
-
-      renderizarTarjetasAdmin(resultado, 'contenedor-dashboard');
-    }
-
-    function renderizarTarjetasAdmin(lista, idContenedor) {
-      const contenedor = document.getElementById(idContenedor);
-      contenedor.innerHTML = '';
-      if (lista.length === 0) {
-        contenedor.innerHTML = '<div class="text-secondary text-center small py-4 col-12">No hay órdenes registradas.</div>';
-        return;
-      }
-
-      lista.forEach(r => {
-        let st = (r.estado || '').trim().toLowerCase();
-        const isConflict = st !== 'gestionado' && st !== 'pendiente' && st !== 'sin gestion' && st !== '';
-        let badgeStyle = st === 'gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
-        let tieneEvidencia = r.evidencia_url && r.evidencia_url.length > 5;
-
-        contenedor.innerHTML += `
-          <div class="order-card fade-in-view ${isConflict ? 'conflictive' : ''}">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle ${badgeStyle}">${r.estado || 'Pendiente'}</span>
-                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numero_ot || 'S/N'}</small>
-              </div>
-              <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombre_usuario || 'Cliente'}</div>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
-              <span class="text-secondary fw-bold" style="font-size: 0.72rem;"><i class="bi bi-person me-1"></i>${r.tecnico_asignado || 'Sin Asignar'}</span>
-              ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-2 small" style="font-size: 0.72rem;" onclick="verFotoModal('${r.evidencia_url}')">Ver Foto</button>` : ''}
-            </div>
-          </div>`;
-      });
-    }
-
-    // --- CARGAR PENDIENTES TÉCNICO ---
-    async function cargarPendientesTecnico() {
-      if(!usuarioActual) return;
-      mostrarSyncStatus(true);
-      try {
-        const { data, error } = await supabase
-          .from('gestiones')
-          .select('*')
-          .ilike('tecnico_asignado', usuarioActual.nombre)
-          .or('estado.ilike.pendiente,estado.ilike.sin gestion,estado.is.null');
-
-        if (data && !error) {
-          pendientesTecnicoActual = data.map(item => ({
-             fila: item.id,
-             idGestion: item.id,
-             codigoCliente: item.codigo_cliente,
-             nombreUsuario: item.nombre_usuario,
-             tecnicoAsignado: item.tecnico_asignado,
-             fechaAsignacion: item.fecha_asignacion,
-             estado: item.estado || 'Pendiente',
-             numeroOT: item.numero_ot,
-             telefono: item.telefono
-          }));
-          renderizarPendientesTecnicoUI();
-        }
-      } catch(e) {}
-      mostrarSyncStatus(false);
-    }
-
-    // --- CARGAR HISTÓRICO TÉCNICO ---
-    async function cargarHistoricoTecnico() {
-      if(!usuarioActual) return;
-      try {
-        const { data, error } = await supabase
-          .from('gestiones')
-          .select('*')
-          .ilike('tecnico_asignado', usuarioActual.nombre)
-          .not('estado', 'ilike', 'pendiente');
-
-        if (data && !error) {
-          historicoTecnicoActual = data.map(item => ({
-             fila: item.id,
-             idGestion: item.id,
-             codigoCliente: item.codigo_cliente,
-             nombreUsuario: item.nombre_usuario,
-             numeroOT: item.numero_ot,
-             estado: item.estado,
-             evidencia: item.evidencia_url
-          }));
-          renderizarHistoricoTecnicoUI();
-        }
-      } catch(e) {}
-    }
-
-    // --- CARGAR DIRECTORIO DE TÉCNICOS ---
-    async function cargarDirectorioTecnicosAdmin() {
-      try {
-        const { data, error } = await supabase.from('usuarios').select('*');
-        if (data && !error) {
-          directorioTecnicos = data;
-          renderizarDirectorioTecnicosAdminUI();
-        }
-      } catch(e) {}
-    }
-
-    function renderizarDirectorioTecnicosAdminUI() {
-      const cont = document.getElementById('lista-directorio-tecnicos');
-      if (!cont) return;
-      cont.innerHTML = '';
-
-      const deptFiltro = (document.getElementById('select-filtro-dept') ? document.getElementById('select-filtro-dept').value : 'TODOS').toUpperCase();
-      const ciuFiltro = (document.getElementById('select-filtro-ciudad') ? document.getElementById('select-filtro-ciudad').value : 'TODAS').toUpperCase();
-
-      let filtrados = directorioTecnicos.filter(t => {
-        let d = (t.departamento || "").toUpperCase();
-        let c = (t.ciudad || "").toUpperCase();
-        let matchDept = (deptFiltro === "TODOS" || d === deptFiltro);
-        let matchCiu = (ciuFiltro === "TODAS" || c === ciuFiltro);
-        return matchDept && matchCiu;
-      });
-
-      const selTec = document.getElementById('select-filtro-tecnico');
-      if (selTec) {
-        let valActual = selTec.value;
-        selTec.innerHTML = '<option value="TODOS">Técnico: TODOS</option>';
-        filtrados.forEach(t => {
-          if (t.nombre) {
-            let opt = document.createElement('option');
-            opt.value = t.nombre;
-            opt.innerText = t.nombre;
-            selTec.appendChild(opt);
-          }
-        });
-        if (Array.from(selTec.options).some(o => o.value === valActual)) {
-          selTec.value = valActual;
-        }
-      }
-
-      if (filtrados.length === 0) {
-        cont.innerHTML = '<div class="text-secondary text-center small py-3 col-12">No hay técnicos disponibles.</div>';
-        return;
-      }
-
-      filtrados.forEach((t) => {
-        let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:40px; height:40px; font-size:1.1rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
-        cont.innerHTML += `
-          <div class="bi-card-dark p-2 d-flex justify-content-between align-items-center mb-2">
-            <div class="d-flex align-items-center gap-2">
-              ${avatarHtml}
-              <div>
-                <h6 class="m-0 text-white fw-bold" style="font-size:0.85rem;">${t.nombre}</h6>
-                <small class="text-secondary" style="font-size:0.7rem;">${t.departamento || ''} • ${t.ciudad || ''}</small>
-              </div>
-            </div>
-          </div>`;
-      });
-    }
-
-    // --- GUARDAR GESTIÓN Y FOTO EN SUPABASE ---
-    async function guardarFormulario() {
-      const filaId = document.getElementById('modal-fila').value;
-      const numeroOT = document.getElementById('modal-ot').value.trim();
-      const codigoCliente = document.getElementById('modal-codigo').value.trim();
-      const estado = document.getElementById('modal-estado').value;
-      const obs = document.getElementById('modal-observacion').value.trim();
-
-      if (!base64Compresion && !archivoFotoSeleccionado) {
-        alert("⚠ DEBE ADJUNTAR UNA FOTO DE RESPALDO OBLIGATORIAMENTE.");
-        return;
-      }
-
-      const btnGuardar = document.getElementById('btn-guardar');
-      btnGuardar.disabled = true;
-      btnGuardar.innerText = "Subiendo archivo...";
-
-      try {
-        let urlFoto = "";
-        if (base64Compresion) {
-           const resBlob = await fetch(base64Compresion);
-           const blob = await resBlob.blob();
-           const nombreArchivo = `${numeroOT || codigoCliente}_${Date.now()}.jpg`;
-
-           const { error: uploadErr } = await supabase.storage
-             .from('evidencias_nps')
-             .upload(`fotos/${nombreArchivo}`, blob, { contentType: 'image/jpeg' });
-
-           if (!uploadErr) {
-              const { data: publicUrlData } = supabase.storage.from('evidencias_nps').getPublicUrl(`fotos/${nombreArchivo}`);
-              urlFoto = publicUrlData ? publicUrlData.publicUrl : "";
-           } else {
-              urlFoto = base64Compresion;
-           }
-        }
-
-        const { error } = await supabase
-          .from('gestiones')
-          .update({
-             estado: estado,
-             observacion: obs,
-             evidencia_url: urlFoto
-          })
-          .eq('id', filaId);
-
-        if (error) throw error;
-
-        btnGuardar.disabled = false;
-        btnGuardar.innerText = "Guardar Gestión";
-        
-        pendientesTecnicoActual = pendientesTecnicoActual.filter(item => item.fila != filaId);
-        renderizarPendientesTecnicoUI();
-        
-        alert("¡Gestión y foto guardadas con éxito!");
-        ocultarModalBS('modalGestion');
-        
-        archivoFotoSeleccionado = null;
-        base64Compresion = null;
-        cargarHistoricoTecnico();
-
-      } catch(e) {
-        btnGuardar.disabled = false;
-        btnGuardar.innerText = "Guardar Gestión";
-        alert("Error de conexión al guardar.");
-      }
-    }
-
-    // --- CARGA MASIVA DE CSV (ADMIN) ---
-    async function subirAsignacionesCSV() {
-      const fileInput = document.getElementById('input-csv-cargas');
-      const statusLbl = document.getElementById('status-carga-csv');
-      const btn = document.getElementById('btn-subir-csv');
-
-      if (!fileInput.files || fileInput.files.length === 0) {
-        return alert("Por favor, selecciona un archivo CSV primero.");
-      }
-
-      const file = fileInput.files[0];
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
-      statusLbl.className = "text-warning mt-2 d-block fw-bold small";
-      statusLbl.innerText = "⏳ Leyendo archivo y subiendo a la nube...";
-
-      try {
-        const text = await file.text();
-        const lineas = text.split('\n').filter(line => line.trim() !== '');
-        
-        if (lineas.length < 2) throw new Error("El archivo está vacío o no tiene registros.");
-
-        const separador = lineas[0].includes(';') ? ';' : ',';
-        const headers = lineas[0].split(separador).map(h => h.trim().toLowerCase().replace(/["']/g, ''));
-        
-        const registrosInsertar = [];
-        const hoy = new Date().toISOString().split('T')[0];
-
-        for (let i = 1; i < lineas.length; i++) {
-          const valores = lineas[i].split(separador).map(v => v.trim().replace(/["']/g, ''));
-          let obj = {};
-          
-          headers.forEach((header, index) => {
-            if (header && valores[index]) {
-              obj[header] = valores[index];
-            }
-          });
-
-          if (obj.codigo_cliente || obj.numero_ot) {
-            obj.estado = obj.estado || 'Pendiente';
-            obj.fecha_asignacion = obj.fecha_asignacion || hoy;
-            registrosInsertar.push(obj);
-          }
-        }
-
-        if (registrosInsertar.length === 0) {
-          throw new Error("No se encontraron registros válidos.");
-        }
-
-        const { error } = await supabase.from('gestiones').insert(registrosInsertar);
-        if (error) throw error;
-
-        statusLbl.className = "text-success mt-2 d-block fw-bold small";
-        statusLbl.innerText = `¡Éxito! Se asignaron ${registrosInsertar.length} nuevas órdenes.`;
-        fileInput.value = '';
-        
-        cargarDashboard(true);
-
       } catch (err) {
-        statusLbl.className = "text-danger mt-2 d-block fw-bold small";
-        statusLbl.innerText = "⚠ Error: " + err.message;
+        btn.disabled = false;
+        btn.innerHTML = 'Iniciar Sesión';
+        alertBox.innerText = "Error de autenticación: " + err.message;
+        alertBox.classList.remove('hidden');
       }
-
-      btn.disabled = false;
-      btn.innerHTML = '<i class="bi bi-upload me-1"></i> Subir a Base de Datos';
     }
 
-    // --- GRÁFICOS Y UTILIDADES ---
-    function renderizarGraficoGauge(scoreVal) {
-      const ctx = document.getElementById('gaugeChart');
-      if (!ctx) return;
-      if (chartGauge) chartGauge.destroy();
+    async function cargarOrdenesTecnico() {
+      const cont = document.getElementById('lista-pendientes');
+      cont.innerHTML = '<div class="text-secondary small">Cargando órdenes...</div>';
 
-      let val = Math.max(0, Math.min(100, scoreVal));
+      try {
+        const correo = usuarioActual.usuario.trim().toLowerCase();
+        const nombre = (usuarioActual.nombre || '').trim();
 
-      chartGauge = new Chart(ctx.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-          labels: ['Score', 'Resto'],
-          datasets: [{
-            data: [val, 100 - val],
-            backgroundColor: [scoreVal >= 50 ? '#10b981' : '#38bdf8', '#23335a'],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          rotation: -90,
-          circumference: 180,
-          cutout: '75%',
-          plugins: { legend: { display: false } }
+        // Consulta doble: busca coincidencia por correo O por nombre técnico
+        const { data, error } = await supabaseClient
+          .from('gestiones')
+          .select('*')
+          .or(`tecnico_asignado.ilike.${correo},nombre_tecnico.ilike.%${nombre}%`);
+
+        if (error) throw error;
+
+        cont.innerHTML = '';
+        if (!data || data.length === 0) {
+          cont.innerHTML = '<div class="text-secondary small">No tienes órdenes asignadas.</div>';
+          return;
         }
-      });
-    }
 
-    function renderizarGraficoBarras(tecnicos) {
-      const ctx = document.getElementById('barTecnicosChart');
-      if (!ctx) return;
-      if (chartBar) chartBar.destroy();
-
-      const nombres = tecnicos.map(t => t.nombre);
-      const avances = tecnicos.map(t => t.pctAvance);
-
-      chartBar = new Chart(ctx.getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: nombres,
-          datasets: [{
-            label: '% Cumplimiento',
-            data: avances,
-            backgroundColor: '#38bdf8',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { 
-            x: { max: 100, ticks: { color: '#8e9bb4', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-            y: { ticks: { color: '#f8fafc' }, grid: { display: false } }
-          }
-        }
-      });
-    }
-
-    function renderizarPendientesTecnicoUI() {
-      const contenedor = document.getElementById('lista-pendientes');
-      if (!contenedor) return;
-
-      document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
-      document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
-      
-      const badgeEl = document.getElementById('bnav-badge-count');
-      if (pendientesTecnicoActual.length > 0) {
-        badgeEl.innerText = pendientesTecnicoActual.length;
-        badgeEl.classList.remove('hidden');
-      } else { badgeEl.classList.add('hidden'); }
-
-      contenedor.innerHTML = '';
-      if (pendientesTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes.</div>';
-        return;
-      }
-
-      pendientesTecnicoActual.forEach((item, index) => {
-        contenedor.innerHTML += `
-          <div class="order-card mb-3 fade-in-view">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle badge-pending">Pendiente</span>
-                <span class="text-info fw-semibold" style="font-size: 0.72rem;">OT #${item.numeroOT || 'S/N'}</span>
+        data.forEach(item => {
+          cont.innerHTML += `
+            <div class="col-12 col-md-6">
+              <div class="order-card p-3 mb-2">
+                <div class="d-flex justify-content-between">
+                  <span class="badge-subtle ${item.estado === 'Gestionado' ? 'badge-done' : 'badge-pending'}">${item.estado || 'Pendiente'}</span>
+                  <small class="text-secondary">Código: ${item.codigo_cliente || 'S/C'}</small>
+                </div>
+                <div class="fw-bold text-white mt-2">${item.nombre_usuario || 'Cliente'}</div>
+                <small class="text-info d-block mt-1">OT: ${item.id_gestion || item.numero_ot || 'S/N'}</small>
               </div>
-              <h6 class="fw-bold text-white m-0">Cliente #${item.codigoCliente || 'S/C'}</h6>
-              <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${item.nombreUsuario || 'Titular'}</small>
-            </div>
-            <div class="d-flex gap-2 mt-2 border-top border-secondary border-opacity-25 pt-2">
-              <button class="btn btn-sm btn-outline-info flex-fill fw-bold py-2" onclick="verDetallesOrdenTecnico(${index})"><i class="bi bi-eye me-1"></i> Detalles</button>
-              <button class="btn btn-sm btn-primary flex-fill fw-bold py-2" onclick="abrirModal('${item.fila}', '${item.numeroOT}', '${item.codigoCliente}')"><i class="bi bi-check2-circle me-1"></i> Gestionar</button>
-            </div>
-          </div>`;
-      });
-    }
-
-    function verDetallesOrdenTecnico(idx) {
-      let item = pendientesTecnicoActual[idx];
-      if (!item) return;
-
-      document.getElementById('det-codigo').innerText = item.codigoCliente || 'N/A';
-      document.getElementById('det-nombre').innerText = item.nombreUsuario || 'N/A';
-      document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
-      document.getElementById('det-telefono').innerText = item.telefono || 'Sin registrar';
-      document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || (usuarioActual ? usuarioActual.nombre : '');
-      document.getElementById('det-fecha').innerText = item.fechaAsignacion || 'Hoy';
-
-      abrirModalBS('modalDetalleOrden');
-    }
-
-    function renderizarHistoricoTecnicoUI() {
-      const contenedor = document.getElementById('lista-historico-tecnico');
-      if (!contenedor) return;
-      document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
-      contenedor.innerHTML = '';
-
-      if (historicoTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes gestiones en tu histórico.</div>';
-        return;
-      }
-
-      historicoTecnicoActual.forEach((r) => {
-        let isConflict = r.estado !== 'Gestionado' && r.estado !== 'Pendiente';
-        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
-        let tieneEvidencia = r.evidencia && r.evidencia.length > 5;
-
-        contenedor.innerHTML += `
-          <div class="order-card mb-3 fade-in-view ${isConflict ? 'conflictive' : ''}">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
-                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT || 'S/N'}</small>
-              </div>
-              <h6 class="fw-bold text-white m-0">Cliente #${r.codigoCliente || 'S/C'}</h6>
-              <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${r.nombreUsuario || 'Cliente'}</small>
-            </div>
-            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary border-opacity-25">
-              ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-3 small fw-bold" onclick="verFotoModal('${r.evidencia}')"><i class="bi bi-image me-1"></i>Ver Evidencia</button>` : '<span class="text-secondary small">Sin Foto</span>'}
-            </div>
-          </div>`;
-      });
-    }
-
-    function abrirModal(fila, numeroOT, codigoCliente) {
-      document.getElementById('modal-fila').value = fila;
-      document.getElementById('modal-ot').value = numeroOT || '';
-      document.getElementById('modal-codigo').value = codigoCliente || '';
-      document.getElementById('modal-estado').value = 'Gestionado';
-      document.getElementById('modal-observacion').value = '';
-      archivoFotoSeleccionado = null;
-      base64Compresion = null;
-      abrirModalBS('modalGestion');
-    }
-
-    function procesarFotoSeleccionada(input) {
-      if (input.files && input.files[0]) {
-        archivoFotoSeleccionado = input.files[0];
-        convertirYComprimirFoto(archivoFotoSeleccionado).then(b64 => {
-          base64Compresion = b64;
-          document.getElementById('label-archivo-elegido').className = "text-success small fw-bold text-center";
-          document.getElementById('label-archivo-elegido').innerText = "✓ Respaldo fotográfico adjuntado";
+            </div>`;
         });
+      } catch (err) {
+        cont.innerHTML = '<div class="text-danger small">Error al cargar datos: ' + err.message + '</div>';
       }
-    }
-
-    function convertirYComprimirFoto(file) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement('canvas');
-            let maxDimension = 800;
-            let width = img.width, height = img.height;
-            if (width > height && width > maxDimension) { height = Math.round((height * maxDimension) / width); width = maxDimension; }
-            else if (height > maxDimension) { width = Math.round((width * maxDimension) / height); height = maxDimension; }
-            canvas.width = width; canvas.height = height;
-            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 0.5));
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function verFotoModal(url) {
-      const img = document.getElementById('visor-img');
-      img.src = url;
-      img.classList.remove('hidden');
-      abrirModalBS('modalVisorFoto');
-    }
-
-    function autenticarConHuella() {
-      const perfil = localStorage.getItem("nps_user_profile");
-      if (perfil) iniciarVistaSegunRol(JSON.parse(perfil));
-      else alert("Inicie sesión primero.");
-    }
-
-    function cambiarPestana(p) {
-      document.getElementById('tab-tecnicos-btn').classList.toggle('active', p === 'tecnicos');
-      document.getElementById('tab-general-btn').classList.toggle('active', p === 'general');
-      document.getElementById('sec-tecnicos').classList.toggle('hidden', p !== 'tecnicos');
-      document.getElementById('sec-general').classList.toggle('hidden', p !== 'general');
-    }
-
-    function navegarBottom(s) {
-      document.querySelectorAll('.nav-item-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('bnav-' + s).classList.add('active');
-      ['inicio', 'pendientes', 'historico', 'perfil'].forEach(id => {
-        document.getElementById('sec-tec-' + id).classList.add('hidden');
-      });
-      document.getElementById('sec-tec-' + s).classList.remove('hidden');
-      if (s === 'pendientes') cargarPendientesTecnico();
-      if (s === 'historico') cargarHistoricoTecnico();
-    }
-
-    function abrirModalBS(id) { 
-      const el = document.getElementById(id);
-      if(el) {
-        let instance = bootstrap.Modal.getInstance(el);
-        if(!instance) instance = new bootstrap.Modal(el);
-        instance.show();
-      }
-    }
-    
-    function ocultarModalBS(id) { 
-      const el = document.getElementById(id);
-      if(el) {
-        let instance = bootstrap.Modal.getInstance(el);
-        if(instance) instance.hide();
-      }
-    }
-
-    function actualizarSaludoHora() {
-      const h = new Date().getHours();
-      const m = new Date().getMinutes().toString().padStart(2,'0');
-      const el = document.getElementById('label-reloj-hora');
-      if(el) el.innerText = `${h}:${m}`;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const p = localStorage.getItem("nps_user_profile");
-      if (p) {
-        try {
-          usuarioActual = JSON.parse(p);
-          iniciarVistaSegunRol(usuarioActual);
-        } catch(e) {}
-      }
-      setInterval(actualizarSaludoHora, 30000);
-    });
-
-    function iniciarVistaSegunRol(res) {
-      document.getElementById('view-login').classList.add('hidden');
-      if (res.esTecnico || (res.rol && res.rol.toLowerCase().includes('tec'))) {
-        document.getElementById('view-tecnico').classList.remove('hidden');
-        document.getElementById('app-bottom-nav').classList.remove('hidden');
-        document.getElementById('label-nombre-tec').innerText = res.nombre;
-        document.getElementById('perfil-nombre').innerText = res.nombre;
-        document.getElementById('perfil-correo').innerText = res.usuario;
-        cargarPendientesTecnico();
-        cargarHistoricoTecnico();
-      } else {
-        document.getElementById('view-admin').classList.remove('hidden');
-        document.getElementById('admin-header-titulo').innerText = `${res.nombre} (${res.rol})`;
-        cargarDirectorioTecnicosAdmin().then(() => {
-          cargarDashboard();
-        });
-      }
-    }
-
-    function mostrarSyncStatus(s) {
-      const lbl = document.getElementById('label-sync-status');
-      const sp = document.getElementById('icon-sync-spinner');
-      if (lbl) lbl.innerText = s ? "Sincronizando..." : "Sincronizado";
-      if (sp) sp.classList.toggle('hidden', !s);
     }
 
     function cerrarSesion() {
-      localStorage.removeItem("nps_user_profile");
       location.reload();
     }
   </script>
