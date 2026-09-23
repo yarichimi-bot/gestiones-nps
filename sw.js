@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nps-cache-v1';
+const CACHE_NAME = 'nps-cache-v2';
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
