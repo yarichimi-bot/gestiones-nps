@@ -857,7 +857,7 @@ supabase = window.supabaseApp;
                 tecnicoAsignado: item.nombre_tecnico || item.tecnico_asignado,
                 fechaAsignacion: item.fecha_asignacion,
                 estado: item.estado || 'Pendiente',
-                numeroOT: item.id_gestion || item.numero_ot,
+                numeroOT: item.numero_ot || item.id_gestion || 'S/N',
                 telefono: item.telefono
               });
             }
