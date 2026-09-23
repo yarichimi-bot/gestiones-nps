@@ -534,7 +534,8 @@
     // ==========================================
     const supabaseUrl = 'https://lrvitaprtpppqcwhbjba.supabase.co'; 
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxydml0YXBydHBwcHFjd2hiamJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4NTQ2MzQsImV4cCI6MjEwNTQzMDYzNH0.pkw8hR7BwkZa65h3phhVqDG_3-qTdPhZnn5PqPgJHEA'; 
-    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    window.supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
+supabase = window.supabaseApp;
 
     let usuarioActual = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
