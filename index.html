@@ -814,7 +814,7 @@ supabase = window.supabaseApp;
       });
     }
 
-    // --- CARGAR PENDIENTES TÉCNICO ---
+    // --- CARGAR PENDIENTES TÉCNICO CON VENCIMIENTO A 6 DÍAS ---
     async function cargarPendientesTecnico() {
       if(!usuarioActual) return;
       mostrarSyncStatus(true);
@@ -828,23 +828,54 @@ supabase = window.supabaseApp;
           .or(`tecnico_asignado.ilike.${correo},nombre_tecnico.ilike.%${nombre}%`);
 
         if (data && !error) {
-          pendientesTecnicoActual = data.filter(item => {
+          const hoy = new Date();
+          const idsVencidos = [];
+
+          pendientesTecnicoActual = [];
+
+          data.forEach(item => {
             let st = (item.estado || '').toLowerCase();
-            return st === 'pendiente' || st === 'sin gestion' || st === '';
-          }).map(item => ({
-             fila: item.id,
-             idGestion: item.id_gestion || item.id,
-             codigoCliente: item.codigo_cliente,
-             nombreUsuario: item.nombre_usuario,
-             tecnicoAsignado: item.nombre_tecnico || item.tecnico_asignado,
-             fechaAsignacion: item.fecha_asignacion,
-             estado: item.estado || 'Pendiente',
-             numeroOT: item.id_gestion || item.numero_ot,
-             telefono: item.telefono
-          }));
+            let esPendiente = st === 'pendiente' || st === 'sin gestion' || st === '';
+
+            // Calcular días transcurridos desde fecha_asignacion
+            let diasTranscurridos = 0;
+            if (item.fecha_asignacion) {
+              const fechaAsig = new Date(item.fecha_asignacion);
+              const diffTime = hoy - fechaAsig;
+              diasTranscurridos = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            }
+
+            // Si tiene más de 6 días y sigue sin gestionarse, marcar para actualizar
+            if (esPendiente && diasTranscurridos > 6) {
+              idsVencidos.push(item.id);
+            } else if (esPendiente) {
+              pendientesTecnicoActual.push({
+                fila: item.id,
+                idGestion: item.id_gestion || item.id,
+                codigoCliente: item.codigo_cliente,
+                nombreUsuario: item.nombre_usuario,
+                tecnicoAsignado: item.nombre_tecnico || item.tecnico_asignado,
+                fechaAsignacion: item.fecha_asignacion,
+                estado: item.estado || 'Pendiente',
+                numeroOT: item.id_gestion || item.numero_ot,
+                telefono: item.telefono
+              });
+            }
+          });
+
+          // Si hay registros con más de 6 días, actualizamos su estado en Supabase
+          if (idsVencidos.length > 0) {
+            await supabase
+              .from('gestiones')
+              .update({ estado: 'SIN GESTION' })
+              .in('id', idsVencidos);
+          }
+
           renderizarPendientesTecnicoUI();
         }
-      } catch(e) {}
+      } catch(e) {
+        console.error("Error cargando pendientes:", e);
+      }
       mostrarSyncStatus(false);
     }
 
