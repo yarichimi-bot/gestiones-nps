@@ -688,11 +688,19 @@ supabase = window.supabaseApp;
            todosLosRegistros = data;
            procesarYRenderizarDashboard(data);
         }
+        
       } catch(e) { console.error(e); }
     }
 
     function procesarYRenderizarDashboard(registrosDb) {
       let cTotal = registrosDb.length;
+      // MOSTRAR ÚLTIMA CARGA CSV
+  let ultimaCarga = registrosDb.filter(r => r.fecha_carga && r.subido_por).pop();
+  const statusLbl = document.getElementById('status-carga-csv');
+  if (statusLbl && ultimaCarga) {
+    statusLbl.innerText = `Última carga registrada: ${ultimaCarga.fecha_carga} por ${ultimaCarga.subido_por}.`;
+    statusLbl.className = "text-info mt-2 d-block fw-semibold small";
+  }
       let cGestionados = 0;
       let cPendientes = 0;
       let cDescartados = 0;
@@ -1027,7 +1035,9 @@ supabase = window.supabaseApp;
         const headers = lineas[0].split(separador).map(h => h.trim().toLowerCase().replace(/["']/g, ''));
         
         const registrosInsertar = [];
-        const hoy = new Date().toISOString().split('T')[0];
+        const ahora = new Date();
+        const fechaHoraFormateada = ahora.toLocaleDateString('es-ES') + ' ' + ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const nombreUsuarioCarga = usuarioActual ? (usuarioActual.nombre || usuarioActual.usuario) : 'Administrador';
 
         for (let i = 1; i < lineas.length; i++) {
           const valores = lineas[i].split(separador).map(v => v.trim().replace(/["']/g, ''));
@@ -1041,7 +1051,9 @@ supabase = window.supabaseApp;
 
           if (obj.codigo_cliente || obj.numero_ot || obj.id_gestion) {
             obj.estado = obj.estado || 'Pendiente';
-            obj.fecha_asignacion = obj.fecha_asignacion || hoy;
+            obj.fecha_asignacion = obj.fecha_asignacion || ahora.toISOString().split('T')[0];
+            obj.subido_por = nombreUsuarioCarga;
+            obj.fecha_carga = fechaHoraFormateada;
             registrosInsertar.push(obj);
           }
         }
@@ -1058,8 +1070,8 @@ supabase = window.supabaseApp;
   });
         if (error) throw error;
 
-        statusLbl.className = "text-success mt-2 d-block fw-bold small";
-        statusLbl.innerText = `¡Éxito! Se asignaron ${registrosInsertar.length} nuevas órdenes.`;
+       statusLbl.className = "text-success mt-2 d-block fw-bold small";
+        statusLbl.innerText = `¡Éxito! Se asignaron/actualizaron ${registrosInsertar.length} órdenes. Última carga por ${nombreUsuarioCarga} el ${fechaHoraFormateada}.`;
         fileInput.value = '';
         
         cargarDashboard(true);
