@@ -1345,10 +1345,18 @@ supabase = window.supabaseApp;
       if (sp) sp.classList.toggle('hidden', !s);
     }
 
-    function cerrarSesion() {
+   function cerrarSesion() {
       localStorage.removeItem("nps_user_profile");
       location.reload();
     }
+
+    // ESCUCHAR CAMBIOS EN TIEMPO REAL
+    (window.supabaseApp || window.supabase).channel('cambios-gestiones')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gestiones' }, (payload) => {
+        cargarDashboard(true);
+      })
+      .subscribe();
+
   </script>
 </body>
 </html>
