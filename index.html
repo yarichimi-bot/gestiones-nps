@@ -1435,7 +1435,42 @@ supabase = window.supabaseApp;
         cargarDashboard(true);
       })
       .subscribe();
+// REGISTRAR SERVICE WORKER Y SOLICITAR PERMISOS DE NOTIFICACIÓN
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.register('sw.js')
+        .then(function(swReg) {
+          console.log('Service Worker registrado correctamente', swReg);
+          if (Notification.permission === 'default') {
+            Notification.requestPermission();
+          }
+        })
+        .catch(function(error) {
+          console.error('Error al registrar Service Worker', error);
+        });
+    }
 
+    // CANAL REALTIME PARA NOTIFICAR AL TÉCNICO AL ASIGNAR OT
+    (window.supabaseApp || window.supabase).channel('notificaciones-tecnico')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gestiones' }, (payload) => {
+        const nuevaOrden = payload.new;
+        
+        if (usuarioActual && (
+            (nuevaOrden.nombre_tecnico && nuevaOrden.nombre_tecnico.toLowerCase().includes(usuarioActual.nombre.toLowerCase())) ||
+            (nuevaOrden.tecnico_asignado && nuevaOrden.tecnico_asignado.toLowerCase() === usuarioActual.usuario.toLowerCase())
+        )) {
+          if (navigator.serviceWorker.controller && Notification.permission === 'granted') {
+            navigator.serviceWorker.ready.then(function(reg) {
+              reg.showNotification('¡Nueva Orden Asignada! 🛠️', {
+                body: `OT #${nuevaOrden.numero_ot || nuevaOrden.id_gestion || ''} - Cliente: ${nuevaOrden.nombre_usuario || 'Nuevo'}`,
+                icon: 'logo.png',
+                vibrate: [200, 100, 200]
+              });
+            });
+          }
+          if (typeof cargarPendientesTecnico === 'function') cargarPendientesTecnico();
+        }
+      })
+      .subscribe();
   </script>
 </body>
 </html>
