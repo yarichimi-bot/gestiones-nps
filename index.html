@@ -1458,19 +1458,35 @@ supabase = window.supabaseApp;
             (nuevaOrden.nombre_tecnico && nuevaOrden.nombre_tecnico.toLowerCase().includes(usuarioActual.nombre.toLowerCase())) ||
             (nuevaOrden.tecnico_asignado && nuevaOrden.tecnico_asignado.toLowerCase() === usuarioActual.usuario.toLowerCase())
         )) {
-          if (navigator.serviceWorker.controller && Notification.permission === 'granted') {
-            navigator.serviceWorker.ready.then(function(reg) {
-              reg.showNotification('¡Nueva Orden Asignada! 🛠️', {
-                body: `OT #${nuevaOrden.numero_ot || nuevaOrden.id_gestion || ''} - Cliente: ${nuevaOrden.nombre_usuario || 'Nuevo'}`,
-                icon: 'logo.png',
-                vibrate: [200, 100, 200]
-              });
-            });
-          }
+          lanzarNotificacion('¡Nueva Orden Asignada! 🛠️', `OT #${nuevaOrden.numero_ot || nuevaOrden.id_gestion || ''} - Cliente: ${nuevaOrden.nombre_usuario || 'Nuevo'}`);
           if (typeof cargarPendientesTecnico === 'function') cargarPendientesTecnico();
         }
       })
       .subscribe();
+
+    // FUNCIÓN AUXILIAR REUTILIZABLE PARA NOTIFICACIONES NATIVAS
+    function lanzarNotificacion(titulo, mensaje) {
+      if (Notification.permission === 'granted') {
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.ready.then(function(reg) {
+            reg.showNotification(titulo, {
+              body: mensaje,
+              icon: 'logo.png',
+              vibrate: [200, 100, 200]
+            });
+          });
+        } else {
+          new Notification(titulo, { body: mensaje, icon: 'logo.png' });
+        }
+      }
+    }
+
+    // RECORDATORIO AUTOMÁTICO DE TAREAS PENDIENTES (CADA 3 HORAS)
+    setInterval(() => {
+      if (usuarioActual && typeof pendientesTecnicoActual !== 'undefined' && pendientesTecnicoActual.length > 0) {
+        lanzarNotificacion('Recordatorio de Gestión ⏰', `Tienes ${pendientesTecnicoActual.length} OT(s) pendiente(s) por gestionar.`);
+      }
+    }, 3 * 60 * 60 * 1000);
   </script>
 </body>
 </html>
