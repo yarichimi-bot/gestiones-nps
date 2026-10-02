@@ -280,7 +280,7 @@
         <div id="lista-pendientes" class="grid-dashboard"></div>
       </div>
 
-      <!-- SECCIÓN HISTÓRICO TÉCNICO CON SELECTOR DE MES Y BÚSQUEDA -->
+      <!-- SECCIÓN HISTÓRICO TÉCNICO -->
       <div id="sec-tec-historico" class="hidden">
         <div class="bi-card-dark mb-3 p-3">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
@@ -294,7 +294,7 @@
         <div id="lista-historico-tecnico" class="grid-dashboard"></div>
       </div>
 
-      <!-- SECCIÓN MI PERFIL TÉCNICO Y PLANTILLA PERSONALIZADA -->
+      <!-- SECCIÓN MI PERFIL TÉCNICO -->
       <div id="sec-tec-perfil" class="hidden">
         <div class="bi-card-dark mb-3 text-center">
           <div class="avatar-container">
@@ -364,7 +364,7 @@
           </div>
         </div>
 
-        <!-- INDICADORES OPERATIVOS Y NPS -->
+        <!-- INDICADORES OPERATIVOS -->
         <h6 class="fw-bold text-info border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
           <i class="bi bi-card-checklist me-1"></i> 1. INDICADOR DE GESTIÓN OPERATIVA (VOLUMEN)
         </h6>
@@ -414,7 +414,7 @@
       </div>
 
       <div id="sec-general" class="hidden">
-        <!-- CARGA MASIVA DE ÓRDENES (CSV) -->
+        <!-- CARGA MASIVA CSV -->
         <div class="bi-card-dark mb-3 p-3 border-info border-opacity-50">
           <h6 class="fw-bold text-info small mb-3"><i class="bi bi-cloud-arrow-up-fill me-2"></i>CARGA MASIVA DE ÓRDENES (CSV)</h6>
           <div class="d-flex gap-2 align-items-center flex-wrap">
@@ -690,7 +690,6 @@
           document.getElementById('input-plantilla-propia').value = plantillaGuardada;
         }
 
-        // Inicializar estado en el historial para controlar el botón "Atrás"
         history.replaceState({ section: 'inicio' }, '');
         seccionActualTecnico = 'inicio';
 
@@ -699,14 +698,13 @@
       }
     }
 
-    // --- GENERAR SELECTORES DE MES DINÁMICOS INCLUYENDO EL MES EN CURSO ---
+    // --- GENERAR SELECTORES DE MES DINÁMICOS EN AMBAS VISTAS ---
     function poblarSelectoresDeMesDinamicos(data) {
       const selectAdmin = document.getElementById('select-filtro-mes');
       const selectTec = document.getElementById('select-tec-mes-historico');
 
       let mapaMeses = {};
 
-      // Forzar inclusión del mes actual (Octubre 2026)
       const hoy = new Date();
       const anoHoy = hoy.getFullYear();
       const mesHoy = hoy.getMonth();
@@ -742,7 +740,7 @@
         return b.mes - a.mes;
       });
 
-      // Rellenar Selector Admin
+      // Selector Panel Administrador
       if (selectAdmin) {
         let valPrevio = selectAdmin.value;
         selectAdmin.innerHTML = '<option value="TODOS">Mes: Todos los Históricos</option>';
@@ -761,7 +759,7 @@
         }
       }
 
-      // Rellenar Selector Técnico
+      // Selector Pestaña Gestionados del Técnico
       if (selectTec) {
         let valPrevioTec = selectTec.value;
         selectTec.innerHTML = '<option value="TODOS">Ver: Todos los Meses</option>';
@@ -968,6 +966,8 @@
           .or(`tecnico_asignado.ilike.${correo},nombre_tecnico.ilike.%${nombre}%`);
 
         if (data && !error) {
+          poblarSelectoresDeMesDinamicos(data);
+
           const hoy = new Date();
           const idsVencidos = [];
 
@@ -1015,7 +1015,7 @@
       mostrarSyncStatus(false);
     }
 
-    // --- CARGAR HISTÓRICO TÉCNICO ---
+    // --- CARGAR HISTÓRICO TÉCNICO CON FILTRO DINÁMICO ---
     async function cargarHistoricoTecnico() {
       if(!usuarioActual) return;
       try {
@@ -1029,6 +1029,8 @@
           .or(`tecnico_asignado.ilike.${correo},nombre_tecnico.ilike.%${nombre}%`);
 
         if (data && !error) {
+          poblarSelectoresDeMesDinamicos(data);
+
           let gestionesRealizadas = data.filter(item => {
             let st = (item.estado || '').toLowerCase();
             return st !== 'pendiente' && st !== 'sin gestion' && st !== '';
@@ -1572,7 +1574,7 @@
       if (s === 'historico') cargarHistoricoTecnico();
     }
 
-    // MANEJAR BOTÓN ATRÁS DEL NAVEGADOR / MÓVIL
+    // MANEJAR BOTÓN ATRÁS EN MÓVILES/PWA
     window.addEventListener('popstate', (e) => {
       if (e.state && e.state.section) {
         navegarBottom(e.state.section, true);
