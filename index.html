@@ -48,9 +48,9 @@
       body { padding-bottom: 0px; }
     }
 
-    .fade-in-view { animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    .fade-in-view { animation: fadeIn 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -124,7 +124,7 @@
     .nav-item-btn {
       background: transparent; border: none; color: var(--text-muted);
       display: flex; flex-direction: column; align-items: center;
-      font-size: 0.7rem; font-weight: 600; transition: all 0.2s ease;
+      font-size: 0.7rem; font-weight: 600; transition: all 0.15s ease;
       position: relative; width: 23%; padding: 8px 0; border-radius: 14px;
     }
     .nav-item-btn i { font-size: 1.4rem; margin-bottom: 2px; }
@@ -242,7 +242,10 @@
             </small>
           </div>
         </div>
-        <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i></button>
+        <div>
+          <button onclick="sincronizarDatosTecnico(true)" class="btn btn-outline-info btn-sm me-1" title="Sincronizar datos"><i class="bi bi-arrow-clockwise"></i></button>
+          <button onclick="cerrarSesion()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i></button>
+        </div>
       </div>
 
       <!-- SECCIÓN INICIO TECNICO -->
@@ -285,7 +288,7 @@
         <div class="bi-card-dark mb-3 p-3">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
             <h6 class="fw-bold text-white m-0"><i class="bi bi-check2-circle me-2 text-success"></i>Histórico Gestionado</h6>
-            <select id="select-tec-mes-historico" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarHistoricoTecnico()">
+            <select id="select-tec-mes-historico" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="renderizarHistoricoConFiltroMes()">
               <option value="TODOS">Ver: Todos los Meses</option>
             </select>
           </div>
@@ -364,7 +367,6 @@
           </div>
         </div>
 
-        <!-- INDICADORES OPERATIVOS -->
         <h6 class="fw-bold text-info border-bottom border-secondary border-opacity-25 pb-1 mb-2" style="font-size: 0.8rem;">
           <i class="bi bi-card-checklist me-1"></i> 1. INDICADOR DE GESTIÓN OPERATIVA (VOLUMEN)
         </h6>
@@ -414,7 +416,6 @@
       </div>
 
       <div id="sec-general" class="hidden">
-        <!-- CARGA MASIVA CSV -->
         <div class="bi-card-dark mb-3 p-3 border-info border-opacity-50">
           <h6 class="fw-bold text-info small mb-3"><i class="bi bi-cloud-arrow-up-fill me-2"></i>CARGA MASIVA DE ÓRDENES (CSV)</h6>
           <div class="d-flex gap-2 align-items-center flex-wrap">
@@ -557,6 +558,9 @@
 
     let usuarioActual = null;
     let seccionActualTecnico = 'inicio';
+    let datosTecnicoCargados = false;
+    let rawDatosTecnico = [];
+
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
     let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
 
@@ -603,7 +607,6 @@
       cargarDashboard(true);
     }
 
-    // --- AUTENTICACIÓN FLEXIBLE POR SUPABASE ---
     async function ejecutarLogin() {
       const uInput = document.getElementById('input-user');
       const pInput = document.getElementById('input-pass');
@@ -693,9 +696,114 @@
         history.replaceState({ section: 'inicio' }, '');
         seccionActualTecnico = 'inicio';
 
-        cargarPendientesTecnico();
-        cargarHistoricoTecnico();
+        // CARGA ÚNICA Y OPTIMIZADA DE DATOS DEL TÉCNICO
+        sincronizarDatosTecnico();
       }
+    }
+
+    // --- CARGA Y CACHÉ RÁPIDO DE DATOS DE TÉCNICO ---
+    async function sincronizarDatosTecnico(forzar = false) {
+      if(!usuarioActual) return;
+      if(datosTecnicoCargados && !forzar) {
+        renderizarVistaTecnicoDesdeMemoria();
+        return;
+      }
+
+      mostrarSyncStatus(true);
+      try {
+        const correo = (usuarioActual.usuario || '').trim().toLowerCase();
+        const nombre = (usuarioActual.nombre || '').trim();
+
+        const { data, error } = await supabase
+          .from('gestiones')
+          .select('*')
+          .or(`tecnico_asignado.ilike.${correo},nombre_tecnico.ilike.%${nombre}%`);
+
+        if (data && !error) {
+          rawDatosTecnico = data;
+          datosTecnicoCargados = true;
+          poblarSelectoresDeMesDinamicos(data);
+          renderizarVistaTecnicoDesdeMemoria();
+        }
+      } catch(e) {
+        console.error("Error sincronizando:", e);
+      }
+      mostrarSyncStatus(false);
+    }
+
+    function renderizarVistaTecnicoDesdeMemoria() {
+      if(!rawDatosTecnico) return;
+      const hoy = new Date();
+      const idsVencidos = [];
+      pendientesTecnicoActual = [];
+
+      rawDatosTecnico.forEach(item => {
+        let st = (item.estado || '').toLowerCase();
+        let esPendiente = st === 'pendiente' || st === 'sin gestion' || st === '';
+
+        let diasTranscurridos = 0;
+        if (item.fecha_asignacion) {
+          const diffTime = hoy - new Date(item.fecha_asignacion);
+          diasTranscurridos = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        if (esPendiente && diasTranscurridos > 6) {
+          idsVencidos.push(item.id);
+        } else if (esPendiente) {
+          pendientesTecnicoActual.push({
+            fila: item.id,
+            idGestion: item.id_gestion || item.id,
+            codigoCliente: item.codigo_cliente,
+            nombreUsuario: item.nombre_usuario,
+            tecnicoAsignado: item.nombre_tecnico || item.tecnico_asignado,
+            fechaAsignacion: item.fecha_asignacion,
+            estado: item.estado || 'Pendiente',
+            numeroOT: item.numero_ot || item.id_gestion || 'S/N',
+            telefono: item.telefono
+          });
+        }
+      });
+
+      if (idsVencidos.length > 0) {
+        supabase
+          .from('gestiones')
+          .update({ estado: 'SIN GESTION' })
+          .in('id', idsVencidos);
+      }
+
+      renderizarPendientesTecnicoUI();
+      renderizarHistoricoConFiltroMes();
+    }
+
+    function renderizarHistoricoConFiltroMes() {
+      if(!rawDatosTecnico) return;
+      const filtroMes = document.getElementById('select-tec-mes-historico') ? document.getElementById('select-tec-mes-historico').value : 'TODOS';
+
+      let gestionesRealizadas = rawDatosTecnico.filter(item => {
+        let st = (item.estado || '').toLowerCase();
+        return st !== 'pendiente' && st !== 'sin gestion' && st !== '';
+      });
+
+      if (filtroMes !== 'TODOS' && filtroMes.includes('-')) {
+        let [anoSel, mesSel] = filtroMes.split('-').map(Number);
+        gestionesRealizadas = gestionesRealizadas.filter(item => {
+          let f = new Date(item.fecha_asignacion || item.created_at || new Date());
+          return f.getFullYear() === anoSel && f.getMonth() === mesSel;
+        });
+      }
+
+      historicoTecnicoActual = gestionesRealizadas.map(item => ({
+         fila: item.id,
+         idGestion: item.id_gestion || item.id,
+         codigoCliente: item.codigo_cliente,
+         nombreUsuario: item.nombre_usuario,
+         numeroOT: item.numero_ot || item.id_gestion || 'S/N',
+         estado: item.estado,
+         evidencia: item.evidencia_url,
+         fecha: item.fecha_asignacion || item.created_at
+      }));
+
+      renderizarHistoricoTecnicoUI(historicoTecnicoActual);
     }
 
     // --- GENERAR SELECTORES DE MES DINÁMICOS EN AMBAS VISTAS ---
@@ -704,17 +812,12 @@
       const selectTec = document.getElementById('select-tec-mes-historico');
 
       let mapaMeses = {};
-
       const hoy = new Date();
       const anoHoy = hoy.getFullYear();
       const mesHoy = hoy.getMonth();
       const keyHoy = `${anoHoy}-${mesHoy}`;
 
-      mapaMeses[keyHoy] = {
-        ano: anoHoy,
-        mes: mesHoy,
-        label: `${NOMBRES_MESES[mesHoy]} ${anoHoy}`
-      };
+      mapaMeses[keyHoy] = { ano: anoHoy, mes: mesHoy, label: `${NOMBRES_MESES[mesHoy]} ${anoHoy}` };
 
       if (data && Array.isArray(data)) {
         data.forEach(item => {
@@ -724,23 +827,15 @@
             if (!isNaN(f.getTime())) {
               let key = `${f.getFullYear()}-${f.getMonth()}`;
               if (!mapaMeses[key]) {
-                mapaMeses[key] = {
-                  ano: f.getFullYear(),
-                  mes: f.getMonth(),
-                  label: `${NOMBRES_MESES[f.getMonth()]} ${f.getFullYear()}`
-                };
+                mapaMeses[key] = { ano: f.getFullYear(), mes: f.getMonth(), label: `${NOMBRES_MESES[f.getMonth()]} ${f.getFullYear()}` };
               }
             }
           }
         });
       }
 
-      let listaMeses = Object.values(mapaMeses).sort((a, b) => {
-        if (b.ano !== a.ano) return b.ano - a.ano;
-        return b.mes - a.mes;
-      });
+      let listaMeses = Object.values(mapaMeses).sort((a, b) => (b.ano !== a.ano ? b.ano - a.ano : b.mes - a.mes));
 
-      // Selector Panel Administrador
       if (selectAdmin) {
         let valPrevio = selectAdmin.value;
         selectAdmin.innerHTML = '<option value="TODOS">Mes: Todos los Históricos</option>';
@@ -748,18 +843,12 @@
           let opt = document.createElement('option');
           opt.value = `${m.ano}-${m.mes}`;
           opt.innerText = `Mes: ${m.label}`;
-          if (`${m.ano}-${m.mes}` === keyHoy && (valPrevio === 'TODOS' || !valPrevio)) {
-            opt.selected = true;
-          }
+          if (`${m.ano}-${m.mes}` === keyHoy && (valPrevio === 'TODOS' || !valPrevio)) opt.selected = true;
           selectAdmin.appendChild(opt);
         });
-
-        if (valPrevio && Array.from(selectAdmin.options).some(o => o.value === valPrevio)) {
-          selectAdmin.value = valPrevio;
-        }
+        if (valPrevio && Array.from(selectAdmin.options).some(o => o.value === valPrevio)) selectAdmin.value = valPrevio;
       }
 
-      // Selector Pestaña Gestionados del Técnico
       if (selectTec) {
         let valPrevioTec = selectTec.value;
         selectTec.innerHTML = '<option value="TODOS">Ver: Todos los Meses</option>';
@@ -767,15 +856,10 @@
           let opt = document.createElement('option');
           opt.value = `${m.ano}-${m.mes}`;
           opt.innerText = m.label;
-          if (`${m.ano}-${m.mes}` === keyHoy && (valPrevioTec === 'TODOS' || !valPrevioTec)) {
-            opt.selected = true;
-          }
+          if (`${m.ano}-${m.mes}` === keyHoy && (valPrevioTec === 'TODOS' || !valPrevioTec)) opt.selected = true;
           selectTec.appendChild(opt);
         });
-
-        if (valPrevioTec && Array.from(selectTec.options).some(o => o.value === valPrevioTec)) {
-          selectTec.value = valPrevioTec;
-        }
+        if (valPrevioTec && Array.from(selectTec.options).some(o => o.value === valPrevioTec)) selectTec.value = valPrevioTec;
       }
     }
 
@@ -787,20 +871,14 @@
 
       try {
         let query = supabase.from('gestiones').select('*').range(0, 9999);
-        
-        if (dept !== 'TODOS') {
-          query = query.ilike('departamento', dept);
-        }
-        if (ciu !== 'TODAS') {
-          query = query.ilike('ciudad', ciu);
-        }
+        if (dept !== 'TODOS') query = query.ilike('departamento', dept);
+        if (ciu !== 'TODAS') query = query.ilike('ciudad', ciu);
 
         const { data, error } = await query;
         if (data && !error) {
           poblarSelectoresDeMesDinamicos(data);
 
           let datosFiltrados = data;
-          
           if (filtroMes !== 'TODOS' && filtroMes.includes('-')) {
             let [anoSel, mesSel] = filtroMes.split('-').map(Number);
             datosFiltrados = data.filter(r => {
@@ -813,7 +891,6 @@
           todosLosRegistros = datosFiltrados;
           procesarYRenderizarDashboard(datosFiltrados, data);
         }
-        
       } catch(e) { console.error(e); }
     }
 
@@ -821,21 +898,14 @@
       let cTotal = registrosDb.length;
       actualizarEtiquetaUltimaCarga(todosLosOriginales || registrosDb);
 
-      let cGestionados = 0;
-      let cPendientes = 0;
-      let cDescartados = 0;
+      let cGestionados = 0, cPendientes = 0, cDescartados = 0;
       let mapTecnicos = {};
 
       registrosDb.forEach(item => {
         let st = (item.estado || '').trim().toLowerCase();
-        
-        if (st === 'gestionado') {
-          cGestionados++;
-        } else if (st === 'pendiente' || st === 'sin gestion' || st === '') {
-          cPendientes++;
-        } else {
-          cDescartados++;
-        }
+        if (st === 'gestionado') cGestionados++;
+        else if (st === 'pendiente' || st === 'sin gestion' || st === '') cPendientes++;
+        else cDescartados++;
 
         let nombreTec = (item.nombre_tecnico || item.tecnico_asignado || 'Sin Asignar').trim().toUpperCase();
         if(!mapTecnicos[nombreTec]) mapTecnicos[nombreTec] = { total: 0, gestionados: 0 };
@@ -851,12 +921,10 @@
       const pctCobertura = cTotal > 0 ? Math.round((cGestionados / cTotal) * 100) : 0;
       document.getElementById('kpi-pct-prom').innerText = pctCobertura + "%";
 
-      let arrayTecnicos = Object.keys(mapTecnicos).map(nombre => {
-        return {
-          nombre: nombre,
-          pctAvance: mapTecnicos[nombre].total > 0 ? Math.round((mapTecnicos[nombre].gestionados / mapTecnicos[nombre].total) * 100) : 0
-        };
-      }).sort((a,b) => b.pctAvance - a.pctAvance);
+      let arrayTecnicos = Object.keys(mapTecnicos).map(nombre => ({
+        nombre: nombre,
+        pctAvance: mapTecnicos[nombre].total > 0 ? Math.round((mapTecnicos[nombre].gestionados / mapTecnicos[nombre].total) * 100) : 0
+      })).sort((a,b) => b.pctAvance - a.pctAvance);
       
       renderizarGraficoBarras(arrayTecnicos);
       renderizarGraficoGauge(pctCobertura);
@@ -905,13 +973,9 @@
         let coincideEstado = true;
         if (filtroEstado !== "TODOS") {
           let st = (r.estado || '').trim().toLowerCase();
-          if (filtroEstado === "Gestionado") {
-            coincideEstado = (st === "gestionado");
-          } else if (filtroEstado === "Pendiente") {
-            coincideEstado = (st === "pendiente" || st === "sin gestion" || st === "");
-          } else if (filtroEstado === "Descartado") {
-            coincideEstado = (st !== "gestionado" && st !== "pendiente" && st !== "sin gestion" && st !== "");
-          }
+          if (filtroEstado === "Gestionado") coincideEstado = (st === "gestionado");
+          else if (filtroEstado === "Pendiente") coincideEstado = (st === "pendiente" || st === "sin gestion" || st === "");
+          else if (filtroEstado === "Descartado") coincideEstado = (st !== "gestionado" && st !== "pendiente" && st !== "sin gestion" && st !== "");
         }
 
         return coincideBusqueda && coincideTecnico && coincideEstado;
@@ -928,13 +992,14 @@
         return;
       }
 
+      let html = '';
       lista.forEach(r => {
         let st = (r.estado || '').trim().toLowerCase();
         const isConflict = st !== 'gestionado' && st !== 'pendiente' && st !== 'sin gestion' && st !== '';
         let badgeStyle = st === 'gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
         let tieneEvidencia = r.evidencia_url && r.evidencia_url.length > 5;
 
-        contenedor.innerHTML += `
+        html += `
           <div class="order-card fade-in-view ${isConflict ? 'conflictive' : ''}">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
@@ -950,114 +1015,7 @@
             </div>
           </div>`;
       });
-    }
-
-    // --- CARGAR PENDIENTES TÉCNICO ---
-    async function cargarPendientesTecnico() {
-      if(!usuarioActual) return;
-      mostrarSyncStatus(true);
-      try {
-        const correo = (usuarioActual.usuario || '').trim().toLowerCase();
-        const nombre = (usuarioActual.nombre || '').trim();
-
-        const { data, error } = await supabase
-          .from('gestiones')
-          .select('*')
-          .or(`tecnico_asignado.ilike.${correo},nombre_tecnico.ilike.%${nombre}%`);
-
-        if (data && !error) {
-          poblarSelectoresDeMesDinamicos(data);
-
-          const hoy = new Date();
-          const idsVencidos = [];
-
-          pendientesTecnicoActual = [];
-
-          data.forEach(item => {
-            let st = (item.estado || '').toLowerCase();
-            let esPendiente = st === 'pendiente' || st === 'sin gestion' || st === '';
-
-            let diasTranscurridos = 0;
-            if (item.fecha_asignacion) {
-              const diffTime = hoy - new Date(item.fecha_asignacion);
-              diasTranscurridos = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            }
-
-            if (esPendiente && diasTranscurridos > 6) {
-              idsVencidos.push(item.id);
-            } else if (esPendiente) {
-              pendientesTecnicoActual.push({
-                fila: item.id,
-                idGestion: item.id_gestion || item.id,
-                codigoCliente: item.codigo_cliente,
-                nombreUsuario: item.nombre_usuario,
-                tecnicoAsignado: item.nombre_tecnico || item.tecnico_asignado,
-                fechaAsignacion: item.fecha_asignacion,
-                estado: item.estado || 'Pendiente',
-                numeroOT: item.numero_ot || item.id_gestion || 'S/N',
-                telefono: item.telefono
-              });
-            }
-          });
-
-          if (idsVencidos.length > 0) {
-            await supabase
-              .from('gestiones')
-              .update({ estado: 'SIN GESTION' })
-              .in('id', idsVencidos);
-          }
-
-          renderizarPendientesTecnicoUI();
-        }
-      } catch(e) {
-        console.error("Error cargando pendientes:", e);
-      }
-      mostrarSyncStatus(false);
-    }
-
-    // --- CARGAR HISTÓRICO TÉCNICO CON FILTRO DINÁMICO ---
-    async function cargarHistoricoTecnico() {
-      if(!usuarioActual) return;
-      try {
-        const correo = (usuarioActual.usuario || '').trim().toLowerCase();
-        const nombre = (usuarioActual.nombre || '').trim();
-        const filtroMes = document.getElementById('select-tec-mes-historico') ? document.getElementById('select-tec-mes-historico').value : 'TODOS';
-
-        const { data, error } = await supabase
-          .from('gestiones')
-          .select('*')
-          .or(`tecnico_asignado.ilike.${correo},nombre_tecnico.ilike.%${nombre}%`);
-
-        if (data && !error) {
-          poblarSelectoresDeMesDinamicos(data);
-
-          let gestionesRealizadas = data.filter(item => {
-            let st = (item.estado || '').toLowerCase();
-            return st !== 'pendiente' && st !== 'sin gestion' && st !== '';
-          });
-
-          if (filtroMes !== 'TODOS' && filtroMes.includes('-')) {
-            let [anoSel, mesSel] = filtroMes.split('-').map(Number);
-            gestionesRealizadas = gestionesRealizadas.filter(item => {
-              let f = new Date(item.fecha_asignacion || item.created_at || new Date());
-              return f.getFullYear() === anoSel && f.getMonth() === mesSel;
-            });
-          }
-
-          historicoTecnicoActual = gestionesRealizadas.map(item => ({
-             fila: item.id,
-             idGestion: item.id_gestion || item.id,
-             codigoCliente: item.codigo_cliente,
-             nombreUsuario: item.nombre_usuario,
-             numeroOT: item.numero_ot || item.id_gestion || 'S/N',
-             estado: item.estado,
-             evidencia: item.evidencia_url,
-             fecha: item.fecha_asignacion || item.created_at
-          }));
-
-          renderizarHistoricoTecnicoUI(historicoTecnicoActual);
-        }
-      } catch(e) {}
+      contenedor.innerHTML = html;
     }
 
     function filtrarHistoricoTecnicoLocal() {
@@ -1073,7 +1031,6 @@
       renderizarHistoricoTecnicoUI(filtrados);
     }
 
-    // --- CARGAR DIRECTORIO DE TÉCNICOS ---
     async function cargarDirectorioTecnicosAdmin() {
       try {
         const { data, error } = await supabase.from('usuarios').select('*');
@@ -1095,9 +1052,7 @@
       let filtrados = directorioTecnicos.filter(t => {
         let d = (t.departamento || "").toUpperCase();
         let c = (t.ciudad || "").toUpperCase();
-        let matchDept = (deptFiltro === "TODOS" || d === deptFiltro);
-        let matchCiu = (ciuFiltro === "TODAS" || c === ciuFiltro);
-        return matchDept && matchCiu;
+        return (deptFiltro === "TODOS" || d === deptFiltro) && (ciuFiltro === "TODAS" || c === ciuFiltro);
       });
 
       const selTec = document.getElementById('select-filtro-tecnico');
@@ -1112,9 +1067,7 @@
             selTec.appendChild(opt);
           }
         });
-        if (Array.from(selTec.options).some(o => o.value === valActual)) {
-          selTec.value = valActual;
-        }
+        if (Array.from(selTec.options).some(o => o.value === valActual)) selTec.value = valActual;
       }
 
       if (filtrados.length === 0) {
@@ -1122,9 +1075,10 @@
         return;
       }
 
+      let html = '';
       filtrados.forEach((t) => {
         let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:40px; height:40px; font-size:1.1rem;">${(t.nombre || 'T').charAt(0).toUpperCase()}</div>`;
-        cont.innerHTML += `
+        html += `
           <div class="bi-card-dark p-2 d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center gap-2">
               ${avatarHtml}
@@ -1135,9 +1089,9 @@
             </div>
           </div>`;
       });
+      cont.innerHTML = html;
     }
 
-    // --- GUARDAR GESTIÓN Y FOTO ---
     async function guardarFormulario() {
       const filaId = document.getElementById('modal-fila').value;
       const numeroOT = document.getElementById('modal-ot').value.trim();
@@ -1175,11 +1129,7 @@
 
         const { error } = await supabase
           .from('gestiones')
-          .update({
-             estado: estado,
-             observacion: obs,
-             evidencia_url: urlFoto
-          })
+          .update({ estado: estado, observacion: obs, evidencia_url: urlFoto })
           .eq('id', filaId);
 
         if (error) throw error;
@@ -1187,15 +1137,12 @@
         btnGuardar.disabled = false;
         btnGuardar.innerText = "Guardar Gestión";
         
-        pendientesTecnicoActual = pendientesTecnicoActual.filter(item => item.fila != filaId);
-        renderizarPendientesTecnicoUI();
-        
         alert("¡Gestión y foto guardadas con éxito!");
         ocultarModalBS('modalGestion');
         
         archivoFotoSeleccionado = null;
         base64Compresion = null;
-        cargarHistoricoTecnico();
+        sincronizarDatosTecnico(true);
 
       } catch(e) {
         btnGuardar.disabled = false;
@@ -1204,7 +1151,6 @@
       }
     }
 
-    // --- CARGA MASIVA DE CSV (ADMIN) ---
     async function subirAsignacionesCSV() {
       const fileInput = document.getElementById('input-csv-cargas');
       const statusLbl = document.getElementById('status-carga-csv');
@@ -1239,9 +1185,7 @@
           let obj = {};
           
           headers.forEach((header, index) => {
-            if (header && valores[index]) {
-              obj[header] = valores[index];
-            }
+            if (header && valores[index]) obj[header] = valores[index];
           });
 
           if (obj.codigo_cliente || obj.numero_ot || obj.id_gestion) {
@@ -1253,21 +1197,16 @@
           }
         }
 
-        if (registrosInsertar.length === 0) {
-          throw new Error("No se encontraron registros válidos.");
-        }
+        if (registrosInsertar.length === 0) throw new Error("No se encontraron registros válidos.");
 
         const { error } = await supabase
           .from('gestiones')
-          .upsert(registrosInsertar, { 
-            onConflict: 'codigo_cliente', 
-            ignoreDuplicates: false 
-          });
+          .upsert(registrosInsertar, { onConflict: 'codigo_cliente', ignoreDuplicates: false });
 
         if (error) throw error;
 
         statusLbl.className = "text-success mt-2 d-block fw-bold small";
-        statusLbl.innerText = `¡Éxito! Se asignaron/actualizaron ${registrosInsertar.length} órdenes. Última carga por ${nombreUsuarioCarga} el ${fechaHoraFormateada}.`;
+        statusLbl.innerText = `¡Éxito! Se asignaron/actualizaron ${registrosInsertar.length} órdenes.`;
         fileInput.value = '';
         
         cargarDashboard(true);
@@ -1300,18 +1239,9 @@
         type: 'doughnut',
         data: {
           labels: ['Score', 'Resto'],
-          datasets: [{
-            data: [val, 100 - val],
-            backgroundColor: [scoreVal >= 50 ? '#10b981' : '#38bdf8', '#23335a'],
-            borderWidth: 0
-          }]
+          datasets: [{ data: [val, 100 - val], backgroundColor: [scoreVal >= 50 ? '#10b981' : '#38bdf8', '#23335a'], borderWidth: 0 }]
         },
-        options: {
-          rotation: -90,
-          circumference: 180,
-          cutout: '75%',
-          plugins: { legend: { display: false } }
-        }
+        options: { rotation: -90, circumference: 180, cutout: '75%', plugins: { legend: { display: false } } }
       });
     }
 
@@ -1320,24 +1250,14 @@
       if (!ctx) return;
       if (chartBar) chartBar.destroy();
 
-      const nombres = tecnicos.map(t => t.nombre);
-      const avances = tecnicos.map(t => t.pctAvance);
-
       chartBar = new Chart(ctx.getContext('2d'), {
         type: 'bar',
         data: {
-          labels: nombres,
-          datasets: [{
-            label: '% Cumplimiento',
-            data: avances,
-            backgroundColor: '#38bdf8',
-            borderRadius: 6
-          }]
+          labels: tecnicos.map(t => t.nombre),
+          datasets: [{ label: '% Cumplimiento', data: tecnicos.map(t => t.pctAvance), backgroundColor: '#38bdf8', borderRadius: 6 }]
         },
         options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: { 
             x: { max: 100, ticks: { color: '#8e9bb4', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -1368,13 +1288,11 @@
 
       const horaActual = new Date().getHours();
       let saludoTiempo = "buenos días";
-      if (horaActual >= 12 && horaActual < 19) {
-        saludoTiempo = "buenas tardes";
-      } else if (horaActual >= 19 || horaActual < 5) {
-        saludoTiempo = "buenas noches";
-      }
+      if (horaActual >= 12 && horaActual < 19) saludoTiempo = "buenas tardes";
+      else if (horaActual >= 19 || horaActual < 5) saludoTiempo = "buenas noches";
 
       const plantillaPropia = usuarioActual ? localStorage.getItem(`plantilla_propia_${usuarioActual.usuario}`) : null;
+      let html = '';
 
       pendientesTecnicoActual.forEach((item, index) => {
         let tel = item.telefono || '';
@@ -1417,7 +1335,7 @@
           </div>
         ` : '<div class="text-secondary small mb-2"><i class="bi bi-exclamation-circle me-1"></i> Sin teléfono registrado</div>';
 
-        contenedor.innerHTML += `
+        html += `
           <div class="order-card mb-3 fade-in-view">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
@@ -1436,6 +1354,7 @@
             </div>
           </div>`;
       });
+      contenedor.innerHTML = html;
     }
 
     function verDetallesOrdenTecnico(idx) {
@@ -1463,12 +1382,13 @@
         return;
       }
 
+      let html = '';
       lista.forEach((r) => {
         let isConflict = r.estado !== 'Gestionado' && r.estado !== 'Pendiente';
         let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
         let tieneEvidencia = r.evidencia && r.evidencia.length > 5;
 
-        contenedor.innerHTML += `
+        html += `
           <div class="order-card mb-3 fade-in-view ${isConflict ? 'conflictive' : ''}">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
@@ -1483,6 +1403,7 @@
             </div>
           </div>`;
       });
+      contenedor.innerHTML = html;
     }
 
     function abrirModal(fila, numeroOT, codigoCliente) {
@@ -1548,7 +1469,7 @@
       document.getElementById('sec-general').classList.toggle('hidden', p !== 'general');
     }
 
-    // NAVEGACIÓN PWA CON CONTROL DEL BOTÓN "ATRÁS" DEL DISPOSITIVO
+    // NAVEGACIÓN ULTRA FLUIDA (INSTANTÁNEA)
     function navegarBottom(s, esRetroceso = false) {
       if (seccionActualTecnico === s) return;
 
@@ -1570,11 +1491,12 @@
         history.pushState({ section: s }, '');
       }
 
-      if (s === 'pendientes') cargarPendientesTecnico();
-      if (s === 'historico') cargarHistoricoTecnico();
+      requestAnimationFrame(() => {
+        if (s === 'pendientes') renderizarPendientesTecnicoUI();
+        if (s === 'historico') renderizarHistoricoConFiltroMes();
+      });
     }
 
-    // MANEJAR BOTÓN ATRÁS EN MÓVILES/PWA
     window.addEventListener('popstate', (e) => {
       if (e.state && e.state.section) {
         navegarBottom(e.state.section, true);
@@ -1630,10 +1552,14 @@
       location.reload();
     }
 
-    // ESCUCHAR CAMBIOS EN TIEMPO REAL
+    // REALTIME EN SEGUNDO PLANO
     (window.supabaseApp || window.supabase).channel('cambios-gestiones')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gestiones' }, (payload) => {
-        cargarDashboard(true);
+        if(usuarioActual) {
+          const rolStr = (usuarioActual.rol || '').toLowerCase();
+          if(rolStr.includes('admin') || rolStr.includes('encargado')) cargarDashboard(true);
+          else sincronizarDatosTecnico(true);
+        }
       })
       .subscribe();
 
@@ -1661,7 +1587,7 @@
             (nuevaOrden.tecnico_asignado && nuevaOrden.tecnico_asignado.toLowerCase() === usuarioActual.usuario.toLowerCase())
         )) {
           lanzarNotificacion('¡Nueva Orden Asignada! 🛠️', `OT #${nuevaOrden.numero_ot || nuevaOrden.id_gestion || ''} - Cliente: ${nuevaOrden.nombre_usuario || 'Nuevo'}`);
-          if (typeof cargarPendientesTecnico === 'function') cargarPendientesTecnico();
+          if (typeof sincronizarDatosTecnico === 'function') sincronizarDatosTecnico(true);
         }
       })
       .subscribe();
