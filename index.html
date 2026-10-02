@@ -280,7 +280,7 @@
         <div id="lista-pendientes" class="grid-dashboard"></div>
       </div>
 
-      <!-- SECCIÓN HISTÓRICO TÉCNICO -->
+      <!-- SECCIÓN HISTÓRICO TÉCNICO CON SELECTOR DE MES Y BÚSQUEDA -->
       <div id="sec-tec-historico" class="hidden">
         <div class="bi-card-dark mb-3 p-3">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
@@ -556,6 +556,7 @@
     supabase = window.supabaseApp;
 
     let usuarioActual = null;
+    let seccionActualTecnico = 'inicio';
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
     let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
 
@@ -689,32 +690,52 @@
           document.getElementById('input-plantilla-propia').value = plantillaGuardada;
         }
 
+        // Inicializar estado en el historial para controlar el botón "Atrás"
+        history.replaceState({ section: 'inicio' }, '');
+        seccionActualTecnico = 'inicio';
+
         cargarPendientesTecnico();
         cargarHistoricoTecnico();
       }
     }
 
-    // --- GENERAR SELECTORES DE MES DINÁMICOS DESDE SUPABASE ---
+    // --- GENERAR SELECTORES DE MES DINÁMICOS INCLUYENDO EL MES EN CURSO ---
     function poblarSelectoresDeMesDinamicos(data) {
       const selectAdmin = document.getElementById('select-filtro-mes');
       const selectTec = document.getElementById('select-tec-mes-historico');
 
       let mapaMeses = {};
 
-      data.forEach(item => {
-        let fecha = item.fecha_asignacion || item.created_at;
-        if (fecha) {
-          let f = new Date(fecha);
-          if (!isNaN(f.getTime())) {
-            let key = `${f.getFullYear()}-${f.getMonth()}`;
-            mapaMeses[key] = {
-              ano: f.getFullYear(),
-              mes: f.getMonth(),
-              label: `${NOMBRES_MESES[f.getMonth()]} ${f.getFullYear()}`
-            };
+      // Forzar inclusión del mes actual (Octubre 2026)
+      const hoy = new Date();
+      const anoHoy = hoy.getFullYear();
+      const mesHoy = hoy.getMonth();
+      const keyHoy = `${anoHoy}-${mesHoy}`;
+
+      mapaMeses[keyHoy] = {
+        ano: anoHoy,
+        mes: mesHoy,
+        label: `${NOMBRES_MESES[mesHoy]} ${anoHoy}`
+      };
+
+      if (data && Array.isArray(data)) {
+        data.forEach(item => {
+          let fecha = item.fecha_asignacion || item.created_at;
+          if (fecha) {
+            let f = new Date(fecha);
+            if (!isNaN(f.getTime())) {
+              let key = `${f.getFullYear()}-${f.getMonth()}`;
+              if (!mapaMeses[key]) {
+                mapaMeses[key] = {
+                  ano: f.getFullYear(),
+                  mes: f.getMonth(),
+                  label: `${NOMBRES_MESES[f.getMonth()]} ${f.getFullYear()}`
+                };
+              }
+            }
           }
-        }
-      });
+        });
+      }
 
       let listaMeses = Object.values(mapaMeses).sort((a, b) => {
         if (b.ano !== a.ano) return b.ano - a.ano;
@@ -725,16 +746,16 @@
       if (selectAdmin) {
         let valPrevio = selectAdmin.value;
         selectAdmin.innerHTML = '<option value="TODOS">Mes: Todos los Históricos</option>';
-        listaMeses.forEach((m, idx) => {
+        listaMeses.forEach((m) => {
           let opt = document.createElement('option');
           opt.value = `${m.ano}-${m.mes}`;
           opt.innerText = `Mes: ${m.label}`;
-          // Seleccionar por defecto el mes más reciente
-          if (idx === 0 && valPrevio === 'TODOS' && selectAdmin.children.length === 1) {
+          if (`${m.ano}-${m.mes}` === keyHoy && (valPrevio === 'TODOS' || !valPrevio)) {
             opt.selected = true;
           }
           selectAdmin.appendChild(opt);
         });
+
         if (valPrevio && Array.from(selectAdmin.options).some(o => o.value === valPrevio)) {
           selectAdmin.value = valPrevio;
         }
@@ -744,12 +765,16 @@
       if (selectTec) {
         let valPrevioTec = selectTec.value;
         selectTec.innerHTML = '<option value="TODOS">Ver: Todos los Meses</option>';
-        listaMeses.forEach(m => {
+        listaMeses.forEach((m) => {
           let opt = document.createElement('option');
           opt.value = `${m.ano}-${m.mes}`;
           opt.innerText = m.label;
+          if (`${m.ano}-${m.mes}` === keyHoy && (valPrevioTec === 'TODOS' || !valPrevioTec)) {
+            opt.selected = true;
+          }
           selectTec.appendChild(opt);
         });
+
         if (valPrevioTec && Array.from(selectTec.options).some(o => o.value === valPrevioTec)) {
           selectTec.value = valPrevioTec;
         }
@@ -990,7 +1015,7 @@
       mostrarSyncStatus(false);
     }
 
-    // --- CARGAR HISTÓRICO TÉCNICO CON FILTRO MENSUAL Y BÚSQUEDA ---
+    // --- CARGAR HISTÓRICO TÉCNICO ---
     async function cargarHistoricoTecnico() {
       if(!usuarioActual) return;
       try {
@@ -1521,16 +1546,40 @@
       document.getElementById('sec-general').classList.toggle('hidden', p !== 'general');
     }
 
-    function navegarBottom(s) {
+    // NAVEGACIÓN PWA CON CONTROL DEL BOTÓN "ATRÁS" DEL DISPOSITIVO
+    function navegarBottom(s, esRetroceso = false) {
+      if (seccionActualTecnico === s) return;
+
       document.querySelectorAll('.nav-item-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('bnav-' + s).classList.add('active');
+      const bnavEl = document.getElementById('bnav-' + s);
+      if (bnavEl) bnavEl.classList.add('active');
+
       ['inicio', 'pendientes', 'historico', 'perfil'].forEach(id => {
-        document.getElementById('sec-tec-' + id).classList.add('hidden');
+        const sec = document.getElementById('sec-tec-' + id);
+        if (sec) sec.classList.add('hidden');
       });
-      document.getElementById('sec-tec-' + s).classList.remove('hidden');
+
+      const secDestino = document.getElementById('sec-tec-' + s);
+      if (secDestino) secDestino.classList.remove('hidden');
+
+      seccionActualTecnico = s;
+
+      if (!esRetroceso) {
+        history.pushState({ section: s }, '');
+      }
+
       if (s === 'pendientes') cargarPendientesTecnico();
       if (s === 'historico') cargarHistoricoTecnico();
     }
+
+    // MANEJAR BOTÓN ATRÁS DEL NAVEGADOR / MÓVIL
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.section) {
+        navegarBottom(e.state.section, true);
+      } else {
+        navegarBottom('inicio', true);
+      }
+    });
 
     function abrirModalBS(id) { 
       const el = document.getElementById(id);
