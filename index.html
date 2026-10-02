@@ -280,16 +280,13 @@
         <div id="lista-pendientes" class="grid-dashboard"></div>
       </div>
 
-      <!-- SECCIÓN HISTÓRICO TÉCNICO CON SELECTOR DE MES Y BÚSQUEDA -->
+      <!-- SECCIÓN HISTÓRICO TÉCNICO -->
       <div id="sec-tec-historico" class="hidden">
         <div class="bi-card-dark mb-3 p-3">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
             <h6 class="fw-bold text-white m-0"><i class="bi bi-check2-circle me-2 text-success"></i>Histórico Gestionado</h6>
             <select id="select-tec-mes-historico" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarHistoricoTecnico()">
               <option value="TODOS">Ver: Todos los Meses</option>
-              <option value="ACTUAL" selected>Mes Actual (Octubre 2026)</option>
-              <option value="9">Septiembre 2026</option>
-              <option value="8">Agosto 2026</option>
             </select>
           </div>
           <input type="text" id="input-buscar-historico-tec" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Buscar por cliente, código u OT..." onkeyup="filtrarHistoricoTecnicoLocal()">
@@ -340,7 +337,6 @@
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <select id="select-filtro-mes" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
               <option value="TODOS">Mes: Todos los Históricos</option>
-              <option value="ACTUAL" selected>Mes: Octubre 2026</option>
             </select>
             <select id="select-filtro-dept" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="alCambiarDepartamentoFiltro()">
               <option value="TODOS">Dep: TODOS</option>
@@ -563,6 +559,8 @@
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
     let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
 
+    const NOMBRES_MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
     const MAPA_CIUDADES = {
       "TODOS": ["TODAS"],
       "TARIJA": ["TODAS", "Tarija", "Yacuiba", "Villamontes"],
@@ -696,11 +694,73 @@
       }
     }
 
+    // --- GENERAR SELECTORES DE MES DINÁMICOS DESDE SUPABASE ---
+    function poblarSelectoresDeMesDinamicos(data) {
+      const selectAdmin = document.getElementById('select-filtro-mes');
+      const selectTec = document.getElementById('select-tec-mes-historico');
+
+      let mapaMeses = {};
+
+      data.forEach(item => {
+        let fecha = item.fecha_asignacion || item.created_at;
+        if (fecha) {
+          let f = new Date(fecha);
+          if (!isNaN(f.getTime())) {
+            let key = `${f.getFullYear()}-${f.getMonth()}`;
+            mapaMeses[key] = {
+              ano: f.getFullYear(),
+              mes: f.getMonth(),
+              label: `${NOMBRES_MESES[f.getMonth()]} ${f.getFullYear()}`
+            };
+          }
+        }
+      });
+
+      let listaMeses = Object.values(mapaMeses).sort((a, b) => {
+        if (b.ano !== a.ano) return b.ano - a.ano;
+        return b.mes - a.mes;
+      });
+
+      // Rellenar Selector Admin
+      if (selectAdmin) {
+        let valPrevio = selectAdmin.value;
+        selectAdmin.innerHTML = '<option value="TODOS">Mes: Todos los Históricos</option>';
+        listaMeses.forEach((m, idx) => {
+          let opt = document.createElement('option');
+          opt.value = `${m.ano}-${m.mes}`;
+          opt.innerText = `Mes: ${m.label}`;
+          // Seleccionar por defecto el mes más reciente
+          if (idx === 0 && valPrevio === 'TODOS' && selectAdmin.children.length === 1) {
+            opt.selected = true;
+          }
+          selectAdmin.appendChild(opt);
+        });
+        if (valPrevio && Array.from(selectAdmin.options).some(o => o.value === valPrevio)) {
+          selectAdmin.value = valPrevio;
+        }
+      }
+
+      // Rellenar Selector Técnico
+      if (selectTec) {
+        let valPrevioTec = selectTec.value;
+        selectTec.innerHTML = '<option value="TODOS">Ver: Todos los Meses</option>';
+        listaMeses.forEach(m => {
+          let opt = document.createElement('option');
+          opt.value = `${m.ano}-${m.mes}`;
+          opt.innerText = m.label;
+          selectTec.appendChild(opt);
+        });
+        if (valPrevioTec && Array.from(selectTec.options).some(o => o.value === valPrevioTec)) {
+          selectTec.value = valPrevioTec;
+        }
+      }
+    }
+
     // --- CARGAR DASHBOARD ADMIN ---
     async function cargarDashboard(forzarNube = false) {
       const dept = document.getElementById('select-filtro-dept') ? document.getElementById('select-filtro-dept').value : 'TODOS';
       const ciu = document.getElementById('select-filtro-ciudad') ? document.getElementById('select-filtro-ciudad').value : 'TODAS';
-      const filtroMes = document.getElementById('select-filtro-mes') ? document.getElementById('select-filtro-mes').value : 'ACTUAL';
+      const filtroMes = document.getElementById('select-filtro-mes') ? document.getElementById('select-filtro-mes').value : 'TODOS';
 
       try {
         let query = supabase.from('gestiones').select('*').range(0, 9999);
@@ -714,15 +774,16 @@
 
         const { data, error } = await query;
         if (data && !error) {
+          poblarSelectoresDeMesDinamicos(data);
+
           let datosFiltrados = data;
           
-          if (filtroMes === 'ACTUAL') {
-            const anoActual = 2026;
-            const mesActual = 9; // Octubre (base 0)
+          if (filtroMes !== 'TODOS' && filtroMes.includes('-')) {
+            let [anoSel, mesSel] = filtroMes.split('-').map(Number);
             datosFiltrados = data.filter(r => {
-              if (!r.fecha_asignacion && !r.created_at) return true;
+              if (!r.fecha_asignacion && !r.created_at) return false;
               const f = new Date(r.fecha_asignacion || r.created_at);
-              return f.getFullYear() === anoActual && f.getMonth() === mesActual;
+              return f.getFullYear() === anoSel && f.getMonth() === mesSel;
             });
           }
 
@@ -935,7 +996,7 @@
       try {
         const correo = (usuarioActual.usuario || '').trim().toLowerCase();
         const nombre = (usuarioActual.nombre || '').trim();
-        const filtroMes = document.getElementById('select-tec-mes-historico') ? document.getElementById('select-tec-mes-historico').value : 'ACTUAL';
+        const filtroMes = document.getElementById('select-tec-mes-historico') ? document.getElementById('select-tec-mes-historico').value : 'TODOS';
 
         const { data, error } = await supabase
           .from('gestiones')
@@ -948,13 +1009,11 @@
             return st !== 'pendiente' && st !== 'sin gestion' && st !== '';
           });
 
-          // Filtrar por mes seleccionado si aplica
-          if (filtroMes !== 'TODOS') {
-            const anoActual = 2026;
-            const mesTarget = filtroMes === 'ACTUAL' ? 9 : parseInt(filtroMes); // 9 = Octubre
+          if (filtroMes !== 'TODOS' && filtroMes.includes('-')) {
+            let [anoSel, mesSel] = filtroMes.split('-').map(Number);
             gestionesRealizadas = gestionesRealizadas.filter(item => {
               let f = new Date(item.fecha_asignacion || item.created_at || new Date());
-              return f.getFullYear() === anoActual && f.getMonth() === mesTarget;
+              return f.getFullYear() === anoSel && f.getMonth() === mesSel;
             });
           }
 
