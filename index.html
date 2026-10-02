@@ -255,7 +255,7 @@
             <small class="text-info fw-bold" id="label-reloj-hora">--:--</small>
           </div>
           <h4 class="fw-extrabold text-white mb-1" id="label-saludo-animado">¡Hola! 👋</h4>
-          <p class="text-secondary small mb-3">Listo para gestionar tus encuestas NPS de hoy.</p>
+          <p class="text-secondary small mb-3">Listo para gestionar tus encuestas NPS del mes.</p>
           
           <div class="d-flex gap-2">
             <button class="btn btn-sm btn-primary fw-bold flex-fill py-2" onclick="navegarBottom('pendientes')">
@@ -265,7 +265,7 @@
         </div>
 
         <div class="bi-card-dark mb-3">
-          <h6 class="fw-bold text-white mb-2">Resumen Operativo</h6>
+          <h6 class="fw-bold text-white mb-2">Resumen Operativo (Mes Actual)</h6>
           <div class="row g-2 text-center">
             <div class="col-4"><div class="kpi-strip"><div class="lbl">ASIGNADAS</div><div class="val text-light" id="tec-kpi-total">0</div></div></div>
             <div class="col-4"><div class="kpi-strip"><div class="lbl text-success">GESTIONADAS</div><div class="val text-success" id="tec-kpi-gestionadas">0</div></div></div>
@@ -286,7 +286,7 @@
         <div id="lista-historico-tecnico" class="grid-dashboard"></div>
       </div>
 
-      <!-- SECCIÓN MI PERFIL TÉCNICO -->
+      <!-- SECCIÓN MI PERFIL TÉCNICO Y PLANTILLA PERSONALIZADA -->
       <div id="sec-tec-perfil" class="hidden">
         <div class="bi-card-dark mb-3 text-center">
           <div class="avatar-container">
@@ -298,6 +298,14 @@
           <h5 class="fw-bold text-white mb-0" id="perfil-nombre">Nombre Técnico</h5>
           <small class="text-secondary d-block mb-2" id="perfil-correo">correo@datared.com</small>
           <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3 py-1">Técnico Habilitado</span>
+        </div>
+
+        <!-- CONFIGURACIÓN DE MENSAJE PERSONALIZADO DE WHATSAPP -->
+        <div class="bi-card-dark mb-3">
+          <h6 class="fw-bold text-info small mb-2"><i class="bi bi-chat-text-fill me-2"></i>MI PLANTILLA PERSONALIZADA DE WHATSAPP</h6>
+          <p class="text-secondary small mb-2">Redacta aquí tu propio saludo o aviso personalizado para tus clientes:</p>
+          <textarea id="input-plantilla-propia" class="form-control bg-dark text-white border-secondary mb-2" rows="4" placeholder="Ejemplo: Estimado cliente, le habla su técnico asignado. Le recuerdo responder la encuesta de Tigo..."></textarea>
+          <button class="btn btn-sm btn-info fw-bold w-100 py-2" onclick="guardarPlantillaPersonalizada()"><i class="bi bi-save me-1"></i> Guardar Mi Mensaje</button>
         </div>
 
         <div class="bi-card-dark mb-3">
@@ -320,6 +328,10 @@
           </div>
           
           <div class="d-flex align-items-center gap-2 flex-wrap">
+            <select id="select-filtro-mes" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
+              <option value="ACTUAL">Mes: Octubre 2026</option>
+              <option value="TODOS">Mes: Todos los Históricos</option>
+            </select>
             <select id="select-filtro-dept" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="alCambiarDepartamentoFiltro()">
               <option value="TODOS">Dep: TODOS</option>
               <option value="TARIJA">Tarija</option>
@@ -405,7 +417,7 @@
               <i class="bi bi-upload me-1"></i> Subir a Base de Datos
             </button>
           </div>
-          <small class="text-secondary mt-2 d-block" id="status-carga-csv">Sube un archivo CSV con encabezados (ej. codigo_cliente, tecnico_asignado, numero_ot, departamento, ciudad).</small>
+          <small class="text-secondary mt-2 d-block" id="status-carga-csv">Cargando fecha de actualización desde Supabase...</small>
         </div>
         
         <div class="bi-card-dark mb-3 p-3">
@@ -535,7 +547,7 @@
     const supabaseUrl = 'https://lrvitaprtpppqcwhbjba.supabase.co'; 
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxydml0YXBydHBwcHFjd2hiamJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4NTQ2MzQsImV4cCI6MjEwNTQzMDYzNH0.pkw8hR7BwkZa65h3phhVqDG_3-qTdPhZnn5PqPgJHEA'; 
     window.supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
-supabase = window.supabaseApp;
+    supabase = window.supabaseApp;
 
     let usuarioActual = null;
     let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
@@ -663,6 +675,13 @@ supabase = window.supabaseApp;
         document.getElementById('label-nombre-tec').innerText = res.nombre || res.usuario;
         document.getElementById('perfil-nombre').innerText = res.nombre || res.usuario;
         document.getElementById('perfil-correo').innerText = res.usuario;
+
+        // Cargar plantilla propia si existe
+        const plantillaGuardada = localStorage.getItem(`plantilla_propia_${res.usuario}`);
+        if (plantillaGuardada && document.getElementById('input-plantilla-propia')) {
+          document.getElementById('input-plantilla-propia').value = plantillaGuardada;
+        }
+
         cargarPendientesTecnico();
         cargarHistoricoTecnico();
       }
@@ -672,6 +691,7 @@ supabase = window.supabaseApp;
     async function cargarDashboard(forzarNube = false) {
       const dept = document.getElementById('select-filtro-dept') ? document.getElementById('select-filtro-dept').value : 'TODOS';
       const ciu = document.getElementById('select-filtro-ciudad') ? document.getElementById('select-filtro-ciudad').value : 'TODAS';
+      const filtroMes = document.getElementById('select-filtro-mes') ? document.getElementById('select-filtro-mes').value : 'ACTUAL';
 
       try {
         let query = supabase.from('gestiones').select('*').range(0, 9999);
@@ -685,22 +705,32 @@ supabase = window.supabaseApp;
 
         const { data, error } = await query;
         if (data && !error) {
-           todosLosRegistros = data;
-           procesarYRenderizarDashboard(data);
+          let datosFiltrados = data;
+          
+          // Filtro mensual automático (Mes actual: Octubre 2026)
+          if (filtroMes === 'ACTUAL') {
+            const anoActual = 2026;
+            const mesActual = 9; // Octubre (base 0)
+            datosFiltrados = data.filter(r => {
+              if (!r.fecha_asignacion && !r.created_at) return true;
+              const f = new Date(r.fecha_asignacion || r.created_at);
+              return f.getFullYear() === anoActual && f.getMonth() === mesActual;
+            });
+          }
+
+          todosLosRegistros = datosFiltrados;
+          procesarYRenderizarDashboard(datosFiltrados, data);
         }
         
       } catch(e) { console.error(e); }
     }
 
-    function procesarYRenderizarDashboard(registrosDb) {
+    function procesarYRenderizarDashboard(registrosDb, todosLosOriginales) {
       let cTotal = registrosDb.length;
-      // MOSTRAR ÚLTIMA CARGA CSV
-  let ultimaCarga = registrosDb.filter(r => r.fecha_carga && r.subido_por).pop();
-  const statusLbl = document.getElementById('status-carga-csv');
-  if (statusLbl && ultimaCarga) {
-    statusLbl.innerText = `Última carga registrada: ${ultimaCarga.fecha_carga} por ${ultimaCarga.subido_por}.`;
-    statusLbl.className = "text-info mt-2 d-block fw-semibold small";
-  }
+      
+      // MOSTRAR ÚLTIMA CARGA DINÁMICA REAL DESDE SUPABASE
+      actualizarEtiquetaUltimaCarga(todosLosOriginales || registrosDb);
+
       let cGestionados = 0;
       let cPendientes = 0;
       let cDescartados = 0;
@@ -742,6 +772,27 @@ supabase = window.supabaseApp;
       renderizarGraficoGauge(pctCobertura);
       renderizarDirectorioTecnicosAdminUI();
       aplicarFiltrosMultiples();
+    }
+
+    // ACTUALIZAR ETIQUETA DE ÚLTIMA CARGA DINÁMICAMENTE DESDE LA BD
+    function actualizarEtiquetaUltimaCarga(registros) {
+      const statusLbl = document.getElementById('status-carga-csv');
+      if (!statusLbl || !registros || registros.length === 0) return;
+
+      // Buscar el registro con fecha_carga o el más reciente
+      let registrosConCarga = registros.filter(r => r.fecha_carga || r.created_at);
+      if (registrosConCarga.length > 0) {
+        registrosConCarga.sort((a, b) => new Date(b.created_at || b.fecha_carga) - new Date(a.created_at || a.fecha_carga));
+        let masReciente = registrosConCarga[0];
+        let subidoPor = masReciente.subido_por || 'SISTEMA';
+        let fechaMostrar = masReciente.fecha_carga || (new Date(masReciente.created_at).toLocaleString('es-ES'));
+
+        statusLbl.innerText = `Última carga registrada en base de datos: ${fechaMostrar} por ${subidoPor}.`;
+        statusLbl.className = "text-info mt-2 d-block fw-semibold small";
+      } else {
+        statusLbl.innerText = "Sube un archivo CSV con encabezados (ej. codigo_cliente, tecnico_asignado, numero_ot, departamento, ciudad).";
+        statusLbl.className = "text-secondary mt-2 d-block small";
+      }
     }
 
     // --- FILTROS MÚLTIPLES ---
@@ -801,7 +852,7 @@ supabase = window.supabaseApp;
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="badge-subtle ${badgeStyle}">${r.estado || 'Pendiente'}</span>
-                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.id_gestion || r.numero_ot || 'S/N'}</small>
+                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numero_ot || r.id_gestion || 'S/N'}</small>
               </div>
               <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombre_usuario || 'Cliente'}</div>
             </div>
@@ -814,7 +865,7 @@ supabase = window.supabaseApp;
       });
     }
 
-    // --- CARGAR PENDIENTES TÉCNICO CON VENCIMIENTO A 6 DÍAS ---
+    // --- CARGAR PENDIENTES TÉCNICO CON VENCIMIENTO Y AUTO-LIMPIEZA MENSUAL ---
     async function cargarPendientesTecnico() {
       if(!usuarioActual) return;
       mostrarSyncStatus(true);
@@ -829,6 +880,8 @@ supabase = window.supabaseApp;
 
         if (data && !error) {
           const hoy = new Date();
+          const anoActual = 2026;
+          const mesActual = 9; // Octubre
           const idsVencidos = [];
 
           pendientesTecnicoActual = [];
@@ -837,18 +890,20 @@ supabase = window.supabaseApp;
             let st = (item.estado || '').toLowerCase();
             let esPendiente = st === 'pendiente' || st === 'sin gestion' || st === '';
 
-            // Calcular días transcurridos desde fecha_asignacion
+            // Verificar que pertenezca al mes en curso (Limpieza/Archivo mensual automático)
+            let fechaOT = item.fecha_asignacion ? new Date(item.fecha_asignacion) : new Date(item.created_at || hoy);
+            let esDelMesActual = (fechaOT.getFullYear() === anoActual && fechaOT.getMonth() === mesActual);
+
+            // Calcular días transcurridos
             let diasTranscurridos = 0;
             if (item.fecha_asignacion) {
-              const fechaAsig = new Date(item.fecha_asignacion);
-              const diffTime = hoy - fechaAsig;
+              const diffTime = hoy - new Date(item.fecha_asignacion);
               diasTranscurridos = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             }
 
-            // Si tiene más de 6 días y sigue sin gestionarse, marcar para actualizar
             if (esPendiente && diasTranscurridos > 6) {
               idsVencidos.push(item.id);
-            } else if (esPendiente) {
+            } else if (esPendiente && esDelMesActual) {
               pendientesTecnicoActual.push({
                 fila: item.id,
                 idGestion: item.id_gestion || item.id,
@@ -863,7 +918,7 @@ supabase = window.supabaseApp;
             }
           });
 
-          // Si hay registros con más de 6 días, actualizamos su estado en Supabase
+          // Actualizar OTs de más de 6 días
           if (idsVencidos.length > 0) {
             await supabase
               .from('gestiones')
@@ -900,7 +955,7 @@ supabase = window.supabaseApp;
              idGestion: item.id_gestion || item.id,
              codigoCliente: item.codigo_cliente,
              nombreUsuario: item.nombre_usuario,
-             numeroOT: item.id_gestion || item.numero_ot,
+             numeroOT: item.numero_ot || item.id_gestion || 'S/N',
              estado: item.estado,
              evidencia: item.evidencia_url
           }));
@@ -1094,14 +1149,15 @@ supabase = window.supabaseApp;
         }
 
         const { error } = await supabase
-  .from('gestiones')
-  .upsert(registrosInsertar, { 
-    onConflict: 'codigo_cliente', 
-    ignoreDuplicates: false 
-  });
+          .from('gestiones')
+          .upsert(registrosInsertar, { 
+            onConflict: 'codigo_cliente', 
+            ignoreDuplicates: false 
+          });
+
         if (error) throw error;
 
-       statusLbl.className = "text-success mt-2 d-block fw-bold small";
+        statusLbl.className = "text-success mt-2 d-block fw-bold small";
         statusLbl.innerText = `¡Éxito! Se asignaron/actualizaron ${registrosInsertar.length} órdenes. Última carga por ${nombreUsuarioCarga} el ${fechaHoraFormateada}.`;
         fileInput.value = '';
         
@@ -1114,6 +1170,15 @@ supabase = window.supabaseApp;
 
       btn.disabled = false;
       btn.innerHTML = '<i class="bi bi-upload me-1"></i> Subir a Base de Datos';
+    }
+
+    // --- GUARDAR Y GESTIONAR PLANTILLA PERSONALIZADA ---
+    function guardarPlantillaPersonalizada() {
+      if (!usuarioActual) return;
+      const texto = document.getElementById('input-plantilla-propia').value.trim();
+      localStorage.setItem(`plantilla_propia_${usuarioActual.usuario}`, texto);
+      alert("¡Tu plantilla personalizada se guardó correctamente!");
+      renderizarPendientesTecnicoUI();
     }
 
     // --- GRÁFICOS Y UTILIDADES ---
@@ -1190,7 +1255,7 @@ supabase = window.supabaseApp;
 
       contenedor.innerHTML = '';
       if (pendientesTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes.</div>';
+        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes para el mes en curso.</div>';
         return;
       }
 
@@ -1203,6 +1268,9 @@ supabase = window.supabaseApp;
         saludoTiempo = "buenas noches";
       }
 
+      // Obtener si el técnico tiene plantilla personalizada
+      const plantillaPropia = usuarioActual ? localStorage.getItem(`plantilla_propia_${usuarioActual.usuario}`) : null;
+
       pendientesTecnicoActual.forEach((item, index) => {
         let tel = item.telefono || '';
         let telLimpio = tel.toString().replace(/\D/g, '');
@@ -1211,8 +1279,8 @@ supabase = window.supabaseApp;
         let codigoCliente = item.codigoCliente || 'S/C';
         let tecNombre = usuarioActual ? (usuarioActual.nombre || usuarioActual.usuario) : 'el técnico asignado';
 
-        // MENSAJE DETALLADO CON GUÍA NPS Y SALUDO SEGÚN HORARIO
-        let textoMensaje = `Estimado cliente, ${saludoTiempo}.\n\n` +
+        // 1. Mensaje Oficial NPS
+        let textoOficial = `Estimado cliente, ${saludoTiempo}.\n\n` +
           `Le escribo de parte del Servicio Técnico TIGO. Recientemente realicé un trabajo correspondiente a su código *${codigoCliente} - ${clienteNombre}*\n\n` +
           `Mi nombre es *${tecNombre}*. Quería consultarle si pudo completar la encuesta de satisfacción que le mencioné al finalizar mi trabajo.\n\n` +
           `En caso de que aún no la haya respondido, le agradecería mucho si pudiera tomarse un momento para completarla, si hice un buen trabajo porfavor un *10* 😁. Su calificación y opinión son muy importantes para nosotros, ya que nos ayudan a evaluar y mejorar la calidad de nuestro servicio.\n\n` +
@@ -1227,13 +1295,20 @@ supabase = window.supabaseApp;
           `De antemano le quedo muy agradecido y quedo atento a su consulta acerca del servicio!\n\n` +
           `Muchas gracias!`;
 
-        let mensajeWS = encodeURIComponent(textoMensaje);
+        let urlOficial = encodeURIComponent(textoOficial);
+
+        // 2. Mensaje Personalizado del Técnico (si lo configuró)
+        let urlPropia = plantillaPropia ? encodeURIComponent(plantillaPropia) : urlOficial;
 
         let botonesContacto = telLimpio ? `
           <div class="d-flex gap-2 mb-2">
-            <a href="https://wa.me/591${telLimpio}?text=${mensajeWS}" target="_blank" class="btn btn-sm btn-success flex-fill fw-bold py-1">
-              <i class="bi bi-whatsapp me-1"></i> WhatsApp
+            <a href="https://wa.me/591${telLimpio}?text=${urlOficial}" id="btn-wa-oficial-${index}" target="_blank" class="btn btn-sm btn-success flex-fill fw-bold py-1">
+              <i class="bi bi-whatsapp me-1"></i> WA Oficial
             </a>
+            ${plantillaPropia ? `
+            <a href="https://wa.me/591${telLimpio}?text=${urlPropia}" target="_blank" class="btn btn-sm btn-outline-success flex-fill fw-bold py-1">
+              <i class="bi bi-chat-dots me-1"></i> WA Propio
+            </a>` : ''}
             <a href="tel:${telLimpio}" class="btn btn-sm btn-outline-primary flex-fill fw-bold py-1">
               <i class="bi bi-telephone me-1"></i> Llamar
             </a>
@@ -1424,7 +1499,7 @@ supabase = window.supabaseApp;
       if (sp) sp.classList.toggle('hidden', !s);
     }
 
-   function cerrarSesion() {
+    function cerrarSesion() {
       localStorage.removeItem("nps_user_profile");
       location.reload();
     }
@@ -1435,7 +1510,8 @@ supabase = window.supabaseApp;
         cargarDashboard(true);
       })
       .subscribe();
-// REGISTRAR SERVICE WORKER Y SOLICITAR PERMISOS DE NOTIFICACIÓN
+
+    // REGISTRAR SERVICE WORKER Y SOLICITAR PERMISOS DE NOTIFICACIÓN
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       navigator.serviceWorker.register('sw.js')
         .then(function(swReg) {
