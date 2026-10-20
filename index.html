@@ -152,12 +152,13 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .order-card.conflictive { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, #15203e 0%, #2a1215 100%); }
+    .order-card.expired { border-color: rgba(100, 116, 139, 0.4); background: linear-gradient(180deg, #15203e 0%, #1e293b 100%); opacity: 0.85; }
 
     .badge-subtle { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
     .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
     .badge-done { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
     .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .badge-expired { background: rgba(100, 116, 139, 0.15); color: #cbd5e1; border: 1px solid rgba(100, 116, 139, 0.3); }
+    .badge-expired { background: rgba(100, 116, 139, 0.25); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4); }
 
     .input-group-text { background: #0b1329; border-color: var(--card-border); color: var(--text-muted); }
     .form-control, .form-select { background-color: #0b1329 !important; border-color: var(--card-border) !important; color: #ffffff !important; border-radius: 10px; }
@@ -270,16 +271,20 @@
         <div class="bi-card-dark mb-3">
           <h6 class="fw-bold text-white mb-2">Resumen Operativo</h6>
           <div class="row g-2 text-center">
-            <div class="col-4"><div class="kpi-strip"><div class="lbl">ASIGNADAS</div><div class="val text-light" id="tec-kpi-total">0</div></div></div>
-            <div class="col-4"><div class="kpi-strip"><div class="lbl text-success">GESTIONADAS</div><div class="val text-success" id="tec-kpi-gestionadas">0</div></div></div>
-            <div class="col-4"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="tec-kpi-pendientes">0</div></div></div>
+            <div class="col-3"><div class="kpi-strip"><div class="lbl">ASIGNADAS</div><div class="val text-light" id="tec-kpi-total">0</div></div></div>
+            <div class="col-3"><div class="kpi-strip"><div class="lbl text-success">GESTIONADAS</div><div class="val text-success" id="tec-kpi-gestionadas">0</div></div></div>
+            <div class="col-3"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="tec-kpi-pendientes">0</div></div></div>
+            <div class="col-3"><div class="kpi-strip"><div class="lbl text-secondary">CADUCADAS</div><div class="val text-secondary" id="tec-kpi-caducadas">0</div></div></div>
           </div>
         </div>
       </div>
 
       <!-- SECCIÓN PENDIENTES TÉCNICO -->
       <div id="sec-tec-pendientes" class="hidden">
-        <h6 class="fw-bold text-white mb-2"><i class="bi bi-clock-history me-2 text-warning"></i>Órdenes Pendientes</h6>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="fw-bold text-white m-0"><i class="bi bi-clock-history me-2 text-warning"></i>Órdenes Vigentes para Encuesta</h6>
+          <small class="text-secondary" style="font-size: 0.72rem;">* Vencen a los 5 días</small>
+        </div>
         <div id="lista-pendientes" class="grid-dashboard"></div>
       </div>
 
@@ -287,10 +292,15 @@
       <div id="sec-tec-historico" class="hidden">
         <div class="bi-card-dark mb-3 p-3">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-            <h6 class="fw-bold text-white m-0"><i class="bi bi-check2-circle me-2 text-success"></i>Histórico Gestionado</h6>
-            <select id="select-tec-mes-historico" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="renderizarHistoricoConFiltroMes()">
-              <option value="TODOS">Ver: Todos los Meses</option>
-            </select>
+            <h6 class="fw-bold text-white m-0"><i class="bi bi-check2-circle me-2 text-success"></i>Histórico y Gestiones</h6>
+            <div class="d-flex gap-2">
+              <select id="select-tec-mes-historico" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="actualizarFiltroDiaTecnico()">
+                <option value="TODOS">Ver: Todos los Meses</option>
+              </select>
+              <select id="select-tec-dia-historico" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="renderizarHistoricoConFiltroMes()">
+                <option value="TODOS">Día: Todos</option>
+              </select>
+            </div>
           </div>
           <input type="text" id="input-buscar-historico-tec" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Buscar por cliente, código u OT..." onkeyup="filtrarHistoricoTecnicoLocal()">
         </div>
@@ -338,8 +348,11 @@
           </div>
           
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <select id="select-filtro-mes" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
+            <select id="select-filtro-mes" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="alCambiarMesAdmin()">
               <option value="TODOS">Mes: Todos los Históricos</option>
+            </select>
+            <select id="select-filtro-dia" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="cargarDashboard(true)">
+              <option value="TODOS">Día: Todos</option>
             </select>
             <select id="select-filtro-dept" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="alCambiarDepartamentoFiltro()">
               <option value="TODOS">Dep: TODOS</option>
@@ -359,7 +372,8 @@
             <select id="select-filtro-estado" class="form-select form-select-sm bg-dark text-white border-secondary w-auto" onchange="aplicarFiltrosMultiples()">
               <option value="TODOS">Estado: TODOS</option>
               <option value="Gestionado">Gestionados</option>
-              <option value="Pendiente">Pendientes / Sin Gestión</option>
+              <option value="Pendiente">Pendientes / Vigentes</option>
+              <option value="Vencido">Caducados / Vencidos (>5 días)</option>
               <option value="Descartado">Descartados / Conflictivos</option>
             </select>
             <button onclick="cargarDashboard(true)" class="btn btn-outline-info btn-sm" title="Refrescar datos de la nube"><i class="bi bi-arrow-clockwise"></i></button>
@@ -371,10 +385,11 @@
           <i class="bi bi-card-checklist me-1"></i> 1. INDICADOR DE GESTIÓN OPERATIVA (VOLUMEN)
         </h6>
         <div class="row g-2 text-center mb-3">
-          <div class="col-6 col-md-3"><div class="kpi-strip"><div class="lbl">ASIGNADOS</div><div class="val text-light" id="kpi-total">0</div></div></div>
-          <div class="col-6 col-md-3"><div class="kpi-strip"><div class="lbl text-success">GESTIONADOS</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
-          <div class="col-6 col-md-3"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
-          <div class="col-6 col-md-3"><div class="kpi-strip border-danger"><div class="lbl text-danger">DESCARTADOS</div><div class="val text-danger" id="kpi-descartados">0</div></div></div>
+          <div class="col-6 col-md-2.4" style="flex: 1;"><div class="kpi-strip"><div class="lbl">ASIGNADOS</div><div class="val text-light" id="kpi-total">0</div></div></div>
+          <div class="col-6 col-md-2.4" style="flex: 1;"><div class="kpi-strip"><div class="lbl text-success">GESTIONADOS</div><div class="val text-success" id="kpi-gestionados">0</div></div></div>
+          <div class="col-6 col-md-2.4" style="flex: 1;"><div class="kpi-strip"><div class="lbl text-warning">PENDIENTES</div><div class="val text-warning" id="kpi-pendientes">0</div></div></div>
+          <div class="col-6 col-md-2.4" style="flex: 1;"><div class="kpi-strip border-secondary"><div class="lbl text-secondary">CADUCADOS</div><div class="val text-secondary" id="kpi-caducados">0</div></div></div>
+          <div class="col-6 col-md-2.4" style="flex: 1;"><div class="kpi-strip border-danger"><div class="lbl text-danger">DESCARTADOS</div><div class="val text-danger" id="kpi-descartados">0</div></div></div>
           <div class="col-12"><div class="kpi-strip border-info"><div class="lbl text-info">% COBERTURA DE GESTIÓN</div><div class="val text-info" id="kpi-pct-prom">0%</div></div></div>
         </div>
       </div>
@@ -431,7 +446,7 @@
           <div class="row g-2">
             <div class="col-12 col-md-6">
               <label class="form-label text-secondary small m-0 mb-1"><i class="bi bi-search me-1"></i> Búsqueda rápida:</label>
-              <input type="text" id="input-buscar" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Buscar OT, cliente..." onkeyup="aplicarFiltrosMultiples()">
+              <input type="text" id="input-buscar" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Buscar OT, cliente, fecha..." onkeyup="aplicarFiltrosMultiples()">
             </div>
           </div>
         </div>
@@ -528,7 +543,7 @@
           <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Número OT:</span> <div class="detail-val text-info fw-bold" id="det-ot">-</div></div>
           <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Teléfono:</span> <div class="detail-val text-success fw-bold" id="det-telefono">-</div></div>
           <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Técnico Asignado:</span> <div class="detail-val fw-bold" id="det-tecnico">-</div></div>
-          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Fecha Asignación:</span> <div class="detail-val text-muted fw-bold" id="det-fecha">-</div></div>
+          <div class="detail-row mb-2"><span class="detail-label text-secondary d-block">Fecha Asignación:</span> <div class="detail-val text-info fw-bold" id="det-fecha">-</div></div>
         </div>
       </div>
     </div>
@@ -561,7 +576,7 @@
     let datosTecnicoCargados = false;
     let rawDatosTecnico = [];
 
-    let todosLosRegistros = [], pendientesTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
+    let todosLosRegistros = [], pendientesTecnicoActual = [], caducadasTecnicoActual = [], historicoTecnicoActual = [], directorioTecnicos = [];
     let archivoFotoSeleccionado = null, base64Compresion = null, chartGauge = null, chartBar = null;
 
     const NOMBRES_MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -696,9 +711,19 @@
         history.replaceState({ section: 'inicio' }, '');
         seccionActualTecnico = 'inicio';
 
-        // CARGA ÚNICA Y OPTIMIZADA DE DATOS DEL TÉCNICO
         sincronizarDatosTecnico();
       }
+    }
+
+    // --- HELPER DE FECHAS Y CADUCIDAD DE ENCUESTAS (> 5 DÍAS) ---
+    function obtenerDiasTranscurridos(fechaAsig) {
+      if (!fechaAsig) return 0;
+      const fAsig = new Date(fechaAsig);
+      const hoy = new Date();
+      fAsig.setHours(0,0,0,0);
+      hoy.setHours(0,0,0,0);
+      const diffTime = hoy - fAsig;
+      return Math.floor(diffTime / (1000 * 60 * 60 * 24));
     }
 
     // --- CARGA Y CACHÉ RÁPIDO DE DATOS DE TÉCNICO ---
@@ -723,6 +748,7 @@
           rawDatosTecnico = data;
           datosTecnicoCargados = true;
           poblarSelectoresDeMesDinamicos(data);
+          actualizarFiltroDiaTecnico();
           renderizarVistaTecnicoDesdeMemoria();
         }
       } catch(e) {
@@ -733,43 +759,57 @@
 
     function renderizarVistaTecnicoDesdeMemoria() {
       if(!rawDatosTecnico) return;
-      const hoy = new Date();
+      
       const idsVencidos = [];
       pendientesTecnicoActual = [];
+      caducadasTecnicoActual = [];
 
       rawDatosTecnico.forEach(item => {
         let st = (item.estado || '').toLowerCase();
-        let esPendiente = st === 'pendiente' || st === 'sin gestion' || st === '';
+        let esSinGestion = st === 'pendiente' || st === 'sin gestion' || st === '' || st === 'vencido' || st === 'caducado';
 
-        let diasTranscurridos = 0;
-        if (item.fecha_asignacion) {
-          const diffTime = hoy - new Date(item.fecha_asignacion);
-          diasTranscurridos = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        }
+        let dias = obtenerDiasTranscurridos(item.fecha_asignacion || item.created_at);
 
-        if (esPendiente && diasTranscurridos > 6) {
-          idsVencidos.push(item.id);
-        } else if (esPendiente) {
-          pendientesTecnicoActual.push({
-            fila: item.id,
-            idGestion: item.id_gestion || item.id,
-            codigoCliente: item.codigo_cliente,
-            nombreUsuario: item.nombre_usuario,
-            tecnicoAsignado: item.nombre_tecnico || item.tecnico_asignado,
-            fechaAsignacion: item.fecha_asignacion,
-            estado: item.estado || 'Pendiente',
-            numeroOT: item.numero_ot || item.id_gestion || 'S/N',
-            telefono: item.telefono
-          });
+        if (esSinGestion) {
+          if (dias > 5) {
+            idsVencidos.push(item.id);
+            caducadasTecnicoActual.push({
+              fila: item.id,
+              idGestion: item.id_gestion || item.id,
+              codigoCliente: item.codigo_cliente,
+              nombreUsuario: item.nombre_usuario,
+              tecnicoAsignado: item.nombre_tecnico || item.tecnico_asignado,
+              fechaAsignacion: item.fecha_asignacion || item.created_at,
+              estado: 'GESTION VENCIDA (CADUCADO)',
+              numeroOT: item.numero_ot || item.id_gestion || 'S/N',
+              telefono: item.telefono,
+              diasVencido: dias
+            });
+          } else {
+            pendientesTecnicoActual.push({
+              fila: item.id,
+              idGestion: item.id_gestion || item.id,
+              codigoCliente: item.codigo_cliente,
+              nombreUsuario: item.nombre_usuario,
+              tecnicoAsignado: item.nombre_tecnico || item.tecnico_asignado,
+              fechaAsignacion: item.fecha_asignacion || item.created_at,
+              estado: item.estado || 'Pendiente',
+              numeroOT: item.numero_ot || item.id_gestion || 'S/N',
+              telefono: item.telefono,
+              diasVencido: dias
+            });
+          }
         }
       });
 
       if (idsVencidos.length > 0) {
         supabase
           .from('gestiones')
-          .update({ estado: 'SIN GESTION' })
+          .update({ estado: 'CADUCADO' })
           .in('id', idsVencidos);
       }
+
+      document.getElementById('tec-kpi-caducadas').innerText = caducadasTecnicoActual.length;
 
       renderizarPendientesTecnicoUI();
       renderizarHistoricoConFiltroMes();
@@ -778,11 +818,9 @@
     function renderizarHistoricoConFiltroMes() {
       if(!rawDatosTecnico) return;
       const filtroMes = document.getElementById('select-tec-mes-historico') ? document.getElementById('select-tec-mes-historico').value : 'TODOS';
+      const filtroDia = document.getElementById('select-tec-dia-historico') ? document.getElementById('select-tec-dia-historico').value : 'TODOS';
 
-      let gestionesRealizadas = rawDatosTecnico.filter(item => {
-        let st = (item.estado || '').toLowerCase();
-        return st !== 'pendiente' && st !== 'sin gestion' && st !== '';
-      });
+      let gestionesRealizadas = rawDatosTecnico;
 
       if (filtroMes !== 'TODOS' && filtroMes.includes('-')) {
         let [anoSel, mesSel] = filtroMes.split('-').map(Number);
@@ -792,21 +830,101 @@
         });
       }
 
-      historicoTecnicoActual = gestionesRealizadas.map(item => ({
-         fila: item.id,
-         idGestion: item.id_gestion || item.id,
-         codigoCliente: item.codigo_cliente,
-         nombreUsuario: item.nombre_usuario,
-         numeroOT: item.numero_ot || item.id_gestion || 'S/N',
-         estado: item.estado,
-         evidencia: item.evidencia_url,
-         fecha: item.fecha_asignacion || item.created_at
-      }));
+      if (filtroDia !== 'TODOS') {
+        gestionesRealizadas = gestionesRealizadas.filter(item => {
+          let fechaStr = (item.fecha_asignacion || item.created_at || '').split('T')[0];
+          return fechaStr === filtroDia;
+        });
+      }
+
+      historicoTecnicoActual = gestionesRealizadas.map(item => {
+        let dias = obtenerDiasTranscurridos(item.fecha_asignacion || item.created_at);
+        let st = (item.estado || '').toLowerCase();
+        let esCaducado = (st === 'pendiente' || st === 'sin gestion' || st === '' || st === 'caducado') && dias > 5;
+
+        return {
+          fila: item.id,
+          idGestion: item.id_gestion || item.id,
+          codigoCliente: item.codigo_cliente,
+          nombreUsuario: item.nombre_usuario,
+          numeroOT: item.numero_ot || item.id_gestion || 'S/N',
+          estado: esCaducado ? 'GESTION VENCIDA (CADUCADO)' : item.estado,
+          evidencia: item.evidencia_url,
+          fecha: (item.fecha_asignacion || item.created_at || '').split('T')[0]
+        };
+      });
 
       renderizarHistoricoTecnicoUI(historicoTecnicoActual);
     }
 
-    // --- GENERAR SELECTORES DE MES DINÁMICOS EN AMBAS VISTAS ---
+    function actualizarFiltroDiaTecnico() {
+      const selectMes = document.getElementById('select-tec-mes-historico');
+      const selectDia = document.getElementById('select-tec-dia-historico');
+      if (!selectDia || !rawDatosTecnico) return;
+
+      let valMes = selectMes ? selectMes.value : 'TODOS';
+      selectDia.innerHTML = '<option value="TODOS">Día: Todos</option>';
+
+      let diasSet = new Set();
+      rawDatosTecnico.forEach(item => {
+        let fecha = item.fecha_asignacion || item.created_at;
+        if (fecha) {
+          let fechaObj = new Date(fecha);
+          if (valMes !== 'TODOS' && valMes.includes('-')) {
+            let [anoSel, mesSel] = valMes.split('-').map(Number);
+            if (fechaObj.getFullYear() === anoSel && fechaObj.getMonth() === mesSel) {
+              diasSet.add(fecha.split('T')[0]);
+            }
+          } else {
+            diasSet.add(fecha.split('T')[0]);
+          }
+        }
+      });
+
+      Array.from(diasSet).sort().reverse().forEach(d => {
+        let opt = document.createElement('option');
+        opt.value = d;
+        opt.innerText = `Día: ${d}`;
+        selectDia.appendChild(opt);
+      });
+
+      renderizarHistoricoConFiltroMes();
+    }
+
+    function alCambiarMesAdmin() {
+      const selectMes = document.getElementById('select-filtro-mes');
+      const selectDia = document.getElementById('select-filtro-dia');
+      if (!selectDia || !todosLosRegistros) return;
+
+      let valMes = selectMes ? selectMes.value : 'TODOS';
+      selectDia.innerHTML = '<option value="TODOS">Día: Todos</option>';
+
+      let diasSet = new Set();
+      todosLosRegistros.forEach(item => {
+        let fecha = item.fecha_asignacion || item.created_at;
+        if (fecha) {
+          let fechaObj = new Date(fecha);
+          if (valMes !== 'TODOS' && valMes.includes('-')) {
+            let [anoSel, mesSel] = valMes.split('-').map(Number);
+            if (fechaObj.getFullYear() === anoSel && fechaObj.getMonth() === mesSel) {
+              diasSet.add(fecha.split('T')[0]);
+            }
+          } else {
+            diasSet.add(fecha.split('T')[0]);
+          }
+        }
+      });
+
+      Array.from(diasSet).sort().reverse().forEach(d => {
+        let opt = document.createElement('option');
+        opt.value = d;
+        opt.innerText = `Día: ${d}`;
+        selectDia.appendChild(opt);
+      });
+
+      cargarDashboard(true);
+    }
+
     function poblarSelectoresDeMesDinamicos(data) {
       const selectAdmin = document.getElementById('select-filtro-mes');
       const selectTec = document.getElementById('select-tec-mes-historico');
@@ -863,11 +981,11 @@
       }
     }
 
-    // --- CARGAR DASHBOARD ADMIN ---
     async function cargarDashboard(forzarNube = false) {
       const dept = document.getElementById('select-filtro-dept') ? document.getElementById('select-filtro-dept').value : 'TODOS';
       const ciu = document.getElementById('select-filtro-ciudad') ? document.getElementById('select-filtro-ciudad').value : 'TODAS';
       const filtroMes = document.getElementById('select-filtro-mes') ? document.getElementById('select-filtro-mes').value : 'TODOS';
+      const filtroDia = document.getElementById('select-filtro-dia') ? document.getElementById('select-filtro-dia').value : 'TODOS';
 
       try {
         let query = supabase.from('gestiones').select('*').range(0, 9999);
@@ -879,12 +997,20 @@
           poblarSelectoresDeMesDinamicos(data);
 
           let datosFiltrados = data;
+          
           if (filtroMes !== 'TODOS' && filtroMes.includes('-')) {
             let [anoSel, mesSel] = filtroMes.split('-').map(Number);
             datosFiltrados = data.filter(r => {
               if (!r.fecha_asignacion && !r.created_at) return false;
               const f = new Date(r.fecha_asignacion || r.created_at);
               return f.getFullYear() === anoSel && f.getMonth() === mesSel;
+            });
+          }
+
+          if (filtroDia !== 'TODOS') {
+            datosFiltrados = datosFiltrados.filter(r => {
+              let fStr = (r.fecha_asignacion || r.created_at || '').split('T')[0];
+              return fStr === filtroDia;
             });
           }
 
@@ -898,14 +1024,22 @@
       let cTotal = registrosDb.length;
       actualizarEtiquetaUltimaCarga(todosLosOriginales || registrosDb);
 
-      let cGestionados = 0, cPendientes = 0, cDescartados = 0;
+      let cGestionados = 0, cPendientes = 0, cCaducados = 0, cDescartados = 0;
       let mapTecnicos = {};
 
       registrosDb.forEach(item => {
         let st = (item.estado || '').trim().toLowerCase();
-        if (st === 'gestionado') cGestionados++;
-        else if (st === 'pendiente' || st === 'sin gestion' || st === '') cPendientes++;
-        else cDescartados++;
+        let dias = obtenerDiasTranscurridos(item.fecha_asignacion || item.created_at);
+        let esSinGestion = st === 'pendiente' || st === 'sin gestion' || st === '' || st === 'vencido' || st === 'caducado';
+
+        if (st === 'gestionado') {
+          cGestionados++;
+        } else if (esSinGestion) {
+          if (dias > 5) cCaducados++;
+          else cPendientes++;
+        } else {
+          cDescartados++;
+        }
 
         let nombreTec = (item.nombre_tecnico || item.tecnico_asignado || 'Sin Asignar').trim().toUpperCase();
         if(!mapTecnicos[nombreTec]) mapTecnicos[nombreTec] = { total: 0, gestionados: 0 };
@@ -916,6 +1050,7 @@
       document.getElementById('kpi-total').innerText = cTotal;
       document.getElementById('kpi-gestionados').innerText = cGestionados;
       document.getElementById('kpi-pendientes').innerText = cPendientes;
+      document.getElementById('kpi-caducados').innerText = cCaducados;
       document.getElementById('kpi-descartados').innerText = cDescartados;
       
       const pctCobertura = cTotal > 0 ? Math.round((cGestionados / cTotal) * 100) : 0;
@@ -959,7 +1094,7 @@
       let resultado = todosLosRegistros.filter(r => {
         let coincideBusqueda = true;
         if (filtroBusqueda) {
-          let textoCompleto = ((r.nombre_usuario || '') + ' ' + (r.numero_ot || '') + ' ' + (r.id_gestion || '') + ' ' + (r.codigo_cliente || '') + ' ' + (r.nombre_tecnico || '') + ' ' + (r.tecnico_asignado || '')).toLowerCase();
+          let textoCompleto = ((r.nombre_usuario || '') + ' ' + (r.numero_ot || '') + ' ' + (r.id_gestion || '') + ' ' + (r.codigo_cliente || '') + ' ' + (r.fecha_asignacion || '') + ' ' + (r.nombre_tecnico || '') + ' ' + (r.tecnico_asignado || '')).toLowerCase();
           coincideBusqueda = textoCompleto.indexOf(filtroBusqueda) !== -1;
         }
 
@@ -971,11 +1106,15 @@
         }
 
         let coincideEstado = true;
+        let st = (r.estado || '').trim().toLowerCase();
+        let dias = obtenerDiasTranscurridos(r.fecha_asignacion || r.created_at);
+        let esSinGestion = st === 'pendiente' || st === 'sin gestion' || st === '' || st === 'vencido' || st === 'caducado';
+
         if (filtroEstado !== "TODOS") {
-          let st = (r.estado || '').trim().toLowerCase();
           if (filtroEstado === "Gestionado") coincideEstado = (st === "gestionado");
-          else if (filtroEstado === "Pendiente") coincideEstado = (st === "pendiente" || st === "sin gestion" || st === "");
-          else if (filtroEstado === "Descartado") coincideEstado = (st !== "gestionado" && st !== "pendiente" && st !== "sin gestion" && st !== "");
+          else if (filtroEstado === "Pendiente") coincideEstado = (esSinGestion && dias <= 5);
+          else if (filtroEstado === "Vencido") coincideEstado = (esSinGestion && dias > 5);
+          else if (filtroEstado === "Descartado") coincideEstado = (!esSinGestion && st !== "gestionado");
         }
 
         return coincideBusqueda && coincideTecnico && coincideEstado;
@@ -995,18 +1134,27 @@
       let html = '';
       lista.forEach(r => {
         let st = (r.estado || '').trim().toLowerCase();
-        const isConflict = st !== 'gestionado' && st !== 'pendiente' && st !== 'sin gestion' && st !== '';
-        let badgeStyle = st === 'gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-pending');
+        let dias = obtenerDiasTranscurridos(r.fecha_asignacion || r.created_at);
+        let esSinGestion = st === 'pendiente' || st === 'sin gestion' || st === '' || st === 'vencido' || st === 'caducado';
+        
+        let esCaducado = esSinGestion && dias > 5;
+        let isConflict = !esSinGestion && st !== 'gestionado';
+
+        let badgeStyle = st === 'gestionado' ? 'badge-done' : (esCaducado ? 'badge-expired' : (isConflict ? 'badge-danger' : 'badge-pending'));
+        let estadoMostrar = st === 'gestionado' ? 'Gestionado' : (esCaducado ? 'GESTION VENCIDA (CADUCADO)' : (r.estado || 'Pendiente'));
+
         let tieneEvidencia = r.evidencia_url && r.evidencia_url.length > 5;
+        let fechaMostrar = (r.fecha_asignacion || r.created_at || '').split('T')[0];
 
         html += `
-          <div class="order-card fade-in-view ${isConflict ? 'conflictive' : ''}">
+          <div class="order-card fade-in-view ${isConflict ? 'conflictive' : (esCaducado ? 'expired' : '')}">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle ${badgeStyle}">${r.estado || 'Pendiente'}</span>
-                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numero_ot || r.id_gestion || 'S/N'}</small>
+                <span class="badge-subtle ${badgeStyle}">${estadoMostrar}</span>
+                <small class="text-info fw-bold" style="font-size: 0.72rem;"><i class="bi bi-calendar-event me-1"></i>${fechaMostrar}</small>
               </div>
               <div class="fw-bold text-light my-1" style="font-size: 0.88rem;">${r.nombre_usuario || 'Cliente'}</div>
+              <small class="text-secondary d-block" style="font-size: 0.72rem;">OT: ${r.numero_ot || r.id_gestion || 'S/N'}</small>
             </div>
             
             <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
@@ -1025,7 +1173,7 @@
         return;
       }
       let filtrados = historicoTecnicoActual.filter(r => {
-        let texto = ((r.codigoCliente || '') + ' ' + (r.nombreUsuario || '') + ' ' + (r.numeroOT || '') + ' ' + (r.estado || '')).toLowerCase();
+        let texto = ((r.codigoCliente || '') + ' ' + (r.nombreUsuario || '') + ' ' + (r.numeroOT || '') + ' ' + (r.fecha || '') + ' ' + (r.estado || '')).toLowerCase();
         return texto.includes(q);
       });
       renderizarHistoricoTecnicoUI(filtrados);
@@ -1271,7 +1419,7 @@
       const contenedor = document.getElementById('lista-pendientes');
       if (!contenedor) return;
 
-      document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length;
+      document.getElementById('tec-kpi-total').innerText = pendientesTecnicoActual.length + caducadasTecnicoActual.length;
       document.getElementById('tec-kpi-pendientes').innerText = pendientesTecnicoActual.length;
       
       const badgeEl = document.getElementById('bnav-badge-count');
@@ -1282,7 +1430,7 @@
 
       contenedor.innerHTML = '';
       if (pendientesTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes.</div>';
+        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes vigentes para encuesta.</div>';
         return;
       }
 
@@ -1301,6 +1449,7 @@
         let clienteNombre = item.nombreUsuario || 'Estimado cliente';
         let codigoCliente = item.codigoCliente || 'S/C';
         let tecNombre = usuarioActual ? (usuarioActual.nombre || usuarioActual.usuario) : 'el técnico asignado';
+        let fechaTrabajo = (item.fechaAsignacion || '').split('T')[0];
 
         let textoOficial = `Estimado cliente, ${saludoTiempo}.\n\n` +
           `Le escribo de parte del Servicio Técnico TIGO. Recientemente realicé un trabajo correspondiente a su código *${codigoCliente} - ${clienteNombre}*\n\n` +
@@ -1339,11 +1488,12 @@
           <div class="order-card mb-3 fade-in-view">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge-subtle badge-pending">Pendiente</span>
-                <span class="text-info fw-semibold" style="font-size: 0.72rem;">OT #${item.numeroOT || 'S/N'}</span>
+                <span class="badge-subtle badge-pending">Vigente (${item.diasVencido} d)</span>
+                <span class="text-info fw-semibold" style="font-size: 0.72rem;"><i class="bi bi-calendar-event me-1"></i>${fechaTrabajo}</span>
               </div>
               <h6 class="fw-bold text-white m-0">Cliente #${item.codigoCliente || 'S/C'}</h6>
-              <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${item.nombreUsuario || 'Titular'}</small>
+              <small class="text-secondary d-block mb-1" style="font-size: 0.75rem;">${item.nombreUsuario || 'Titular'}</small>
+              <small class="text-secondary d-block mb-2" style="font-size: 0.72rem;">OT #${item.numeroOT || 'S/N'}</small>
             </div>
             
             ${botonesContacto}
@@ -1366,7 +1516,7 @@
       document.getElementById('det-ot').innerText = item.numeroOT || 'N/A';
       document.getElementById('det-telefono').innerText = item.telefono || 'Sin registrar';
       document.getElementById('det-tecnico').innerText = item.tecnicoAsignado || (usuarioActual ? usuarioActual.nombre : '');
-      document.getElementById('det-fecha').innerText = item.fechaAsignacion || 'Hoy';
+      document.getElementById('det-fecha').innerText = (item.fechaAsignacion || '').split('T')[0] || 'Hoy';
 
       abrirModalBS('modalDetalleOrden');
     }
@@ -1374,29 +1524,35 @@
     function renderizarHistoricoTecnicoUI(lista) {
       const contenedor = document.getElementById('lista-historico-tecnico');
       if (!contenedor) return;
-      document.getElementById('tec-kpi-gestionadas').innerText = historicoTecnicoActual.length;
+      
+      let totalGestionadosValidos = rawDatosTecnico ? rawDatosTecnico.filter(x => (x.estado || '').toLowerCase() === 'gestionado').length : 0;
+      document.getElementById('tec-kpi-gestionadas').innerText = totalGestionadosValidos;
+      
       contenedor.innerHTML = '';
 
       if (!lista || lista.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No hay gestiones para la búsqueda o mes seleccionado.</div>';
+        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No hay gestiones para la búsqueda o filtro seleccionado.</div>';
         return;
       }
 
       let html = '';
       lista.forEach((r) => {
-        let isConflict = r.estado !== 'Gestionado' && r.estado !== 'Pendiente';
-        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isConflict ? 'badge-danger' : 'badge-expired');
+        let isCaducado = r.estado === 'GESTION VENCIDA (CADUCADO)';
+        let isConflict = !isCaducado && r.estado !== 'Gestionado' && r.estado !== 'Pendiente';
+        
+        let badgeStyle = r.estado === 'Gestionado' ? 'badge-done' : (isCaducado ? 'badge-expired' : (isConflict ? 'badge-danger' : 'badge-pending'));
         let tieneEvidencia = r.evidencia && r.evidencia.length > 5;
 
         html += `
-          <div class="order-card mb-3 fade-in-view ${isConflict ? 'conflictive' : ''}">
+          <div class="order-card mb-3 fade-in-view ${isConflict ? 'conflictive' : (isCaducado ? 'expired' : '')}">
             <div>
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="badge-subtle ${badgeStyle}">${r.estado}</span>
-                <small class="text-secondary" style="font-size: 0.72rem;">OT: ${r.numeroOT || 'S/N'}</small>
+                <small class="text-info fw-bold" style="font-size: 0.72rem;"><i class="bi bi-calendar-event me-1"></i>${r.fecha}</small>
               </div>
               <h6 class="fw-bold text-white m-0">Cliente #${r.codigoCliente || 'S/C'}</h6>
-              <small class="text-secondary d-block mb-2" style="font-size: 0.75rem;">${r.nombreUsuario || 'Cliente'}</small>
+              <small class="text-secondary d-block mb-1" style="font-size: 0.75rem;">${r.nombreUsuario || 'Cliente'}</small>
+              <small class="text-secondary d-block mb-2" style="font-size: 0.72rem;">OT: ${r.numeroOT || 'S/N'}</small>
             </div>
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary border-opacity-25">
               ${tieneEvidencia ? `<button class="btn btn-xs btn-outline-success p-1 px-3 small fw-bold" onclick="verFotoModal('${r.evidencia}')"><i class="bi bi-image me-1"></i>Ver Evidencia</button>` : '<span class="text-secondary small">Sin Foto</span>'}
