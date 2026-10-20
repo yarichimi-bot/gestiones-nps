@@ -18,7 +18,7 @@
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
-  <!-- SDK OFICIAL DE SUPABASE (INICIALIZACIÓN ÚNICA) -->
+  <!-- SDK OFICIAL DE SUPABASE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -265,6 +265,9 @@
             <button class="btn btn-sm btn-primary fw-bold flex-fill py-2" onclick="navegarBottom('pendientes')">
               <i class="bi bi-clock-history me-1"></i> Ver Pendientes
             </button>
+            <button class="btn btn-sm btn-outline-success fw-bold flex-fill py-2" onclick="abrirModalNuevoClienteTecnico()">
+              <i class="bi bi-person-plus-fill me-1"></i> Registrar Cliente
+            </button>
           </div>
         </div>
 
@@ -283,7 +286,7 @@
       <div id="sec-tec-pendientes" class="hidden">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="fw-bold text-white m-0"><i class="bi bi-clock-history me-2 text-warning"></i>Órdenes Vigentes para Encuesta</h6>
-          <small class="text-secondary" style="font-size: 0.72rem;">* Vencen a los 5 días</small>
+          <button class="btn btn-sm btn-success fw-bold px-3 py-1" style="font-size: 0.75rem;" onclick="abrirModalNuevoClienteTecnico()"><i class="bi bi-plus-lg me-1"></i>Nuevo</button>
         </div>
         <div id="lista-pendientes" class="grid-dashboard"></div>
       </div>
@@ -474,6 +477,57 @@
       <i class="bi bi-person-circle"></i>
       <span>Perfil</span>
     </button>
+  </div>
+
+  <!-- MODAL REGISTRAR CLIENTE DIRECTO (NUEVO TÉCNICO) -->
+  <div class="modal fade" id="modalNuevoCliente" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white border-secondary">
+        <div class="modal-header border-secondary">
+          <h6 class="modal-title fw-bold"><i class="bi bi-person-plus-fill text-success me-2"></i>Registrar Nuevo Cliente / OT</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small text-secondary fw-semibold">Código Cliente *</label>
+            <input type="text" id="reg-codigo" class="form-control bg-dark text-white border-secondary" placeholder="Ej: 1234567">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-secondary fw-semibold">Nombre del Titular *</label>
+            <input type="text" id="reg-nombre" class="form-control bg-dark text-white border-secondary" placeholder="Ej: Juan Pérez">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-secondary fw-semibold">Número OT / Orden</label>
+            <input type="text" id="reg-ot" class="form-control bg-dark text-white border-secondary" placeholder="Ej: OT-98765">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-secondary fw-semibold">Número de Teléfono (WhatsApp)</label>
+            <input type="tel" id="reg-telefono" class="form-control bg-dark text-white border-secondary" placeholder="Ej: 71234567">
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small text-secondary fw-semibold">Departamento</label>
+              <select id="reg-dept" class="form-select bg-dark text-white border-secondary">
+                <option value="SANTA CRUZ">Santa Cruz</option>
+                <option value="TARIJA">Tarija</option>
+                <option value="POTOSI">Potosí</option>
+                <option value="COCHABAMBA">Cochabamba</option>
+                <option value="SUCRE">Sucre</option>
+                <option value="LA PAZ">La Paz</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label small text-secondary fw-semibold">Ciudad / Municipio</label>
+              <input type="text" id="reg-ciudad" class="form-control bg-dark text-white border-secondary" placeholder="Ej: Yacuiba">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="btn-registrar-cliente" class="btn btn-sm btn-success fw-bold" onclick="guardarNuevoClienteTecnico()">Guardar e Iniciar Encuesta</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL GESTIÓN CON FOTO -->
@@ -715,7 +769,6 @@
       }
     }
 
-    // --- HELPER DE FECHAS Y CADUCIDAD DE ENCUESTAS (> 5 DÍAS) ---
     function obtenerDiasTranscurridos(fechaAsig) {
       if (!fechaAsig) return 0;
       const fAsig = new Date(fechaAsig);
@@ -726,7 +779,6 @@
       return Math.floor(diffTime / (1000 * 60 * 60 * 24));
     }
 
-    // --- CARGA Y CACHÉ RÁPIDO DE DATOS DE TÉCNICO ---
     async function sincronizarDatosTecnico(forzar = false) {
       if(!usuarioActual) return;
       if(datosTecnicoCargados && !forzar) {
@@ -1240,6 +1292,72 @@
       cont.innerHTML = html;
     }
 
+    // --- REGISTRAR NUEVO CLIENTE POR PARTE DEL TÉCNICO ---
+    function abrirModalNuevoClienteTecnico() {
+      document.getElementById('reg-codigo').value = '';
+      document.getElementById('reg-nombre').value = '';
+      document.getElementById('reg-ot').value = '';
+      document.getElementById('reg-telefono').value = '';
+      if(usuarioActual) {
+        if(usuarioActual.departamento) document.getElementById('reg-dept').value = usuarioActual.departamento.toUpperCase();
+        if(usuarioActual.ciudad) document.getElementById('reg-ciudad').value = usuarioActual.ciudad;
+      }
+      abrirModalBS('modalNuevoCliente');
+    }
+
+    async function guardarNuevoClienteTecnico() {
+      const codigo = document.getElementById('reg-codigo').value.trim();
+      const nombre = document.getElementById('reg-nombre').value.trim();
+      const ot = document.getElementById('reg-ot').value.trim();
+      const telefono = document.getElementById('reg-telefono').value.trim();
+      const dept = document.getElementById('reg-dept').value;
+      const ciudad = document.getElementById('reg-ciudad').value.trim();
+
+      if (!codigo || !nombre) {
+        return alert("⚠ El Código de Cliente y Nombre del Titular son obligatorios.");
+      }
+
+      const btn = document.getElementById('btn-registrar-cliente');
+      btn.disabled = true;
+      btn.innerText = "Registrando...";
+
+      try {
+        const hoy = new Date().toISOString().split('T')[0];
+        const nuevoObj = {
+          codigo_cliente: codigo,
+          nombre_usuario: nombre,
+          numero_ot: ot || codigo,
+          telefono: telefono || '',
+          departamento: dept,
+          ciudad: ciudad || dept,
+          tecnico_asignado: usuarioActual.usuario,
+          nombre_tecnico: usuarioActual.nombre || usuarioActual.usuario,
+          estado: 'Pendiente',
+          fecha_asignacion: hoy,
+          subido_por: usuarioActual.nombre || usuarioActual.usuario
+        };
+
+        const { data, error } = await supabase
+          .from('gestiones')
+          .upsert([nuevoObj], { onConflict: 'codigo_cliente', ignoreDuplicates: true })
+          .select();
+
+        btn.disabled = false;
+        btn.innerText = "Guardar e Iniciar Encuesta";
+
+        if (error) throw error;
+
+        alert("¡Cliente registrado exitosamente!");
+        ocultarModalBS('modalNuevoCliente');
+        sincronizarDatosTecnico(true);
+
+      } catch(e) {
+        btn.disabled = false;
+        btn.innerText = "Guardar e Iniciar Encuesta";
+        alert("Error al registrar cliente: " + (e.message || "Problema de conexión"));
+      }
+    }
+
     async function guardarFormulario() {
       const filaId = document.getElementById('modal-fila').value;
       const numeroOT = document.getElementById('modal-ot').value.trim();
@@ -1299,6 +1417,7 @@
       }
     }
 
+    // --- CARGA CSV INTELIGENTE (RESPETA GESTIONES DE TÉCNICOS) ---
     async function subirAsignacionesCSV() {
       const fileInput = document.getElementById('input-csv-cargas');
       const statusLbl = document.getElementById('status-carga-csv');
@@ -1312,7 +1431,7 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
       statusLbl.className = "text-warning mt-2 d-block fw-bold small";
-      statusLbl.innerText = "⏳ Leyendo archivo y subiendo a la nube...";
+      statusLbl.innerText = "⏳ Verificando registros en la base de datos...";
 
       try {
         const text = await file.text();
@@ -1323,10 +1442,29 @@
         const separador = lineas[0].includes(';') ? ';' : ',';
         const headers = lineas[0].split(separador).map(h => h.trim().toLowerCase().replace(/["']/g, ''));
         
+        // 1. Obtener gestiones existentes para proteger las ya procesadas
+        const { data: registrosExistentes } = await supabase
+          .from('gestiones')
+          .select('codigo_cliente, estado');
+
+        const mapGestionados = new Map();
+        if (registrosExistentes) {
+          registrosExistentes.forEach(r => {
+            if (r.codigo_cliente) {
+              const st = (r.estado || '').toLowerCase();
+              if (st !== 'pendiente' && st !== 'sin gestion' && st !== '') {
+                mapGestionados.set(r.codigo_cliente.toString().trim(), r.estado);
+              }
+            }
+          });
+        }
+
         const registrosInsertar = [];
         const ahora = new Date();
         const fechaHoraFormateada = ahora.toLocaleDateString('es-ES') + ' ' + ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         const nombreUsuarioCarga = usuarioActual ? (usuarioActual.nombre || usuarioActual.usuario) : 'Administrador';
+
+        let omitidosPorTecnico = 0;
 
         for (let i = 1; i < lineas.length; i++) {
           const valores = lineas[i].split(separador).map(v => v.trim().replace(/["']/g, ''));
@@ -1336,7 +1474,15 @@
             if (header && valores[index]) obj[header] = valores[index];
           });
 
-          if (obj.codigo_cliente || obj.numero_ot || obj.id_gestion) {
+          const codCliente = (obj.codigo_cliente || '').toString().trim();
+
+          if (codCliente || obj.numero_ot || obj.id_gestion) {
+            // Protección: Si el técnico ya lo gestionó, NO sobrescribir
+            if (codCliente && mapGestionados.has(codCliente)) {
+              omitidosPorTecnico++;
+              continue;
+            }
+
             obj.estado = obj.estado || 'Pendiente';
             obj.fecha_asignacion = obj.fecha_asignacion || ahora.toISOString().split('T')[0];
             obj.subido_por = nombreUsuarioCarga;
@@ -1345,16 +1491,20 @@
           }
         }
 
-        if (registrosInsertar.length === 0) throw new Error("No se encontraron registros válidos.");
+        if (registrosInsertar.length > 0) {
+          const { error } = await supabase
+            .from('gestiones')
+            .upsert(registrosInsertar, { onConflict: 'codigo_cliente', ignoreDuplicates: false });
 
-        const { error } = await supabase
-          .from('gestiones')
-          .upsert(registrosInsertar, { onConflict: 'codigo_cliente', ignoreDuplicates: false });
-
-        if (error) throw error;
+          if (error) throw error;
+        }
 
         statusLbl.className = "text-success mt-2 d-block fw-bold small";
-        statusLbl.innerText = `¡Éxito! Se asignaron/actualizaron ${registrosInsertar.length} órdenes.`;
+        let msgExito = `¡Éxito! Se cargaron/actualizaron ${registrosInsertar.length} órdenes.`;
+        if (omitidosPorTecnico > 0) {
+          msgExito += ` (${omitidosPorTecnico} registros conservaron la gestión realizada por los técnicos).`;
+        }
+        statusLbl.innerText = msgExito;
         fileInput.value = '';
         
         cargarDashboard(true);
@@ -1430,7 +1580,13 @@
 
       contenedor.innerHTML = '';
       if (pendientesTecnicoActual.length === 0) {
-        contenedor.innerHTML = '<div class="alert alert-dark border-secondary text-secondary text-center small py-3 col-12">No tienes órdenes pendientes vigentes para encuesta.</div>';
+        contenedor.innerHTML = `
+          <div class="alert alert-dark border-secondary text-center small py-4 col-12">
+            <p class="text-secondary mb-2">No tienes órdenes pendientes vigentes para encuesta.</p>
+            <button class="btn btn-sm btn-success fw-bold px-3 py-2" onclick="abrirModalNuevoClienteTecnico()">
+              <i class="bi bi-person-plus-fill me-1"></i> Registrar Primer Cliente
+            </button>
+          </div>`;
         return;
       }
 
@@ -1625,7 +1781,6 @@
       document.getElementById('sec-general').classList.toggle('hidden', p !== 'general');
     }
 
-    // NAVEGACIÓN ULTRA FLUIDA (INSTANTÁNEA)
     function navegarBottom(s, esRetroceso = false) {
       if (seccionActualTecnico === s) return;
 
@@ -1748,7 +1903,6 @@
       })
       .subscribe();
 
-    // FUNCIÓN AUXILIAR REUTILIZABLE PARA NOTIFICACIONES NATIVAS
     function lanzarNotificacion(titulo, mensaje) {
       if (Notification.permission === 'granted') {
         if (navigator.serviceWorker && navigator.serviceWorker.controller) {
