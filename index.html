@@ -1133,7 +1133,7 @@
         statusLbl.innerText = `Última carga registrada en base de datos: ${fechaMostrar} por ${subidoPor}.`;
         statusLbl.className = "text-info mt-2 d-block fw-semibold small";
       } else {
-        statusLbl.innerText = "Sube un archivo CSV con encabezados (ej. codigo_cliente, tecnico_asignado, numero_ot, departamento, ciudad).";
+        statusLbl.innerText = "Sube un archivo CSV con las asignaciones completas de campo.";
         statusLbl.className = "text-secondary mt-2 d-block small";
       }
     }
@@ -1417,7 +1417,7 @@
       }
     }
 
-    // --- CARGA CSV INTELIGENTE (RESPETA GESTIONES DE TÉCNICOS) ---
+    // --- CARGA CSV INTELIGENTE (ADAPTADA AL NUEVO FORMATO, NOMBRE DE CLIENTE, DEPARTAMENTO/CIUDAD SEGÚN TÉCNICO Y PROTECCIÓN) ---
     async function subirAsignacionesCSV() {
       const fileInput = document.getElementById('input-csv-cargas');
       const statusLbl = document.getElementById('status-carga-csv');
@@ -1431,7 +1431,7 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
       statusLbl.className = "text-warning mt-2 d-block fw-bold small";
-      statusLbl.innerText = "⏳ Verificando registros en la base de datos...";
+      statusLbl.innerText = "⏳ Verificando directorio de técnicos y registros en la base de datos...";
 
       try {
         const text = await file.text();
@@ -1442,7 +1442,20 @@
         const separador = lineas[0].includes(';') ? ';' : ',';
         const headers = lineas[0].split(separador).map(h => h.trim().toLowerCase().replace(/["']/g, ''));
         
-        // 1. Obtener gestiones existentes para proteger las ya procesadas
+        // 1. Obtener directorio de usuarios/técnicos para autocompletar Ciudad y Departamento
+        const { data: listaUsuarios } = await supabase.from('usuarios').select('nombre, usuario, departamento, ciudad');
+        const mapaTecnicosInfo = new Map();
+
+        if (listaUsuarios) {
+          listaUsuarios.forEach(u => {
+            let deptU = (u.departamento || '').toUpperCase().trim();
+            let ciuU = (u.ciudad || u.departamento || '').trim();
+            if (u.nombre) mapaTecnicosInfo.set(u.nombre.toLowerCase().trim(), { dept: deptU, ciudad: ciuU });
+            if (u.usuario) mapaTecnicosInfo.set(u.usuario.toLowerCase().trim(), { dept: deptU, ciudad: ciuU });
+          });
+        }
+
+        // 2. Obtener gestiones existentes para proteger las que ya completaron los técnicos
         const { data: registrosExistentes } = await supabase
           .from('gestiones')
           .select('codigo_cliente, estado');
@@ -1468,26 +1481,59 @@
 
         for (let i = 1; i < lineas.length; i++) {
           const valores = lineas[i].split(separador).map(v => v.trim().replace(/["']/g, ''));
-          let obj = {};
+          let rawObj = {};
           
           headers.forEach((header, index) => {
-            if (header && valores[index]) obj[header] = valores[index];
+            if (header && valores[index] !== undefined) rawObj[header] = valores[index];
           });
 
-          const codCliente = (obj.codigo_cliente || '').toString().trim();
+          // Mapeo de columnas
+          const codCliente = (rawObj.id_cliente || rawObj.codigo_cliente || '').toString().trim();
+          const clienteNombre = rawObj.nombre_cliente || rawObj.nombre_usuario || rawObj.cliente || ('Cliente ' + codCliente);
+          const numOT = rawObj.external_transaction_id || rawObj.numero_ot || rawObj.id_gestion || codCliente;
+          const tel = rawObj.telefono_encuesta || rawObj.telefono || '';
+          const tecNombreRaw = rawObj.tecnico || rawObj.nombre_tecnico || rawObj.tecnico_asignado || 'Sin Asignar';
+          const fechaAsig = rawObj.fecha_creacion || rawObj.fecha_transaccion || rawObj.fecha_asignacion || ahora.toISOString().split('T')[0];
+          const contratista = rawObj.contratista || rawObj.dealer || 'DATARED';
 
-          if (codCliente || obj.numero_ot || obj.id_gestion) {
+          // Asignación de Departamento y Ciudad basado en Perfil del Técnico
+          let deptFinal = rawObj.departamento || rawObj.rn || '';
+          let ciudadFinal = rawObj.ciudad || '';
+
+          if (!deptFinal || !ciudadFinal) {
+            const infoTec = mapaTecnicosInfo.get(tecNombreRaw.toLowerCase().trim());
+            if (infoTec) {
+              deptFinal = deptFinal || infoTec.dept || 'DESCONOCIDO';
+              ciudadFinal = ciudadFinal || infoTec.ciudad || 'DESCONOCIDA';
+            } else {
+              deptFinal = deptFinal || 'DESCONOCIDO';
+              ciudadFinal = ciudadFinal || 'DESCONOCIDA';
+            }
+          }
+
+          if (codCliente || numOT) {
             // Protección: Si el técnico ya lo gestionó, NO sobrescribir
             if (codCliente && mapGestionados.has(codCliente)) {
               omitidosPorTecnico++;
               continue;
             }
 
-            obj.estado = obj.estado || 'Pendiente';
-            obj.fecha_asignacion = obj.fecha_asignacion || ahora.toISOString().split('T')[0];
-            obj.subido_por = nombreUsuarioCarga;
-            obj.fecha_carga = fechaHoraFormateada;
-            registrosInsertar.push(obj);
+            let objMapeado = {
+              codigo_cliente: codCliente,
+              nombre_usuario: clienteNombre,
+              numero_ot: numOT,
+              telefono: tel,
+              departamento: deptFinal.toUpperCase(),
+              ciudad: ciudadFinal,
+              tecnico_asignado: tecNombreRaw,
+              nombre_tecnico: tecNombreRaw,
+              estado: rawObj.estado || 'Pendiente',
+              fecha_asignacion: fechaAsig.split(' ')[0],
+              subido_por: contratista || nombreUsuarioCarga,
+              fecha_carga: fechaHoraFormateada
+            };
+
+            registrosInsertar.push(objMapeado);
           }
         }
 
